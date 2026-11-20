@@ -1,0 +1,2115 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>日語階梯 Nihongo Steps｜每日階層式日文學習</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Noto Sans TC, Noto Sans JP & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Canvas Confetti for Celebration -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans TC"', 'Inter', 'sans-serif'],
+            jp: ['"Noto Sans JP"', '"Noto Sans TC"', 'sans-serif'],
+          },
+          colors: {
+            washi: '#FAF8F5',      // 和紙米白
+            washiDark: '#F0ECE3',  // 暖灰紙色
+            ai: '#26436C',         // 傳統靛藍 (Ai-iro)
+            aiLight: '#3B6196',
+            sakura: '#E87A90',     // 櫻花粉
+            shu: '#D94E34',        // 朱紅色 (Torii Red)
+            matcha: '#5B8930',     // 抹茶綠
+            sumi: '#2B2B2B',       // 墨黑
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* 和風紙質感背景紋理與基礎樣式 */
+    body {
+      background-color: #FAF8F5;
+      background-image: radial-gradient(#E5DFD3 0.75px, transparent 0.75px);
+      background-size: 20px 20px;
+      color: #2B2B2B;
+    }
+
+    /* 振假名 (Furigana) 顯示控制 */
+    .hide-furigana rt {
+      visibility: hidden;
+      opacity: 0;
+    }
+    ruby rt {
+      font-size: 0.6em;
+      color: #6B7280;
+      font-weight: 500;
+      transition: opacity 0.2s ease;
+    }
+
+    /* 自訂捲軸 */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F0ECE3;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+
+    /* 卡片浮動與微動畫 */
+    .node-card {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .node-card:hover:not(.locked) {
+      transform: translateY(-3px);
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.7; }
+      70% { transform: scale(1.12); opacity: 0; }
+      100% { transform: scale(0.95); opacity: 0; }
+    }
+    .active-pulse::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 1rem;
+      border: 2px solid #D94E34;
+      animation: pulse-ring 2s infinite;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-sakura/30">
+
+  <!-- 頂部導覽與狀態儀表板 -->
+  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-stone-200/80 shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-2.5 cursor-pointer" onclick="app.goHome()">
+        <div class="w-10 h-10 rounded-xl bg-ai text-white flex items-center justify-center shadow-md relative overflow-hidden">
+          <span class="font-jp font-bold text-xl tracking-tighter">日</span>
+          <div class="absolute bottom-0 right-0 w-3 h-3 bg-shu rounded-tl-lg"></div>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg text-ai leading-tight flex items-center gap-1.5">
+            日語階梯
+            <span class="text-xs font-normal px-2 py-0.5 rounded-full bg-washiDark text-stone-600">Nihongo Steps</span>
+          </h1>
+          <p class="text-xs text-stone-500 hidden sm:block">循序漸進・每日一階</p>
+        </div>
+      </div>
+
+      <!-- 學習數據膠囊列 -->
+      <div class="flex items-center gap-2 sm:gap-4">
+        <!-- 連續天數 Streak -->
+        <div class="flex items-center gap-1.5 bg-orange-50 border border-orange-200/80 px-3 py-1.5 rounded-full" title="連續學習天數">
+          <span class="text-base">🔥</span>
+          <span id="stat-streak" class="font-bold text-shu text-sm">1</span>
+          <span class="text-xs text-orange-800/80 hidden md:inline">天連勝</span>
+        </div>
+
+        <!-- 等級與經驗值 XP -->
+        <div class="flex items-center gap-2 bg-slate-100 border border-slate-200/80 px-3 py-1.5 rounded-full">
+          <div class="flex items-center gap-1">
+            <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-ai text-white" id="stat-level-badge">Lv.1</span>
+            <span id="stat-xp" class="font-bold text-ai text-sm">0</span>
+            <span class="text-xs text-slate-500">XP</span>
+          </div>
+          <div class="w-14 sm:w-20 h-2 bg-slate-200 rounded-full overflow-hidden hidden xs:block">
+            <div id="stat-xp-bar" class="h-full bg-gradient-to-r from-ai to-sakura transition-all duration-500" style="width: 10%"></div>
+          </div>
+        </div>
+
+        <!-- 設定 / 工具按鈕 -->
+        <button onclick="app.toggleSettingsModal()" class="p-2 text-stone-500 hover:text-ai hover:bg-stone-100 rounded-xl transition" title="學習設定與工具">
+          <i class="fa-solid fa-sliders text-lg"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主內容區 -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-6">
+    
+    <!-- 視圖 1：學習路徑主儀表板 -->
+    <div id="view-dashboard" class="space-y-6">
+      
+      <!-- 今日任務與每日特訓橫幅 -->
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- 每日特訓卡片 (Daily Challenge) -->
+        <div class="md:col-span-2 bg-gradient-to-br from-ai via-[#2D4F7E] to-[#1E3557] text-white rounded-2xl p-5 sm:p-6 shadow-md relative overflow-hidden flex flex-col justify-between">
+          <!-- 裝飾和風圓紋 -->
+          <div class="absolute -right-8 -bottom-8 w-40 h-40 rounded-full border-[16px] border-white/5 pointer-events-none"></div>
+          <div class="absolute right-12 -top-10 w-28 h-28 rounded-full bg-sakura/15 blur-xl pointer-events-none"></div>
+
+          <div class="relative z-10">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 text-xs font-medium mb-3 backdrop-blur-sm">
+              <i class="fa-solid fa-bolt text-amber-300"></i>
+              <span>間隔重複記憶強化</span>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-bold mb-1.5">每日混合特訓 (Daily Challenge)</h2>
+            <p class="text-sm text-blue-100/90 max-w-lg leading-relaxed">
+              系統自動從您已解鎖的關卡中抽選 6 道精選題目，融合聽力、假名、單字與句型重組，鞏固長期記憶！
+            </p>
+          </div>
+
+          <div class="relative z-10 mt-5 flex flex-wrap items-center gap-3">
+            <button onclick="app.startDailyChallenge()" class="px-5 py-2.5 bg-shu hover:bg-[#c44129] active:scale-95 text-white font-bold rounded-xl shadow-lg shadow-shu/30 transition flex items-center gap-2">
+              <i class="fa-solid fa-play"></i>
+              <span>開始今日特訓 (+50 XP)</span>
+            </button>
+            <span id="daily-challenge-status" class="text-xs text-blue-200 flex items-center gap-1">
+              <i class="fa-regular fa-clock"></i> 隨時可重複挑戰
+            </span>
+          </div>
+        </div>
+
+        <!-- 今日目標面板 -->
+        <div class="bg-white rounded-2xl p-5 border border-stone-200/90 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-bold text-stone-800 flex items-center gap-2">
+                <i class="fa-solid fa-bullseye text-shu"></i>
+                <span>今日學習目標</span>
+              </h3>
+              <span id="daily-goal-badge" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">進行中</span>
+            </div>
+
+            <div class="space-y-3 mt-4">
+              <!-- 任務 1 -->
+              <div class="flex items-center justify-between text-sm">
+                <div class="flex items-center gap-2">
+                  <div id="task1-icon" class="w-5 h-5 rounded-full border-2 border-stone-300 flex items-center justify-center text-xs text-white transition-colors"></div>
+                  <span class="text-stone-700">完成 1 個關卡練習</span>
+                </div>
+                <span id="task1-progress" class="text-xs font-semibold text-stone-500">0/1</span>
+              </div>
+
+              <!-- 任務 2 -->
+              <div class="flex items-center justify-between text-sm">
+                <div class="flex items-center gap-2">
+                  <div id="task2-icon" class="w-5 h-5 rounded-full border-2 border-stone-300 flex items-center justify-center text-xs text-white transition-colors"></div>
+                  <span class="text-stone-700">答對 8 道日文題目</span>
+                </div>
+                <span id="task2-progress" class="text-xs font-semibold text-stone-500">0/8</span>
+              </div>
+
+              <!-- 任務 3 -->
+              <div class="flex items-center justify-between text-sm">
+                <div class="flex items-center gap-2">
+                  <div id="task3-icon" class="w-5 h-5 rounded-full border-2 border-stone-300 flex items-center justify-center text-xs text-white transition-colors"></div>
+                  <span class="text-stone-700">使用發音朗讀 3 次</span>
+                </div>
+                <span id="task3-progress" class="text-xs font-semibold text-stone-500">0/3</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500">
+            <span>達成全目標額外獎勵</span>
+            <span class="font-bold text-matcha">+30 XP</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 快速控制列：振假名開關 & 體驗全解鎖開關 -->
+      <section class="bg-white/80 backdrop-blur-sm border border-stone-200/80 rounded-2xl px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2 text-sm font-medium text-stone-700">
+          <i class="fa-solid fa-map-signs text-ai"></i>
+          <span>階層式學習地圖（需達 <strong class="text-shu">80%</strong> 正確率解鎖下一關）</span>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-4">
+          <!-- 振假名 (漢字標音) 切換 -->
+          <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+            <input type="checkbox" id="toggle-furigana" class="sr-only peer" checked onchange="app.toggleFurigana(this.checked)">
+            <div class="w-9 h-5 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-ai relative"></div>
+            <span class="text-xs sm:text-sm text-stone-700 font-medium">漢字標註平假名</span>
+          </label>
+
+          <!-- 體驗全解鎖切換 -->
+          <label class="inline-flex items-center gap-2 cursor-pointer select-none" title="開啟後可自由預覽所有階層與關卡">
+            <input type="checkbox" id="toggle-unlock-all" class="sr-only peer" onchange="app.toggleUnlockAll(this.checked)">
+            <div class="w-9 h-5 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-shu relative"></div>
+            <span class="text-xs sm:text-sm text-stone-700 font-medium">自由預覽(全解鎖)</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- 四大階層課程地圖容器 -->
+      <section id="curriculum-container" class="space-y-8 pb-10">
+        <!-- 由 JavaScript 動態渲染 4 個 Level 與各單元卡片 -->
+      </section>
+    </div>
+
+    <!-- 視圖 2：單元課前預習 / 單字文法卡片總覽 (Lesson Preview) -->
+    <div id="view-lesson-preview" class="hidden max-w-3xl mx-auto space-y-6 pb-12">
+      <div class="flex items-center justify-between">
+        <button onclick="app.goHome()" class="inline-flex items-center gap-2 text-sm font-medium text-stone-600 hover:text-ai px-3 py-2 rounded-xl hover:bg-white transition">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>返回學習地圖</span>
+        </button>
+        <span id="preview-level-tag" class="text-xs font-bold px-3 py-1 rounded-full bg-ai/10 text-ai">Level 1</span>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
+        <div class="p-6 sm:p-8 border-b border-stone-100 bg-gradient-to-r from-washi to-white">
+          <div class="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h2 id="preview-title" class="text-2xl font-bold text-stone-900 mb-2">單元標題</h2>
+              <p id="preview-desc" class="text-stone-600 text-sm leading-relaxed">單元說明文字</p>
+            </div>
+            <button onclick="app.startQuizFromPreview()" class="px-6 py-3 bg-shu hover:bg-[#c44129] active:scale-95 text-white font-bold rounded-xl shadow-md shadow-shu/20 transition flex items-center gap-2 shrink-0">
+              <i class="fa-solid fa-pen-to-square"></i>
+              <span>直接開始測驗</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 學習重點小卡列表 -->
+        <div class="p-6 sm:p-8 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-stone-800 flex items-center gap-2">
+              <i class="fa-solid fa-book-open text-ai"></i>
+              <span>本關核心知識點（點擊喇叭聆聽發音）</span>
+            </h3>
+            <span class="text-xs text-stone-400">建議先聽熟再測驗</span>
+          </div>
+
+          <div id="preview-cards-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <!-- 動態產生知識點卡片 -->
+          </div>
+        </div>
+
+        <div class="p-5 bg-washi border-t border-stone-200/70 flex justify-center">
+          <button onclick="app.startQuizFromPreview()" class="w-full sm:w-auto px-8 py-3.5 bg-ai hover:bg-aiLight text-white font-bold rounded-xl shadow-md transition flex items-center justify-center gap-2">
+            <span>準備好了，進入挑戰！</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 視圖 3：互動練習測驗區 (Quiz Arena) -->
+    <div id="view-quiz" class="hidden max-w-2xl mx-auto pb-12">
+      <!-- 測驗頂部進度條 -->
+      <div class="flex items-center gap-3 mb-6">
+        <button onclick="app.confirmExitQuiz()" class="p-2 text-stone-400 hover:text-stone-700 hover:bg-white rounded-xl transition" title="離開練習">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        <div class="flex-1 h-3 bg-stone-200 rounded-full overflow-hidden">
+          <div id="quiz-progress-bar" class="h-full bg-matcha transition-all duration-300 rounded-full" style="width: 0%"></div>
+        </div>
+        <span id="quiz-counter" class="text-xs font-bold text-stone-600 tabular-nums">1 / 5</span>
+      </div>
+
+      <!-- 題目主卡片 -->
+      <div class="bg-white rounded-3xl border border-stone-200/90 shadow-md p-6 sm:p-8 relative">
+        <!-- 題型標籤 -->
+        <div class="flex items-center justify-between mb-4">
+          <span id="quiz-type-badge" class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-blue-50 text-ai">
+            <i class="fa-solid fa-headphones"></i> 聽力辨識
+          </span>
+          <!-- 題目中也可以隨時切換振假名 -->
+          <button onclick="app.toggleFuriganaFromButton()" class="text-xs text-stone-500 hover:text-ai flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-stone-100 transition">
+            <i class="fa-solid fa-language"></i>
+            <span id="quiz-furigana-label">隱藏假名</span>
+          </button>
+        </div>
+
+        <!-- 題目指令與日文內容 -->
+        <div class="mb-6">
+          <p id="quiz-instruction" class="text-sm text-stone-500 font-medium mb-2">請選出正確的中文意思：</p>
+          
+          <div class="flex flex-wrap items-center gap-3">
+            <!-- 發音按鈕群 -->
+            <div id="quiz-audio-controls" class="flex items-center gap-2">
+              <button onclick="app.playCurrentQuestionAudio(1.0)" class="w-12 h-12 rounded-2xl bg-ai hover:bg-aiLight active:scale-95 text-white flex items-center justify-center shadow-md shadow-ai/20 transition" title="正常語速朗讀">
+                <i class="fa-solid fa-volume-high text-lg"></i>
+              </button>
+              <button onclick="app.playCurrentQuestionAudio(0.65)" class="px-3 h-12 rounded-2xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-ai text-xs font-bold flex items-center gap-1 transition" title="慢速清晰朗讀">
+                <i class="fa-solid fa-snail"></i>
+                <span>慢速</span>
+              </button>
+            </div>
+
+            <!-- 題幹日文顯示區 -->
+            <div id="quiz-prompt-display" class="font-jp text-2xl sm:text-3xl font-bold text-stone-900 leading-relaxed">
+              <!-- 動態填入題目文字或純聽力提示 -->
+            </div>
+          </div>
+          <p id="quiz-romaji-hint" class="text-xs text-stone-400 mt-1.5 font-mono hidden"></p>
+        </div>
+
+        <!-- 作答區 A：單選題 (選擇題 / 聽力題) -->
+        <div id="quiz-options-container" class="grid grid-cols-1 gap-3">
+          <!-- 動態產生選項按鈕 -->
+        </div>
+
+        <!-- 作答區 B：句型重組 (Sentence Builder) -->
+        <div id="quiz-builder-container" class="hidden space-y-5">
+          <!-- 組合槽 (作答區) -->
+          <div class="min-h-[68px] p-3 rounded-2xl bg-washi border-2 border-dashed border-stone-300 flex flex-wrap items-center gap-2" id="builder-answer-slot">
+            <span class="text-xs text-stone-400 select-none" id="builder-placeholder">請依序點擊下方的日文單字卡組合成句...</span>
+          </div>
+
+          <!-- 單字候選池 -->
+          <div class="flex flex-wrap gap-2.5 justify-center pt-2" id="builder-word-bank">
+            <!-- 動態產生可點擊單字卡 -->
+          </div>
+        </div>
+
+        <!-- 提交按鈕 (句型重組專用) -->
+        <div id="quiz-submit-row" class="mt-6 hidden">
+          <button id="btn-check-answer" onclick="app.checkSentenceBuilder()" class="w-full py-3.5 bg-ai hover:bg-aiLight disabled:bg-stone-300 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-md transition">
+            檢查答案
+          </button>
+        </div>
+      </div>
+
+      <!-- 立即回饋與詳細解析抽屜 (答題後顯示) -->
+      <div id="quiz-feedback-panel" class="hidden mt-4 rounded-3xl p-6 border-2 shadow-lg transition-all">
+        <div class="flex items-start gap-3.5">
+          <div id="feedback-icon" class="w-10 h-10 rounded-2xl flex items-center justify-center text-white text-xl shrink-0 mt-0.5">
+            <i class="fa-solid fa-check"></i>
+          </div>
+          <div class="flex-1 space-y-2">
+            <div class="flex items-center justify-between">
+              <h4 id="feedback-title" class="font-bold text-lg">答對了！太棒了！</h4>
+              <button onclick="app.playFeedbackSentenceAudio()" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-white/80 hover:bg-white text-ai border border-stone-200 flex items-center gap-1 transition">
+                <i class="fa-solid fa-volume-high"></i> 聽完整句
+              </button>
+            </div>
+            
+            <!-- 正確日文與中文對照 -->
+            <div class="bg-white/80 rounded-xl p-3 border border-black/5 space-y-1">
+              <p id="feedback-jp" class="font-jp font-bold text-base text-stone-900"></p>
+              <p id="feedback-romaji" class="text-xs text-stone-500 font-mono"></p>
+              <p id="feedback-zh" class="text-sm text-stone-700 font-medium"></p>
+            </div>
+
+            <!-- 文法與單字拆解說明 -->
+            <div class="text-sm text-stone-700 leading-relaxed pt-1">
+              <span class="font-bold text-ai"><i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i>解析：</span>
+              <span id="feedback-explanation"></span>
+            </div>
+          </div>
+        </div>
+
+        <button id="btn-next-question" onclick="app.nextQuestion()" class="mt-5 w-full py-3.5 font-bold rounded-xl text-white shadow-md transition flex items-center justify-center gap-2">
+          <span>繼續下一題</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- 視圖 4：關卡結算畫面 (Lesson Summary) -->
+    <div id="view-summary" class="hidden max-w-lg mx-auto py-8 text-center">
+      <div class="bg-white rounded-3xl border border-stone-200 shadow-lg p-8 space-y-6">
+        <div id="summary-badge-icon" class="w-20 h-20 mx-auto rounded-3xl bg-amber-100 text-amber-500 flex items-center justify-center text-4xl shadow-inner">
+          <i class="fa-solid fa-trophy"></i>
+        </div>
+
+        <div>
+          <h2 id="summary-title" class="text-2xl font-bold text-stone-900 mb-1">關卡挑戰完成！</h2>
+          <p id="summary-subtitle" class="text-sm text-stone-500">繼續保持每日練習的好習慣</p>
+        </div>
+
+        <!-- 成績數據網格 -->
+        <div class="grid grid-cols-3 gap-3">
+          <div class="bg-washi rounded-2xl p-3.5 border border-stone-200/60">
+            <div class="text-xs text-stone-500 mb-1">正確率</div>
+            <div id="summary-accuracy" class="text-xl font-bold text-ai">100%</div>
+          </div>
+          <div class="bg-washi rounded-2xl p-3.5 border border-stone-200/60">
+            <div class="text-xs text-stone-500 mb-1">獲得經驗</div>
+            <div id="summary-xp" class="text-xl font-bold text-matcha">+40 XP</div>
+          </div>
+          <div class="bg-washi rounded-2xl p-3.5 border border-stone-200/60">
+            <div class="text-xs text-stone-500 mb-1">連續天數</div>
+            <div id="summary-streak" class="text-xl font-bold text-shu">1 天</div>
+          </div>
+        </div>
+
+        <!-- 解鎖提示訊息框 -->
+        <div id="summary-unlock-banner" class="hidden bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 text-sm font-medium flex items-center justify-center gap-2">
+          <i class="fa-solid fa-lock-open text-emerald-600"></i>
+          <span id="summary-unlock-text">恭喜解鎖下一個新關卡！</span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 pt-2">
+          <button onclick="app.retryCurrentQuiz()" class="flex-1 py-3 px-4 rounded-xl border border-stone-300 hover:bg-stone-50 text-stone-700 font-bold text-sm transition">
+            再次練習本關
+          </button>
+          <button onclick="app.goHome()" class="flex-1 py-3 px-4 rounded-xl bg-ai hover:bg-aiLight text-white font-bold text-sm shadow-md transition">
+            返回學習地圖
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- 頁尾 -->
+  <footer class="border-t border-stone-200/80 bg-white/60 py-4 text-center text-xs text-stone-500">
+    <p>日語階梯 Nihongo Steps ・ 支援瀏覽器日語語音合成 (ja-JP) 與本地學習進度自動儲存</p>
+  </footer>
+
+  <!-- 設定與確認彈窗 (取代 alert/confirm) -->
+  <div id="modal-overlay" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-stone-200 space-y-5">
+      <div class="flex items-center justify-between">
+        <h3 id="modal-title" class="text-lg font-bold text-stone-900">學習偏好與進度管理</h3>
+        <button onclick="app.closeModal()" class="text-stone-400 hover:text-stone-700 p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div id="modal-body" class="space-y-4 text-sm text-stone-600">
+        <!-- 動態內容 -->
+      </div>
+
+      <div id="modal-footer" class="flex justify-end gap-2 pt-2">
+        <!-- 動態按鈕 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 輕量提示 Toast -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-stone-900/90 text-white text-xs sm:text-sm px-4 py-2.5 rounded-full shadow-lg pointer-events-none opacity-0 transition-opacity duration-300 flex items-center gap-2">
+    <i class="fa-solid fa-circle-info text-sakura"></i>
+    <span id="toast-msg">提示訊息</span>
+  </div>
+
+  <script>
+    /**
+     * ============================================================================
+     * 1. 課程資料庫 (CURRICULUM DATA)
+     *    四大進階階層：
+     *    Level 1：五十音與基礎發音
+     *    Level 2：生存旅遊與日常詞彙
+     *    Level 3：核心文法與句型結構
+     *    Level 4：情境對話與進階閱讀
+     * ============================================================================
+     */
+    const CURRICULUM = [
+      {
+        level: 1,
+        title: "Level 1：五十音與基礎發音",
+        subtitle: "掌握平假名、片假名核心音節與最實用的日常問候語",
+        color: "from-emerald-600 to-teal-700",
+        badgeBg: "bg-emerald-100 text-emerald-800",
+        icon: "fa-seedling",
+        units: [
+          {
+            id: "u1_1",
+            title: "平假名入門：あ行與か行",
+            desc: "認識日文最基礎的母音（あいうえお）與清音（かきくけこ），建立正確發音語感。",
+            xpReward: 30,
+            studyCards: [
+              { jp: "あ・い・う・え・お", romaji: "a · i · u · e · o", zh: "平假名母音（啊、衣、屋、欸、喔）", audio: "あ、い、う、え、お" },
+              { jp: "か・き・く・け・こ", romaji: "ka · ki · ku · ke · ko", zh: "平假名か行清音", audio: "か、き、く、け、こ" },
+              { jp: "<ruby>愛<rt>あい</rt></ruby>", romaji: "ai", zh: "愛、愛情", audio: "あい" },
+              { jp: "<ruby>駅<rt>えき</rt></ruby>", romaji: "eki", zh: "車站", audio: "えき" },
+              { jp: "<ruby>顔<rt>かお</rt></ruby>", romaji: "kao", zh: "臉孔", audio: "かお" },
+              { jp: "<ruby>声<rt>こえ</rt></ruby>", romaji: "koe", zh: "聲音", audio: "こえ" }
+            ],
+            questions: [
+              {
+                type: "listening",
+                instruction: "點擊喇叭聆聽發音，選出對應的平假名：",
+                audioText: "えき",
+                promptDisplay: "🔊 聆聽單字發音（「車站」的意思）",
+                options: ["えき (eki)", "あき (aki)", "いけ (ike)", "おか (oka)"],
+                answerIndex: 0,
+                fullJp: "<ruby>駅<rt>えき</rt></ruby>",
+                romaji: "eki",
+                zh: "車站",
+                explanation: "「え (e)」加上「き (ki)」讀作 eki，漢字寫作「駅」，是日本旅遊最常看到的單字之一。"
+              },
+              {
+                type: "choice",
+                instruction: "平假名「あ・い・う・え・お」中，哪一個字發音類似中文的「屋 (u)」？",
+                audioText: "う",
+                promptDisplay: "母音辨識：u",
+                options: ["う", "あ", "お", "え"],
+                answerIndex: 0,
+                fullJp: "う",
+                romaji: "u",
+                zh: "母音 u",
+                explanation: "「あ(a)、い(i)、う(u)、え(e)、お(o)」為日文五十音的五個基本母音，發「う」時嘴唇微收不需過度突出。"
+              },
+              {
+                type: "choice",
+                instruction: "選出「かお」的正確中文意思：",
+                audioText: "かお",
+                promptDisplay: "かお",
+                options: ["臉孔", "聲音", "秋天", "藍色"],
+                answerIndex: 0,
+                fullJp: "<ruby>顔<rt>かお</rt></ruby>",
+                romaji: "kao",
+                zh: "臉孔",
+                explanation: "「か (ka)」＋「お (o)」＝ かお (kao)，漢字為「顔」，意為臉孔。"
+              },
+              {
+                type: "listening",
+                instruction: "聽聽看這個雙音節單字是什麼：",
+                audioText: "こえ",
+                promptDisplay: "🔊 聆聽單字發音",
+                options: ["こえ (koe)", "くい (kui)", "かお (kao)", "きく (kiku)"],
+                answerIndex: 0,
+                fullJp: "<ruby>声<rt>こえ</rt></ruby>",
+                romaji: "koe",
+                zh: "聲音",
+                explanation: "「こ (ko)」＋「え (e)」＝ こえ (koe)，漢字為「声」，指人或動物發出的聲音。"
+              },
+              {
+                type: "choice",
+                instruction: "下列哪一個平假名屬於「か行」？",
+                audioText: "け",
+                promptDisplay: "け",
+                options: ["ke", "se", "te", "ne"],
+                answerIndex: 0,
+                fullJp: "け",
+                romaji: "ke",
+                zh: "假名 ke",
+                explanation: "か行五個假名依序為：か(ka)、き(ki)、く(ku)、け(ke)、こ(ko)。"
+              }
+            ]
+          },
+          {
+            id: "u1_2",
+            title: "片假名與外來語初體驗",
+            desc: "片假名常用於外來語與強調語氣，透過咖啡、蛋糕等生活單字輕鬆記憶！",
+            xpReward: 35,
+            studyCards: [
+              { jp: "コーヒー", romaji: "kōhī", zh: "咖啡 (Coffee)", audio: "コーヒー" },
+              { jp: "ケーキ", romaji: "kēki", zh: "蛋糕 (Cake)", audio: "ケーキ" },
+              { jp: "ホテル", romaji: "hoteru", zh: "飯店 (Hotel)", audio: "ホテル" },
+              { jp: "トイレ", romaji: "toire", zh: "洗手間 (Toilet)", audio: "トイレ" },
+              { jp: "タクシー", romaji: "takushī", zh: "計程車 (Taxi)", audio: "タクシー" }
+            ],
+            questions: [
+              {
+                type: "choice",
+                instruction: "在日本咖啡廳看到「コーヒー」，這是什麼飲料？",
+                audioText: "コーヒー",
+                promptDisplay: "コーヒー",
+                options: ["咖啡", "可樂", "紅茶", "牛奶"],
+                answerIndex: 0,
+                fullJp: "コーヒー",
+                romaji: "kōhī",
+                zh: "咖啡",
+                explanation: "片假名中的橫線「ー」代表長音，將前一個母音拉長一拍，コーヒー即英文 Coffee 的音譯。"
+              },
+              {
+                type: "listening",
+                instruction: "聽發音，選出在外面急需找尋的地點：",
+                audioText: "トイレ",
+                promptDisplay: "🔊 聆聽單字發音",
+                options: ["トイレ（洗手間）", "ホテル（飯店）", "ケーキ（蛋糕）", "カメラ（相機）"],
+                answerIndex: 0,
+                fullJp: "トイレ",
+                romaji: "toire",
+                zh: "洗手間 / 廁所",
+                explanation: "「トイレ (toire)」源自英文 Toilet，在車站與商場非常實用。"
+              },
+              {
+                type: "choice",
+                instruction: "「飯店、旅館」的日文片假名寫法是哪一個？",
+                audioText: "ホテル",
+                promptDisplay: "飯店 (Hotel)",
+                options: ["ホテル", "ケーキ", "タクシー", "テスト"],
+                answerIndex: 0,
+                fullJp: "ホテル",
+                romaji: "hoteru",
+                zh: "飯店",
+                explanation: "ホ(ho)＋テ(te)＋ル(ru)＝ ホテル (hoteru)。"
+              },
+              {
+                type: "choice",
+                instruction: "片假名單字「タクシー」中的「ー」符號代表什麼意思？",
+                audioText: "タクシー",
+                promptDisplay: "タクシー",
+                options: ["長音（拉長前一音節母音）", "停頓一拍（促音）", "重音符號", "鼻音"],
+                answerIndex: 0,
+                fullJp: "タクシー",
+                romaji: "takushī",
+                zh: "計程車",
+                explanation: "片假名長音符號「ー」表示將「シ (shi)」的母音 i 拉長一拍，讀作 takushī。"
+              }
+            ]
+          },
+          {
+            id: "u1_3",
+            title: "每日必備問候語與禮貌表達",
+            desc: "學會早安、午安、謝謝與不好意思，開啟有禮貌的第一句日文對話。",
+            xpReward: 40,
+            studyCards: [
+              { jp: "おはようございます", romaji: "ohayō gozaimasu", zh: "早安（禮貌說法）", audio: "おはようございます" },
+              { jp: "こんにちは", romaji: "konnichiwa", zh: "午安 / 你好", audio: "こんにちは" },
+              { jp: "ありがとうございます", romaji: "arigatō gozaimasu", zh: "非常謝謝您", audio: "ありがとうございます" },
+              { jp: "すみません", romaji: "sumimasen", zh: "不好意思 / 請問一下 / 對不起", audio: "すみません" },
+              { jp: "お<ruby>願<rt>ねが</rt></ruby>いします", romaji: "onegaishimasu", zh: "拜託您了 / 麻煩您了", audio: "おねがいします" }
+            ],
+            questions: [
+              {
+                type: "choice",
+                instruction: "早上走進日本便利商店或學校時，最有禮貌的打招呼方式是？",
+                audioText: "おはようございます",
+                promptDisplay: "早上打招呼",
+                options: ["おはようございます", "こんばんは", "さようなら", "おやすみなさい"],
+                answerIndex: 0,
+                fullJp: "おはようございます",
+                romaji: "ohayō gozaimasu",
+                zh: "早安",
+                explanation: "「おはよう」用於熟人，加上「ございます」成為敬語，對長輩、老師或店員都適用。"
+              },
+              {
+                type: "choice",
+                instruction: "在餐廳想呼叫店員點餐，或不小心碰到別人時，最萬用的詞是？",
+                audioText: "すみません",
+                promptDisplay: "萬用禮貌語",
+                options: ["すみません", "いただきます", "ごちそうさま", "はじめまして"],
+                answerIndex: 0,
+                fullJp: "すみません",
+                romaji: "sumimasen",
+                zh: "不好意思 / 請問一下 / 對不起",
+                explanation: "「すみません」兼具『對不起』、『謝謝（讓您費心了）』以及『請問一下（呼叫店員）』三重功能！"
+              },
+              {
+                type: "builder",
+                instruction: "請將單字卡組合成「非常謝謝您」：",
+                audioText: "ありがとうございます",
+                words: ["ございます", "ありがとう"],
+                correctOrder: ["ありがとう", "ございます"],
+                fullJp: "ありがとうございます",
+                romaji: "arigatō gozaimasu",
+                zh: "非常謝謝您",
+                explanation: "「ありがとう（謝謝）」加上「ございます」表示鄭重感謝。"
+              },
+              {
+                type: "listening",
+                instruction: "聆聽語音，選出這句話的適用情境：",
+                audioText: "おねがいします",
+                promptDisplay: "🔊 聆聽禮貌用語",
+                options: ["點餐或請對方幫忙時（拜託您了）", "準備睡覺前（晚安）", "吃飽飯後（謝謝款待）", "初次見面時（請多指教）"],
+                answerIndex: 0,
+                fullJp: "お<ruby>願<rt>ねが</rt></ruby>いします",
+                romaji: "onegaishimasu",
+                zh: "拜託您了 / 麻煩您了",
+                explanation: "點完餐或遞交物品給對方時說「お願いします」，展現道地的日語禮貌。"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        level: 2,
+        title: "Level 2：生存旅遊與日常詞彙",
+        subtitle: "掌握數字計數、時間表達、餐廳點餐與交通方向核心單字",
+        color: "from-sky-600 to-blue-700",
+        badgeBg: "bg-sky-100 text-sky-800",
+        icon: "fa-plane-departure",
+        units: [
+          {
+            id: "u2_1",
+            title: "數字 1～10 與購物問價錢",
+            desc: "學會日文數字念法，在商店輕鬆聽懂價格並詢問「這個多少錢？」。",
+            xpReward: 40,
+            studyCards: [
+              { jp: "<ruby>一<rt>いち</rt></ruby>・<ruby>二<rt>に</rt></ruby>・<ruby>三<rt>さん</rt></ruby>・<ruby>四<rt>よん</rt></ruby>・<ruby>五<rt>ご</rt></ruby>", romaji: "ichi · ni · san · yon · go", zh: "數字 1、2、3、4、5", audio: "いち、に、さん、よん、ご" },
+              { jp: "<ruby>百<rt>ひゃく</rt></ruby>・<ruby>千<rt>せん</rt></ruby>・<ruby>一万<rt>いちまん</rt></ruby>", romaji: "hyaku · sen · ichiman", zh: "一百、一千、一萬", audio: "ひゃく、せん、いちまん" },
+              { jp: "いくらですか", romaji: "ikura desu ka", zh: "多少錢呢？", audio: "いくらですか" },
+              { jp: "これ", romaji: "kore", zh: "這個（離說話者近）", audio: "これ" },
+              { jp: "<ruby>円<rt>えん</rt></ruby>", romaji: "en", zh: "日圓（貨幣單位）", audio: "えん" }
+            ],
+            questions: [
+              {
+                type: "choice",
+                instruction: "在紀念品店指著眼前的商品問「這個多少錢？」，該怎麼說？",
+                audioText: "これはいくらですか",
+                promptDisplay: "詢問價格",
+                options: ["これはいくらですか。", "これはなんですか。", "どこですか。", "なんじですか。"],
+                answerIndex: 0,
+                fullJp: "これはいくらですか。",
+                romaji: "kore wa ikura desu ka",
+                zh: "這個多少錢？",
+                explanation: "「これ」是這個，「いくら」是多少錢，「ですか」形成禮貌疑問句。"
+              },
+              {
+                type: "listening",
+                instruction: "聽店員報價，這件商品是多少日圓？",
+                audioText: "さんぜんえん",
+                promptDisplay: "🔊 聆聽價格",
+                options: ["3,000 日圓", "300 日圓", "1,300 日圓", "30,000 日圓"],
+                answerIndex: 0,
+                fullJp: "<ruby>三千円<rt>さんぜんえん</rt></ruby>",
+                romaji: "sanzen en",
+                zh: "三千日圓",
+                explanation: "注意音變！三(さん)＋千(せん)會發生連濁音變，讀作「さんぜん (sanzen)」。"
+              },
+              {
+                type: "builder",
+                instruction: "重組句子：「請給我這個。」",
+                audioText: "これをください",
+                words: ["ください", "これ", "を"],
+                correctOrder: ["これ", "を", "ください"],
+                fullJp: "これをください。",
+                romaji: "kore o kudasai",
+                zh: "請給我這個。",
+                explanation: "「名詞 + を + ください」是購物與點餐最實用的萬用句型，意為「請給我⋯⋯」。"
+              },
+              {
+                type: "choice",
+                instruction: "日文數字「1、2、3、4、5」的正確讀音順序是？",
+                audioText: "いち、に、さん、よん、ご",
+                promptDisplay: "1・2・3・4・5",
+                options: ["ichi, ni, san, yon, go", "ichi, san, ni, go, yon", "hitotsu, futatsu, mittsu, yottsu, itsutsu", "rei, ichi, ni, san, shi"],
+                answerIndex: 0,
+                fullJp: "<ruby>一<rt>いち</rt></ruby>・<ruby>二<rt>に</rt></ruby>・<ruby>三<rt>さん</rt></ruby>・<ruby>四<rt>よん</rt></ruby>・<ruby>五<rt>ご</rt></ruby>",
+                romaji: "ichi, ni, san, yon, go",
+                zh: "一、二、三、四、五",
+                explanation: "數字 4 有「よん (yon)」與「し (shi)」兩種讀法，日常報數與時間多使用「よん」。"
+              }
+            ]
+          },
+          {
+            id: "u2_2",
+            title: "餐廳美食與點餐必備詞彙",
+            desc: "看懂日本餐廳常見料理名稱，學會點水、點拉麵以及稱讚「很好吃！」。",
+            xpReward: 45,
+            studyCards: [
+              { jp: "ラーメン", romaji: "rāmen", zh: "拉麵", audio: "ラーメン" },
+              { jp: "お<ruby>水<rt>みず</rt></ruby>", romaji: "omizu", zh: "水（飲用水）", audio: "おみず" },
+              { jp: "メニュー", romaji: "menyū", zh: "菜單 (Menu)", audio: "メニュー" },
+              { jp: "おいしいです", romaji: "oishii desu", zh: "很好吃", audio: "おいしいです" },
+              { jp: "お<ruby>会計<rt>かいけい</rt></ruby>", romaji: "okaikei", zh: "結帳", audio: "おかいけい" }
+            ],
+            questions: [
+              {
+                type: "choice",
+                instruction: "用餐結束準備離開餐廳時，想請店員結帳該說什麼？",
+                audioText: "おかいけいをおねがいします",
+                promptDisplay: "請幫我結帳",
+                options: ["お会計をお願いします。", "メニューをお願いします。", "お水をお願いします。", "いただきます。"],
+                answerIndex: 0,
+                fullJp: "お<ruby>会計<rt>かいけい</rt></ruby>をお<ruby>願<rt>ねが</rt></ruby>いします。",
+                romaji: "okaikei o onegaishimasu",
+                zh: "麻煩幫我結帳。",
+                explanation: "「お会計（おかいけい）」是結帳的意思，搭配「をお願いします」非常自然有禮。"
+              },
+              {
+                type: "builder",
+                instruction: "組合句子：「請給我菜單。」",
+                audioText: "メニューをください",
+                words: ["を", "メニュー", "ください"],
+                correctOrder: ["メニュー", "を", "ください"],
+                fullJp: "メニューをください。",
+                romaji: "menyū o kudasai",
+                zh: "請給我菜單。",
+                explanation: "外來語「メニュー (Menu)」加上助詞「を」與「ください」。"
+              },
+              {
+                type: "choice",
+                instruction: "吃到美味的拉麵時，想跟老闆稱讚「非常好吃！」，應該說：",
+                audioText: "とてもおいしいです",
+                promptDisplay: "稱讚料理美味",
+                options: ["とてもおいしいです！", "とてもたかいです！", "とてもおおきいです！", "とてもさむいです！"],
+                answerIndex: 0,
+                fullJp: "とてもおいしいです！",
+                romaji: "totemo oishii desu",
+                zh: "非常好吃！",
+                explanation: "「とても」是很、非常；「おいしい」是好吃的（い形容詞）。"
+              },
+              {
+                type: "listening",
+                instruction: "聆聽單字，選出客人向店員索取的物品：",
+                audioText: "おみず",
+                promptDisplay: "🔊 聆聽單字發音",
+                options: ["飲用水 (お水)", "綠茶 (お茶)", "白飯 (ご飯)", "筷子 (お箸)"],
+                answerIndex: 0,
+                fullJp: "お<ruby>水<rt>みず</rt></ruby>",
+                romaji: "omizu",
+                zh: "水",
+                explanation: "「水（みず）」前面加上美化語「お」，變成「お水（おみず）」，指飲用水。"
+              }
+            ]
+          },
+          {
+            id: "u2_3",
+            title: "時間、星期與交通方向",
+            desc: "掌握「幾點鐘」、「今天/明天」以及「右轉、左轉、直走」等關鍵方向詞。",
+            xpReward: 45,
+            studyCards: [
+              { jp: "<ruby>今<rt>いま</rt></ruby>、<ruby>何時<rt>なんじ</rt></ruby>ですか", romaji: "ima, nanji desu ka", zh: "現在幾點呢？", audio: "いま、なんじですか" },
+              { jp: "<ruby>今日<rt>きょう</rt></ruby>・<ruby>明日<rt>あした</rt></ruby>", romaji: "kyō · ashita", zh: "今天・明天", audio: "きょう、あした" },
+              { jp: "<ruby>右<rt>みぎ</rt></ruby>・<ruby>左<rt>ひだり</rt></ruby>・まっすぐ", romaji: "migi · hidari · massugu", zh: "右邊・左邊・直走", audio: "みぎ、ひだり、まっすぐ" },
+              { jp: "<ruby>地下鉄<rt>ちかてつ</rt></ruby>", romaji: "chikatetsu", zh: "地下鐵 / 捷運", audio: "ちかてつ" }
+            ],
+            questions: [
+              {
+                type: "choice",
+                instruction: "漢字「明日」在日文中的正確讀音與意思是？",
+                audioText: "あした",
+                promptDisplay: "明日",
+                options: ["あした (ashita) — 明天", "きのう (kinō) — 昨天", "きょう (kyō) — 今天", "まいにち (mainichi) — 每天"],
+                answerIndex: 0,
+                fullJp: "<ruby>明日<rt>あした</rt></ruby>",
+                romaji: "ashita",
+                zh: "明天",
+                explanation: "「明日」屬於熟字訓，不按單字音讀，而是整體讀作「あした (ashita)」。"
+              },
+              {
+                type: "listening",
+                instruction: "問路時聽到路人指示方向，他叫你往哪邊走？",
+                audioText: "まっすぐいってください",
+                promptDisplay: "🔊 聆聽指路說明",
+                options: ["請直走", "請向右轉", "請向左轉", "請在這裡停下"],
+                answerIndex: 0,
+                fullJp: "まっすぐ<ruby>行<rt>い</rt></ruby>ってください。",
+                romaji: "massugu itte kudasai",
+                zh: "請直走。",
+                explanation: "「まっすぐ」是筆直地；「行ってください」是請走、請前往。"
+              },
+              {
+                type: "builder",
+                instruction: "重組句子：「現在幾點呢？」",
+                audioText: "いまなんじですか",
+                words: ["ですか", "いま", "なんじ"],
+                correctOrder: ["いま", "なんじ", "ですか"],
+                fullJp: "<ruby>今<rt>いま</rt></ruby><ruby>何時<rt>なんじ</rt></ruby>ですか。",
+                romaji: "ima nanji desu ka",
+                zh: "現在幾點呢？",
+                explanation: "「今（いま）」是現在，「何時（なんじ）」是幾點。"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        level: 3,
+        title: "Level 3：核心文法與句型結構",
+        subtitle: "打通日文句子骨幹！精通助詞（は/を/に/で）與動詞ます形、て形變化",
+        color: "from-ai to-indigo-800",
+        badgeBg: "bg-indigo-100 text-ai",
+        icon: "fa-cubes",
+        units: [
+          {
+            id: "u3_1",
+            title: "日文句型骨幹：助詞「は」與「を」",
+            desc: "理解「A 是 B」的判斷句，以及動作對象助詞「を」的正確擺放位置。",
+            xpReward: 50,
+            studyCards: [
+              { jp: "<ruby>私<rt>わたし</rt></ruby>は<ruby>学生<rt>がくせい</rt></ruby>です", romaji: "watashi wa gakusei desu", zh: "我是學生（は讀作 wa）", audio: "わたしはがくせいです" },
+              { jp: "パンを<ruby>食<rt>た</rt></ruby>べます", romaji: "pan o tabemasu", zh: "吃麵包（を標示動作對象）", audio: "パンをたべます" },
+              { jp: "<ruby>日本語<rt>にほんご</rt></ruby>を<ruby>勉強<rt>べんきょう</rt></ruby>します", romaji: "nihongo o benkyō shimasu", zh: "學習日文", audio: "にほんごをべんきょうします" }
+            ],
+            questions: [
+              {
+                type: "choice",
+                instruction: "選出正確的助詞填入空格：「私（　）台湾人です。」（我是台灣人。）",
+                audioText: "わたしはたいわんじんです",
+                promptDisplay: "<ruby>私<rt>わたし</rt></ruby>（　）<ruby>台湾人<rt>たいわんじん</rt></ruby>です。",
+                options: ["は (wa)", "を (o)", "に (ni)", "で (de)"],
+                answerIndex: 0,
+                fullJp: "<ruby>私<rt>わたし</rt></ruby>は<ruby>台湾人<rt>たいわんじん</rt></ruby>です。",
+                romaji: "watashi wa taiwanjin desu",
+                zh: "我是台灣人。",
+                explanation: "提示主題的助詞寫作「は」，但發音必須讀作「wa」喔！"
+              },
+              {
+                type: "builder",
+                instruction: "將單字組合成日文語序（主詞＋受詞＋動詞）：「我喝咖啡。」",
+                audioText: "わたしはコーヒーをのみます",
+                words: ["<ruby>飲<rt>の</rt></ruby>みます", "コーヒー", "<ruby>私<rt>わたし</rt></ruby>は", "を"],
+                correctOrder: ["<ruby>私<rt>わたし</rt></ruby>は", "コーヒー", "を", "<ruby>飲<rt>の</rt></ruby>みます"],
+                fullJp: "<ruby>私<rt>わたし</rt></ruby>はコーヒーを<ruby>飲<rt>の</rt></ruby>みます。",
+                romaji: "watashi wa kōhī o nomimasu",
+                zh: "我喝咖啡。",
+                explanation: "日文動詞永遠放在句尾！「受詞（コーヒー）＋を＋動詞（飲みます）」是核心語序。"
+              },
+              {
+                type: "choice",
+                instruction: "「毎日日本語（　）勉強します。」括弧中應該填入哪個助詞？",
+                audioText: "まいにちにほんごをべんきょうします",
+                promptDisplay: "<ruby>毎日<rt>まいにち</rt></ruby><ruby>日本語<rt>にほんご</rt></ruby>（　）<ruby>勉強<rt>べんきょう</rt></ruby>します。",
+                options: ["を", "は", "へ", "と"],
+                answerIndex: 0,
+                fullJp: "<ruby>毎日<rt>まいにち</rt></ruby><ruby>日本語<rt>にほんご</rt></ruby>を<ruby>勉強<rt>べんきょう</rt></ruby>します。",
+                romaji: "mainichi nihongo o benkyō shimasu",
+                zh: "每天學習日文。",
+                explanation: "「勉強します（學習）」是他動詞，學習的內容「日本語」後面需接助詞「を」。"
+              }
+            ]
+          },
+          {
+            id: "u3_2",
+            title: "場所助詞「に」與「で」的黃金區別",
+            desc: "徹底分清移動目的地「に/へ」與動作發生地點「で」，不再搞混！",
+            xpReward: 55,
+            studyCards: [
+              { jp: "<ruby>東京<rt>とうきょう</rt></ruby>に<ruby>行<rt>い</rt></ruby>きます", romaji: "Tōkyō ni ikimasu", zh: "去東京（に＝移動目的地）", audio: "とうきょうにいきます" },
+              { jp: "カフェで<ruby>本<rt>ほん</rt></ruby>を<ruby>読<rt>よ</rt></ruby>みます", romaji: "kafe de hon o yomimasu", zh: "在咖啡廳看書（で＝動作發生地）", audio: "カフェでほんをよみます" },
+              { jp: "<ruby>電車<rt>でんしゃ</rt></ruby>で<ruby>行<rt>い</rt></ruby>きます", romaji: "densha de ikimasu", zh: "搭電車去（で＝交通工具/手段）", audio: "でんしゃでいきます" }
+            ],
+            questions: [
+              {
+                type: "choice",
+                instruction: "「在圖書館看書」的「在」應該用哪個助詞？",
+                audioText: "としょかんでほんをよみます",
+                promptDisplay: "<ruby>図書館<rt>としょかん</rt></ruby>（　）<ruby>本<rt>ほん</rt></ruby>を<ruby>読<rt>よ</rt></ruby>みます。",
+                options: ["で", "に", "を", "は"],
+                answerIndex: 0,
+                fullJp: "<ruby>図書館<rt>としょかん</rt></ruby>で<ruby>本<rt>ほん</rt></ruby>を<ruby>読<rt>よ</rt></ruby>みます。",
+                romaji: "toshokan de hon o yomimasu",
+                zh: "在圖書館看書。",
+                explanation: "「看書（読みます）」是一個動態行為，發生動作的場所一律使用助詞「で」！",
+              },
+              {
+                type: "choice",
+                instruction: "「明天要去京都。」移動的目的地應該用哪個助詞？",
+                audioText: "あしたきょうとにいきます",
+                promptDisplay: "<ruby>明日<rt>あした</rt></ruby><ruby>京都<rt>きょうと</rt></ruby>（　）<ruby>行<rt>い</rt></ruby>きます。",
+                options: ["に", "で", "を", "が"],
+                answerIndex: 0,
+                fullJp: "<ruby>明日<rt>あした</rt></ruby><ruby>京都<rt>きょうと</rt></ruby>に<ruby>行<rt>い</rt></ruby>きます。",
+                romaji: "ashita Kyōto ni ikimasu",
+                zh: "明天要去京都。",
+                explanation: "搭配「行きます（去）、来ます（來）、帰ります（回）」等移動動詞時，目的地使用「に」或「へ」。"
+              },
+              {
+                type: "builder",
+                instruction: "組合句子：「搭新幹線去大阪。」",
+                audioText: "しんかんせんでおおさかにいきます",
+                words: ["<ruby>行<rt>い</rt></ruby>きます", "<ruby>大阪<rt>おおさか</rt></ruby>に", "<ruby>新幹線<rt>しんかんせん</rt></ruby>で"],
+                correctOrder: ["<ruby>新幹線<rt>しんかんせん</rt></ruby>で", "<ruby>大阪<rt>おおさか</rt></ruby>に", "<ruby>行<rt>い</rt></ruby>きます"],
+                fullJp: "<ruby>新幹線<rt>しんかんせん</rt></ruby>で<ruby>大阪<rt>おおさか</rt></ruby>に<ruby>行<rt>い</rt></ruby>きます。",
+                romaji: "shinkansen de Ōsaka ni ikimasu",
+                zh: "搭新幹線去大阪。",
+                explanation: "交通工具「新幹線」＋「で」（手段），目的地「大阪」＋「に」（方向），最後接動詞「行きます」。"
+              }
+            ]
+          },
+          {
+            id: "u3_3",
+            title: "實用請求句型：動詞「て形＋ください」",
+            desc: "學會日文文法中最關鍵的「て形」，禮貌地請別人做某件事！",
+            xpReward: 60,
+            studyCards: [
+              { jp: "ちょっと<ruby>待<rt>ま</rt></ruby>ってください", romaji: "chotto matte kudasai", zh: "請稍等一下（待つ → 待って）", audio: "ちょっとまってください" },
+              { jp: "ここに<ruby>名前<rt>なまえ</rt></ruby>を<ruby>書<rt>か</rt></ruby>いてください", romaji: "koko ni namae o kaite kudasai", zh: "請在這裡寫名字（書く → 書いて）", audio: "ここになまえをかいてください" },
+              { jp: "<ruby>写真<rt>しゃしん</rt></ruby>を<ruby>撮<rt>と</rt></ruby>ってください", romaji: "shashin o totte kudasai", zh: "請幫我拍張照（撮る → 撮って）", audio: "しゃしんをとってください" }
+            ],
+            questions: [
+              {
+                type: "choice",
+                instruction: "想請路人幫忙拍張紀念照，最自然的說法是？",
+                audioText: "しゃしんをとってください",
+                promptDisplay: "請幫我拍照",
+                options: ["写真を撮ってください。", "写真を見ます。", "写真を撮りました。", "写真を撮りません。"],
+                answerIndex: 0,
+                fullJp: "<ruby>写真<rt>しゃしん</rt></ruby>を<ruby>撮<rt>と</rt></ruby>ってください。",
+                romaji: "shashin o totte kudasai",
+                zh: "請幫我拍張照。",
+                explanation: "動詞「撮ります（拍）」的て形為「撮って」，加上「ください」表示「請做⋯⋯」。"
+              },
+              {
+                type: "builder",
+                instruction: "組合句子：「請稍等一下。」",
+                audioText: "ちょっとまってください",
+                words: ["ください", "ちょっと", "<ruby>待<rt>ま</rt></ruby>って"],
+                correctOrder: ["ちょっと", "<ruby>待<rt>ま</rt></ruby>って", "ください"],
+                fullJp: "ちょっと<ruby>待<rt>ま</rt></ruby>ってください。",
+                romaji: "chotto matte kudasai",
+                zh: "請稍等一下。",
+                explanation: "「ちょっと（稍微、一下）」＋「待って（等待的て形）」＋「ください（請）」。"
+              },
+              {
+                type: "listening",
+                instruction: "在飯店櫃檯辦理入住時，櫃檯人員請你做什麼？",
+                audioText: "ここになまえをかいてください",
+                promptDisplay: "🔊 聆聽櫃檯人員指示",
+                options: ["請在這裡寫下名字", "請在這裡脫鞋子", "請在這裡等候", "請出示護照"],
+                answerIndex: 0,
+                fullJp: "ここに<ruby>名前<rt>なまえ</rt></ruby>を<ruby>書<rt>か</rt></ruby>いてください。",
+                romaji: "koko ni namae o kaite kudasai",
+                zh: "請在這裡寫下名字。",
+                explanation: "「ここ（這裡）」＋「に（附著點）」＋「名前（名字）」＋「書いてください（請寫）」。"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        level: 4,
+        title: "Level 4：情境對話與進階閱讀",
+        subtitle: "整合聽力與長句理解，從容應對日本餐廳點餐、問路與商場購物實戰",
+        color: "from-shu to-rose-700",
+        badgeBg: "bg-rose-100 text-shu",
+        icon: "fa-torii-gate",
+        units: [
+          {
+            id: "u4_1",
+            title: "實戰情境一：居酒屋與餐廳完整對話",
+            desc: "從進門告知人數、詢問推薦菜色到結帳，掌握完整餐廳互動流程。",
+            xpReward: 65,
+            studyCards: [
+              { jp: "<ruby>二人<rt>ふたり</rt></ruby>です", romaji: "futari desu", zh: "我們有兩位（一人：ひとり / 兩人：ふたり）", audio: "ふたりです" },
+              { jp: "おすすめは<ruby>何<rt>なん</rt></ruby>ですか", romaji: "osusume wa nan desu ka", zh: "請問推薦菜色是什麼？", audio: "おすすめはなんですか" },
+              { jp: "カードで<ruby>払<rt>はら</rt></ruby>えますか", romaji: "kādo de haraemasu ka", zh: "可以用信用卡付款嗎？（可能形）", audio: "カードではらえますか" }
+            ],
+            questions: [
+              {
+                type: "choice",
+                instruction: "店員問：「何名様ですか？（請問幾位呢？）」若你們有兩個人，該怎麼回答？",
+                audioText: "ふたりです",
+                promptDisplay: "店員：<ruby>何名様<rt>なんめいさま</rt></ruby>ですか。",
+                options: ["二人（ふたり）です。", "二円（にえん）です。", "二時（にじ）です。", "二階（にかい）です。"],
+                answerIndex: 0,
+                fullJp: "<ruby>二人<rt>ふたり</rt></ruby>です。",
+                romaji: "futari desu",
+                zh: "兩位。",
+                explanation: "日文計算人數時，1人讀作「ひとり」、2人讀作「ふたり」，3人以上才是「さんにん、よにん⋯⋯」。"
+              },
+              {
+                type: "builder",
+                instruction: "組合句子：「請問推薦的料理是什麼？」",
+                audioText: "おすすめのりょうりはなんですか",
+                words: ["<ruby>何<rt>なん</rt></ruby>ですか", "<ruby>料理<rt>りょうり</rt></ruby>は", "おすすめの"],
+                correctOrder: ["おすすめの", "<ruby>料理<rt>りょうり</rt></ruby>は", "<ruby>何<rt>なん</rt></ruby>ですか"],
+                fullJp: "おすすめの<ruby>料理<rt>りょうり</rt></ruby>は<ruby>何<rt>なん</rt></ruby>ですか。",
+                romaji: "osusume no ryōri wa nan desu ka",
+                zh: "請問推薦的料理是什麼？",
+                explanation: "「おすすめ（推薦）」透過助詞「の」修飾名詞「料理（りょうり）」。"
+              },
+              {
+                type: "listening",
+                instruction: "聆聽結帳時的詢問，客人在確認什麼？",
+                audioText: "クレジットカードではらえますか",
+                promptDisplay: "🔊 聆聽結帳對話",
+                options: ["詢問是否可以使用信用卡付款", "詢問是否可以外帶", "詢問是否可以分開結帳", "詢問是否有免稅服務"],
+                answerIndex: 0,
+                fullJp: "クレジットカードで<ruby>払<rt>はら</rt></ruby>えますか。",
+                romaji: "kurejittokādo de haraemasu ka",
+                zh: "可以用信用卡付款嗎？",
+                explanation: "「払えます（haraemasu）」是動詞「払います（付款）」的可能形，表示『能夠支付』。"
+              }
+            ]
+          },
+          {
+            id: "u4_2",
+            title: "實戰情境二：車站問路與轉乘長句閱讀",
+            desc: "訓練閱讀路人與站務員的複合句指引，抓出關鍵地標與出口資訊。",
+            xpReward: 75,
+            studyCards: [
+              { jp: "<ruby>駅<rt>えき</rt></ruby>までどうやって<ruby>行<rt>い</rt></ruby>きますか", romaji: "eki made dōyatte ikimasu ka", zh: "請問到車站要怎麼去？", audio: "えきまでどうやっていきますか" },
+              { jp: "<ruby>三番線<rt>さんばんせん</rt></ruby>に<ruby>乗<rt>の</rt></ruby>ってください", romaji: "sanbansen ni notte kudasai", zh: "請搭乘第3月台的電車", audio: "さんばんせんにのってください" },
+              { jp: "<ruby>北口<rt>きたぐち</rt></ruby>を<ruby>出<rt>で</rt></ruby>て、<ruby>右<rt>みぎ</rt></ruby>に<ruby>曲<rt>ま</rt></ruby>がります", romaji: "kitaguchi o dete, migi ni magarimasu", zh: "出了北口之後，向右轉", audio: "きたぐちをでて、みぎにまがります" }
+            ],
+            questions: [
+              {
+                type: "choice",
+                instruction: "閱讀站務員的指引長句，請問走出「北口」後應該往哪個方向轉？",
+                audioText: "きたぐちをでて、みぎにまがってください",
+                promptDisplay: "<ruby>北口<rt>きたぐち</rt></ruby>を<ruby>出<rt>で</rt></ruby>て、<ruby>右<rt>みぎ</rt></ruby>に<ruby>曲<rt>ま</rt></ruby>がってください。",
+                options: ["向右轉", "向左轉", "往回走", "搭電梯上樓"],
+                answerIndex: 0,
+                fullJp: "<ruby>北口<rt>きたぐち</rt></ruby>を<ruby>出<rt>で</rt></ruby>て、<ruby>右<rt>みぎ</rt></ruby>に<ruby>曲<rt>ま</rt></ruby>がってください。",
+                romaji: "kitaguchi o dete, migi ni magatte kudasai",
+                zh: "請從北口出去，然後向右轉。",
+                explanation: "「北口を出る（離開北口）」接「て形（出て）」表示動作先後順序，接著「右に曲がる（向右轉）」。"
+              },
+              {
+                type: "builder",
+                instruction: "重組長句：「請搭乘第 3 月台的電車。」",
+                audioText: "さんばんせんのでんしゃにのってください",
+                words: ["<ruby>乗<rt>の</rt></ruby>ってください", "<ruby>三番線<rt>さんばんせん</rt></ruby>の", "<ruby>電車<rt>でんしゃ</rt></ruby>に"],
+                correctOrder: ["<ruby>三番線<rt>さんばんせん</rt></ruby>の", "<ruby>電車<rt>でんしゃ</rt></ruby>に", "<ruby>乗<rt>の</rt></ruby>ってください"],
+                fullJp: "<ruby>三番線<rt>さんばんせん</rt></ruby>の<ruby>電車<rt>でんしゃ</rt></ruby>に<ruby>乗<rt>の</rt></ruby>ってください。",
+                romaji: "sanbansen no densha ni notte kudasai",
+                zh: "請搭乘第 3 月台的電車。",
+                explanation: "搭乘交通工具固定搭配助詞「に」＋「乗ります（て形為乗って）」。"
+              },
+              {
+                type: "listening",
+                instruction: "綜合聽力挑戰：仔細聽這段對話，目的地距離這裡走路大約需要幾分鐘？",
+                audioText: "ここからあるいてごふんぐらいです",
+                promptDisplay: "🔊 聆聽路人回答步行時間",
+                options: ["走路大約 5 分鐘", "走路大約 15 分鐘", "搭車大約 5 分鐘", "走路大約 50 分鐘"],
+                answerIndex: 0,
+                fullJp: "ここから<ruby>歩<rt>ある</rt></ruby>いて<ruby>五分<rt>ごふん</rt></ruby>ぐらいです。",
+                romaji: "koko kara aruite gofun gurai desu",
+                zh: "從這裡走路大約五分鐘。",
+                explanation: "「ここから（從這裡）」＋「歩いて（走路）」＋「五分ぐらい（大約五分鐘）」。恭喜完成全系列核心課程！"
+              }
+            ]
+          }
+        ]
+      }
+    ];
+
+    /**
+     * ============================================================================
+     * 2. Web Audio API 清脆音效合成器 (無需外部音檔)
+     * ============================================================================
+     */
+    class SoundEffects {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+      }
+
+      playCorrect() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        // 清脆雙音階 C5 -> E5 -> G5
+        [523.25, 659.25, 783.99].forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+          gain.gain.setValueAtTime(0.15, now + idx * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.25);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + idx * 0.08);
+          osc.stop(now + idx * 0.08 + 0.26);
+        });
+      }
+
+      playWrong() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.linearRampToValueAtTime(175, now + 0.25);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      }
+
+      playFanfare() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach((freq, i) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + i * 0.11);
+          gain.gain.setValueAtTime(0.18, now + i * 0.11);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.11 + 0.45);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + i * 0.11);
+          osc.stop(now + i * 0.11 + 0.46);
+        });
+      }
+    }
+
+    /**
+     * ============================================================================
+     * 3. 主應用程式邏輯與狀態管理 (NihongoStepsApp)
+     * ============================================================================
+     */
+    class NihongoStepsApp {
+      constructor() {
+        this.STORAGE_KEY = 'nihongo_steps_state_v1';
+        this.sfx = new SoundEffects();
+        this.jpVoice = null;
+
+        // 預設使用者狀態
+        this.state = {
+          xp: 0,
+          streak: 1,
+          lastStudyDate: this.getTodayStr(),
+          completedUnits: {}, // { unitId: { bestScore: 100, count: 1 } }
+          unlockAllPreview: false,
+          showFurigana: true,
+          soundEnabled: true,
+          dailyTasks: {
+            date: this.getTodayStr(),
+            unitsCompleted: 0,
+            correctAnswers: 0,
+            audioPlays: 0,
+            bonusClaimed: false
+          }
+        };
+
+        // 當前測驗執行階段變數
+        this.currentUnit = null;
+        this.isDailyChallenge = false;
+        this.quizQuestions = [];
+        this.currentQIndex = 0;
+        this.correctCount = 0;
+        this.selectedBuilderWords = [];
+        this.hasAnsweredCurrent = false;
+
+        this.loadState();
+        this.initSpeechSynthesis();
+        this.applyPreferences();
+        this.renderDashboard();
+      }
+
+      getTodayStr() {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      }
+
+      // 載入並校準每日連續天數與任務
+      loadState() {
+        try {
+          const saved = localStorage.getItem(this.STORAGE_KEY);
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            this.state = { ...this.state, ...parsed };
+          }
+        } catch (e) {
+          console.warn('讀取本地進度失敗，使用預設狀態', e);
+        }
+
+        const today = this.getTodayStr();
+        // 檢查連續天數
+        if (this.state.lastStudyDate !== today) {
+          const lastDate = new Date(this.state.lastStudyDate);
+          const nowDate = new Date(today);
+          const diffDays = Math.round((nowDate - lastDate) / (1000 * 60 * 60 * 24));
+          if (diffDays === 1) {
+            this.state.streak += 1;
+          } else if (diffDays > 1) {
+            this.state.streak = 1;
+          }
+          this.state.lastStudyDate = today;
+        }
+
+        // 重置跨日的每日任務
+        if (!this.state.dailyTasks || this.state.dailyTasks.date !== today) {
+          this.state.dailyTasks = {
+            date: today,
+            unitsCompleted: 0,
+            correctAnswers: 0,
+            audioPlays: 0,
+            bonusClaimed: false
+          };
+        }
+        this.saveState();
+      }
+
+      saveState() {
+        try {
+          localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.state));
+        } catch (e) {
+          console.warn('儲存進度失敗', e);
+        }
+      }
+
+      // 初始化瀏覽器日語語音合成 (ja-JP)
+      initSpeechSynthesis() {
+        if (!('speechSynthesis' in window)) return;
+        const pickVoice = () => {
+          const voices = window.speechSynthesis.getVoices();
+          // 優先尋找日文女聲或 Google 日文語音
+          this.jpVoice =
+            voices.find(v => v.lang.includes('ja') && (v.name.includes('Google') || v.name.includes('Kyoko') || v.name.includes('Haruka'))) ||
+            voices.find(v => v.lang.includes('ja')) ||
+            null;
+        };
+        pickVoice();
+        window.speechSynthesis.onvoiceschanged = pickVoice;
+      }
+
+      // 播放日文語音
+      speakJapanese(text, rate = 1.0) {
+        if (!text) return;
+        // 紀錄每日任務發音次數
+        this.state.dailyTasks.audioPlays += 1;
+        this.checkDailyGoalCompletion();
+        this.saveState();
+        this.updateHeaderAndTasks();
+
+        if (!('speechSynthesis' in window)) {
+          this.showToast('您的瀏覽器不支援語音合成功能');
+          return;
+        }
+
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'ja-JP';
+        if (this.jpVoice) utterance.voice = this.jpVoice;
+        utterance.rate = rate;
+        utterance.pitch = 1.02;
+        window.speechSynthesis.speak(utterance);
+      }
+
+      applyPreferences() {
+        document.body.classList.toggle('hide-furigana', !this.state.showFurigana);
+        const fToggle = document.getElementById('toggle-furigana');
+        if (fToggle) fToggle.checked = this.state.showFurigana;
+
+        const uToggle = document.getElementById('toggle-unlock-all');
+        if (uToggle) uToggle.checked = this.state.unlockAllPreview;
+
+        this.sfx.enabled = this.state.soundEnabled;
+        this.updateQuizFuriganaLabel();
+      }
+
+      toggleFurigana(checked) {
+        this.state.showFurigana = checked;
+        document.body.classList.toggle('hide-furigana', !checked);
+        this.updateQuizFuriganaLabel();
+        this.saveState();
+      }
+
+      toggleFuriganaFromButton() {
+        this.toggleFurigana(!this.state.showFurigana);
+        const fToggle = document.getElementById('toggle-furigana');
+        if (fToggle) fToggle.checked = this.state.showFurigana;
+      }
+
+      updateQuizFuriganaLabel() {
+        const lbl = document.getElementById('quiz-furigana-label');
+        if (lbl) lbl.textContent = this.state.showFurigana ? '隱藏假名' : '顯示假名';
+      }
+
+      toggleUnlockAll(checked) {
+        this.state.unlockAllPreview = checked;
+        this.saveState();
+        this.renderCurriculum();
+        this.showToast(checked ? '已開啟自由預覽模式（全關卡解鎖）' : '已恢復正常階層解鎖進度');
+      }
+
+      // 扁平化取得所有關卡清單，方便判斷解鎖順序
+      getAllUnitsFlat() {
+        const list = [];
+        CURRICULUM.forEach(lvl => {
+          lvl.units.forEach(u => list.push({ ...u, level: lvl.level, levelTitle: lvl.title }));
+        });
+        return list;
+      }
+
+      isUnitUnlocked(unitId) {
+        if (this.state.unlockAllPreview) return true;
+        const flat = this.getAllUnitsFlat();
+        const idx = flat.findIndex(u => u.id === unitId);
+        if (idx <= 0) return true; // 第一關永遠解鎖
+        const prevUnit = flat[idx - 1];
+        const prevRecord = this.state.completedUnits[prevUnit.id];
+        return Boolean(prevRecord && prevRecord.bestScore >= 80);
+      }
+
+      isUnitCompleted(unitId) {
+        const rec = this.state.completedUnits[unitId];
+        return Boolean(rec && rec.bestScore >= 80);
+      }
+
+      // 更新頂部數據與今日任務面板
+      updateHeaderAndTasks() {
+        const xp = this.state.xp;
+        const userLevel = Math.floor(xp / 150) + 1;
+        const levelProgress = Math.round(((xp % 150) / 150) * 100);
+
+        document.getElementById('stat-streak').textContent = this.state.streak;
+        document.getElementById('stat-level-badge').textContent = `Lv.${userLevel}`;
+        document.getElementById('stat-xp').textContent = xp;
+        document.getElementById('stat-xp-bar').style.width = `${Math.max(8, levelProgress)}%`;
+
+        // 更新今日任務進度
+        const dt = this.state.dailyTasks;
+        this.updateSingleTaskUI('task1', Math.min(dt.unitsCompleted, 1), 1);
+        this.updateSingleTaskUI('task2', Math.min(dt.correctAnswers, 8), 8);
+        this.updateSingleTaskUI('task3', Math.min(dt.audioPlays, 3), 3);
+
+        const allDone = dt.unitsCompleted >= 1 && dt.correctAnswers >= 8 && dt.audioPlays >= 3;
+        const badge = document.getElementById('daily-goal-badge');
+        if (allDone) {
+          badge.textContent = '已全部達成！';
+          badge.className = 'text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
+        } else {
+          badge.textContent = '進行中';
+          badge.className = 'text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800';
+        }
+      }
+
+      updateSingleTaskUI(prefix, current, target) {
+        const done = current >= target;
+        const icon = document.getElementById(`${prefix}-icon`);
+        const prog = document.getElementById(`${prefix}-progress`);
+        prog.textContent = `${current}/${target}`;
+        if (done) {
+          icon.className = 'w-5 h-5 rounded-full bg-matcha border-2 border-matcha flex items-center justify-center text-xs text-white transition-colors';
+          icon.innerHTML = '<i class="fa-solid fa-check text-[10px]"></i>';
+          prog.className = 'text-xs font-bold text-matcha';
+        } else {
+          icon.className = 'w-5 h-5 rounded-full border-2 border-stone-300 flex items-center justify-center text-xs text-white transition-colors';
+          icon.innerHTML = '';
+          prog.className = 'text-xs font-semibold text-stone-500';
+        }
+      }
+
+      checkDailyGoalCompletion() {
+        const dt = this.state.dailyTasks;
+        if (!dt.bonusClaimed && dt.unitsCompleted >= 1 && dt.correctAnswers >= 8 && dt.audioPlays >= 3) {
+          dt.bonusClaimed = true;
+          this.state.xp += 30;
+          this.showToast('🎉 今日目標全達成！額外獲得 +30 XP');
+        }
+      }
+
+      // 渲染主學習地圖
+      renderDashboard() {
+        this.updateHeaderAndTasks();
+        this.renderCurriculum();
+      }
+
+      renderCurriculum() {
+        const container = document.getElementById('curriculum-container');
+        container.innerHTML = '';
+
+        // 找出目前最推薦進行的下一關（第一個已解鎖但尚未達 80% 的關卡）
+        const flatUnits = this.getAllUnitsFlat();
+        const nextRecommended = flatUnits.find(u => this.isUnitUnlocked(u.id) && !this.isUnitCompleted(u.id));
+
+        CURRICULUM.forEach(lvl => {
+          const totalInLvl = lvl.units.length;
+          const completedInLvl = lvl.units.filter(u => this.isUnitCompleted(u.id)).length;
+          const lvlUnlocked = lvl.units.some(u => this.isUnitUnlocked(u.id));
+
+          const section = document.createElement('div');
+          section.className = `bg-white rounded-3xl border ${lvlUnlocked ? 'border-stone-200/90 shadow-sm' : 'border-stone-200/60 opacity-85'} overflow-hidden`;
+
+          // Level 標題橫幅
+          section.innerHTML = `
+            <div class="p-5 sm:p-6 bg-gradient-to-r ${lvl.color} text-white flex flex-wrap items-center justify-between gap-4">
+              <div class="flex items-center gap-3.5">
+                <div class="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-xs flex items-center justify-center text-2xl shrink-0">
+                  <i class="fa-solid ${lvl.icon}"></i>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h3 class="text-lg sm:text-xl font-bold">${lvl.title}</h3>
+                    ${!lvlUnlocked ? '<span class="text-xs px-2 py-0.5 rounded-full bg-black/25 text-white/90"><i class="fa-solid fa-lock mr-1"></i>未解鎖</span>' : ''}
+                  </div>
+                  <p class="text-xs sm:text-sm text-white/85 mt-0.5">${lvl.subtitle}</p>
+                </div>
+              </div>
+              <div class="bg-black/20 px-3.5 py-2 rounded-xl text-xs font-bold backdrop-blur-xs">
+                完成進度：${completedInLvl} / ${totalInLvl} 單元
+              </div>
+            </div>
+            <div class="p-5 sm:p-6 grid grid-cols-1 md:grid-cols-3 gap-4" id="lvl-units-${lvl.level}"></div>
+          `;
+
+          container.appendChild(section);
+          const grid = section.querySelector(`#lvl-units-${lvl.level}`);
+
+          lvl.units.forEach((unit, idx) => {
+            const unlocked = this.isUnitUnlocked(unit.id);
+            const completed = this.isUnitCompleted(unit.id);
+            const record = this.state.completedUnits[unit.id];
+            const isNext = nextRecommended && nextRecommended.id === unit.id;
+
+            const card = document.createElement('div');
+            card.className = `node-card relative rounded-2xl p-5 border-2 flex flex-col justify-between ${
+              !unlocked
+                ? 'locked bg-stone-50 border-stone-200/80 text-stone-400 cursor-not-allowed'
+                : completed
+                ? 'bg-emerald-50/30 border-emerald-200 hover:border-emerald-400 cursor-pointer'
+                : isNext
+                ? 'active-pulse bg-white border-shu shadow-md cursor-pointer'
+                : 'bg-white border-stone-200 hover:border-ai cursor-pointer'
+            }`;
+
+            if (unlocked) {
+              card.onclick = () => this.openLessonPreview(unit, lvl);
+            } else {
+              card.onclick = () => this.showToast('請先完成前一關並達 80% 正確率以解鎖此單元！');
+            }
+
+            let statusBadge = '';
+            if (!unlocked) {
+              statusBadge = `<span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-stone-200/80 text-stone-500"><i class="fa-solid fa-lock mr-1"></i>待解鎖</span>`;
+            } else if (completed) {
+              statusBadge = `<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800"><i class="fa-solid fa-circle-check mr-1"></i>最高 ${record.bestScore}%</span>`;
+            } else if (isNext) {
+              statusBadge = `<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-shu text-white animate-pulse">當前推薦</span>`;
+            } else {
+              statusBadge = `<span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-50 text-ai">已解鎖</span>`;
+            }
+
+            card.innerHTML = `
+              <div>
+                <div class="flex items-center justify-between gap-2 mb-3">
+                  <span class="text-xs font-bold text-stone-400">STAGE ${lvl.level}-${idx + 1}</span>
+                  ${statusBadge}
+                </div>
+                <h4 class="font-bold text-base ${unlocked ? 'text-stone-900' : 'text-stone-500'} mb-1.5 leading-snug">${unit.title}</h4>
+                <p class="text-xs ${unlocked ? 'text-stone-600' : 'text-stone-400'} leading-relaxed line-clamp-2">${unit.desc}</p>
+              </div>
+              <div class="mt-4 pt-3 border-t ${unlocked ? 'border-stone-100' : 'border-stone-200/50'} flex items-center justify-between text-xs font-semibold">
+                <span class="${unlocked ? 'text-amber-600' : 'text-stone-400'}"><i class="fa-solid fa-star mr-1"></i>+${unit.xpReward} XP</span>
+                <span class="${unlocked ? 'text-ai group-hover:translate-x-1 transition-transform' : 'text-stone-400'}">
+                  ${unlocked ? (completed ? '複習 / 重測' : '開始學習') : '尚未開放'} <i class="fa-solid fa-chevron-right ml-0.5"></i>
+                </span>
+              </div>
+            `;
+            grid.appendChild(card);
+          });
+        });
+      }
+
+      // 切換主視圖 helper
+      switchView(viewId) {
+        ['view-dashboard', 'view-lesson-preview', 'view-quiz', 'view-summary'].forEach(id => {
+          document.getElementById(id).classList.add('hidden');
+        });
+        document.getElementById(viewId).classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      goHome() {
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        this.switchView('view-dashboard');
+        this.renderDashboard();
+      }
+
+      // 開啟單元課前預覽卡片
+      openLessonPreview(unit, levelObj) {
+        this.currentUnit = unit;
+        this.isDailyChallenge = false;
+
+        document.getElementById('preview-level-tag').textContent = levelObj.title.split('：')[0];
+        document.getElementById('preview-title').textContent = unit.title;
+        document.getElementById('preview-desc').textContent = unit.desc;
+
+        const list = document.getElementById('preview-cards-list');
+        list.innerHTML = '';
+
+        unit.studyCards.forEach(card => {
+          const el = document.createElement('div');
+          el.className = 'p-4 rounded-2xl bg-washi/70 border border-stone-200/80 hover:border-ai/40 transition flex items-center justify-between gap-3';
+          el.innerHTML = `
+            <div class="space-y-0.5">
+              <div class="font-jp font-bold text-lg text-stone-900">${card.jp}</div>
+              <div class="text-xs font-mono text-stone-400">${card.romaji}</div>
+              <div class="text-sm text-stone-700 font-medium pt-0.5">${card.zh}</div>
+            </div>
+            <button class="w-10 h-10 rounded-xl bg-white hover:bg-ai hover:text-white text-ai border border-stone-200 shadow-xs flex items-center justify-center shrink-0 transition" title="聆聽日文發音">
+              <i class="fa-solid fa-volume-high"></i>
+            </button>
+          `;
+          el.querySelector('button').onclick = () => this.speakJapanese(card.audio, 0.95);
+          list.appendChild(el);
+        });
+
+        this.switchView('view-lesson-preview');
+      }
+
+      startQuizFromPreview() {
+        if (!this.currentUnit) return;
+        this.isDailyChallenge = false;
+        // 複製題庫並隨機微調選項順序（保留正確答案追蹤）
+        this.quizQuestions = this.prepareQuestions(this.currentUnit.questions);
+        this.startQuizSession();
+      }
+
+      // 啟動「每日混合特訓」：從所有已解鎖關卡中隨機抽取最多 6 題
+      startDailyChallenge() {
+        const flat = this.getAllUnitsFlat();
+        const unlockedUnits = flat.filter(u => this.isUnitUnlocked(u.id));
+        let pool = [];
+        unlockedUnits.forEach(u => {
+          u.questions.forEach(q => pool.push(q));
+        });
+
+        // 洗牌抽 6 題
+        pool = this.shuffleArray(pool).slice(0, 6);
+        this.currentUnit = {
+          id: 'daily_challenge',
+          title: '每日混合特訓',
+          xpReward: 50
+        };
+        this.isDailyChallenge = true;
+        this.quizQuestions = this.prepareQuestions(pool);
+        this.startQuizSession();
+      }
+
+      prepareQuestions(rawQuestions) {
+        return rawQuestions.map(q => {
+          const clone = JSON.parse(JSON.stringify(q));
+          if (clone.type === 'choice' || clone.type === 'listening') {
+            const correctText = clone.options[clone.answerIndex];
+            const shuffled = this.shuffleArray([...clone.options]);
+            clone.options = shuffled;
+            clone.answerIndex = shuffled.indexOf(correctText);
+          }
+          return clone;
+        });
+      }
+
+      shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      }
+
+      startQuizSession() {
+        this.currentQIndex = 0;
+        this.correctCount = 0;
+        this.switchView('view-quiz');
+        this.renderCurrentQuestion();
+      }
+
+      renderCurrentQuestion() {
+        this.hasAnsweredCurrent = false;
+        const q = this.quizQuestions[this.currentQIndex];
+        const total = this.quizQuestions.length;
+
+        // 進度條與計數
+        const pct = Math.round((this.currentQIndex / total) * 100);
+        document.getElementById('quiz-progress-bar').style.width = `${pct}%`;
+        document.getElementById('quiz-counter').textContent = `${this.currentQIndex + 1} / ${total}`;
+
+        // 題型徽章
+        const badge = document.getElementById('quiz-type-badge');
+        if (q.type === 'listening') {
+          badge.innerHTML = '<i class="fa-solid fa-headphones"></i> 聽力辨識';
+          badge.className = 'inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-amber-50 text-amber-700';
+        } else if (q.type === 'builder') {
+          badge.innerHTML = '<i class="fa-solid fa-puzzle-piece"></i> 文法句型重組';
+          badge.className = 'inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-rose-50 text-shu';
+        } else {
+          badge.innerHTML = '<i class="fa-solid fa-circle-question"></i> 語意與文法選擇';
+          badge.className = 'inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-blue-50 text-ai';
+        }
+
+        document.getElementById('quiz-instruction').textContent = q.instruction;
+
+        // 音訊控制顯示（句型重組題先隱藏音訊以免直接破題，其他題型顯示）
+        const audioCtrl = document.getElementById('quiz-audio-controls');
+        if (q.type === 'builder') {
+          audioCtrl.classList.add('hidden');
+        } else {
+          audioCtrl.classList.remove('hidden');
+        }
+
+        document.getElementById('quiz-prompt-display').innerHTML = q.promptDisplay || '';
+        document.getElementById('quiz-feedback-panel').classList.add('hidden');
+
+        // 渲染對應作答介面
+        const optContainer = document.getElementById('quiz-options-container');
+        const builderContainer = document.getElementById('quiz-builder-container');
+        const submitRow = document.getElementById('quiz-submit-row');
+
+        if (q.type === 'choice' || q.type === 'listening') {
+          optContainer.classList.remove('hidden');
+          builderContainer.classList.add('hidden');
+          submitRow.classList.add('hidden');
+          optContainer.innerHTML = '';
+
+          q.options.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'w-full text-left p-4 rounded-2xl border-2 border-stone-200 hover:border-ai hover:bg-blue-50/40 font-jp font-medium text-base text-stone-800 transition flex items-center gap-3 active:scale-[0.99]';
+            btn.innerHTML = `
+              <span class="w-7 h-7 rounded-lg bg-stone-100 text-stone-600 font-sans font-bold text-xs flex items-center justify-center shrink-0">${String.fromCharCode(65 + idx)}</span>
+              <span>${opt}</span>
+            `;
+            btn.onclick = () => this.handleChoiceAnswer(idx, btn);
+            optContainer.appendChild(btn);
+          });
+
+          // 若是聽力題，自動朗讀一次
+          if (q.type === 'listening' && q.audioText) {
+            setTimeout(() => this.speakJapanese(q.audioText, 0.95), 250);
+          }
+        } else if (q.type === 'builder') {
+          optContainer.classList.add('hidden');
+          builderContainer.classList.remove('hidden');
+          submitRow.classList.remove('hidden');
+
+          this.selectedBuilderWords = [];
+          const bankWords = this.shuffleArray([...q.words]).map((w, i) => ({ id: i, text: w, used: false }));
+          this.builderBankState = bankWords;
+          this.renderSentenceBuilder();
+        }
+      }
+
+      playCurrentQuestionAudio(rate) {
+        const q = this.quizQuestions[this.currentQIndex];
+        if (q && q.audioText) {
+          this.speakJapanese(q.audioText, rate);
+        }
+      }
+
+      playFeedbackSentenceAudio() {
+        const q = this.quizQuestions[this.currentQIndex];
+        if (q && q.audioText) {
+          this.speakJapanese(q.audioText, 0.95);
+        }
+      }
+
+      // 處理單選題作答
+      handleChoiceAnswer(selectedIndex, clickedBtn) {
+        if (this.hasAnsweredCurrent) return;
+        this.hasAnsweredCurrent = true;
+
+        const q = this.quizQuestions[this.currentQIndex];
+        const isCorrect = selectedIndex === q.answerIndex;
+        const allBtns = document.querySelectorAll('#quiz-options-container button');
+
+        allBtns.forEach((b, idx) => {
+          b.disabled = true;
+          b.classList.remove('hover:border-ai', 'hover:bg-blue-50/40');
+          if (idx === q.answerIndex) {
+            b.className = 'w-full text-left p-4 rounded-2xl border-2 border-matcha bg-emerald-50 font-jp font-bold text-base text-emerald-950 flex items-center gap-3';
+            b.querySelector('span').className = 'w-7 h-7 rounded-lg bg-matcha text-white font-sans font-bold text-xs flex items-center justify-center shrink-0';
+            b.querySelector('span').innerHTML = '<i class="fa-solid fa-check"></i>';
+          } else if (idx === selectedIndex && !isCorrect) {
+            b.className = 'w-full text-left p-4 rounded-2xl border-2 border-shu bg-rose-50 font-jp font-medium text-base text-rose-950 flex items-center gap-3';
+            b.querySelector('span').className = 'w-7 h-7 rounded-lg bg-shu text-white font-sans font-bold text-xs flex items-center justify-center shrink-0';
+            b.querySelector('span').innerHTML = '<i class="fa-solid fa-xmark"></i>';
+          } else {
+            b.classList.add('opacity-50');
+          }
+        });
+
+        this.finalizeQuestionResult(isCorrect, q);
+      }
+
+      // 渲染句型重組區
+      renderSentenceBuilder() {
+        const slot = document.getElementById('builder-answer-slot');
+        const bank = document.getElementById('builder-word-bank');
+        const checkBtn = document.getElementById('btn-check-answer');
+
+        slot.innerHTML = '';
+        if (this.selectedBuilderWords.length === 0) {
+          slot.innerHTML = '<span class="text-xs text-stone-400 select-none">請依序點擊下方的日文單字卡組合成句...</span>';
+        } else {
+          this.selectedBuilderWords.forEach((item, pos) => {
+            const chip = document.createElement('button');
+            chip.className = 'px-3.5 py-2 rounded-xl bg-ai text-white font-jp font-bold text-base shadow-xs hover:bg-aiLight transition active:scale-95';
+            chip.innerHTML = item.text;
+            chip.disabled = this.hasAnsweredCurrent;
+            chip.onclick = () => {
+              if (this.hasAnsweredCurrent) return;
+              this.selectedBuilderWords.splice(pos, 1);
+              const targetBank = this.builderBankState.find(b => b.id === item.id);
+              if (targetBank) targetBank.used = false;
+              this.renderSentenceBuilder();
+            };
+            slot.appendChild(chip);
+          });
+        }
+
+        bank.innerHTML = '';
+        this.builderBankState.forEach(item => {
+          const chip = document.createElement('button');
+          chip.className = `px-4 py-2.5 rounded-xl border-2 font-jp font-bold text-base transition ${
+            item.used
+              ? 'bg-stone-100 border-stone-200 text-transparent pointer-events-none select-none'
+              : 'bg-white border-stone-300 hover:border-ai text-stone-800 shadow-xs active:scale-95'
+          }`;
+          chip.innerHTML = item.text;
+          chip.disabled = item.used || this.hasAnsweredCurrent;
+          chip.onclick = () => {
+            if (this.hasAnsweredCurrent || item.used) return;
+            item.used = true;
+            this.selectedBuilderWords.push(item);
+            this.renderSentenceBuilder();
+          };
+          bank.appendChild(chip);
+        });
+
+        checkBtn.disabled = this.selectedBuilderWords.length === 0;
+      }
+
+      checkSentenceBuilder() {
+        if (this.hasAnsweredCurrent) return;
+        this.hasAnsweredCurrent = true;
+
+        const q = this.quizQuestions[this.currentQIndex];
+        const userSeq = this.selectedBuilderWords.map(w => w.text);
+        const isCorrect = JSON.stringify(userSeq) === JSON.stringify(q.correctOrder);
+
+        document.getElementById('quiz-submit-row').classList.add('hidden');
+        this.renderSentenceBuilder();
+        this.finalizeQuestionResult(isCorrect, q);
+      }
+
+      // 統一處理答題對錯回饋與解析顯示
+      finalizeQuestionResult(isCorrect, q) {
+        if (isCorrect) {
+          this.correctCount += 1;
+          this.sfx.playCorrect();
+          this.state.dailyTasks.correctAnswers += 1;
+          this.checkDailyGoalCompletion();
+          this.saveState();
+        } else {
+          this.sfx.playWrong();
+        }
+
+        const panel = document.getElementById('quiz-feedback-panel');
+        const icon = document.getElementById('feedback-icon');
+        const title = document.getElementById('feedback-title');
+        const nextBtn = document.getElementById('btn-next-question');
+
+        panel.classList.remove('hidden', 'bg-emerald-50/90', 'border-matcha', 'bg-rose-50/90', 'border-shu');
+        if (isCorrect) {
+          panel.classList.add('bg-emerald-50/90', 'border-matcha');
+          icon.className = 'w-10 h-10 rounded-2xl bg-matcha flex items-center justify-center text-white text-xl shrink-0 mt-0.5';
+          icon.innerHTML = '<i class="fa-solid fa-check"></i>';
+          title.textContent = '答對了！表現非常出色！';
+          title.className = 'font-bold text-lg text-emerald-900';
+          nextBtn.className = 'mt-5 w-full py-3.5 font-bold rounded-xl text-white bg-matcha hover:bg-[#4d7528] shadow-md transition flex items-center justify-center gap-2';
+        } else {
+          panel.classList.add('bg-rose-50/90', 'border-shu');
+          icon.className = 'w-10 h-10 rounded-2xl bg-shu flex items-center justify-center text-white text-xl shrink-0 mt-0.5';
+          icon.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+          title.textContent = '差一點點，來看看解析吧！';
+          title.className = 'font-bold text-lg text-rose-900';
+          nextBtn.className = 'mt-5 w-full py-3.5 font-bold rounded-xl text-white bg-shu hover:bg-[#c44129] shadow-md transition flex items-center justify-center gap-2';
+        }
+
+        document.getElementById('feedback-jp').innerHTML = q.fullJp;
+        document.getElementById('feedback-romaji').textContent = q.romaji;
+        document.getElementById('feedback-zh').textContent = q.zh;
+        document.getElementById('feedback-explanation').textContent = q.explanation;
+
+        const isLast = this.currentQIndex >= this.quizQuestions.length - 1;
+        nextBtn.querySelector('span').textContent = isLast ? '查看本關結算成績' : '繼續下一題';
+
+        // 自動朗讀正確句型幫助記憶
+        if (q.audioText) {
+          setTimeout(() => this.speakJapanese(q.audioText, 0.95), 350);
+        }
+
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      nextQuestion() {
+        if (this.currentQIndex < this.quizQuestions.length - 1) {
+          this.currentQIndex += 1;
+          this.renderCurrentQuestion();
+        } else {
+          this.finishQuiz();
+        }
+      }
+
+      finishQuiz() {
+        const total = this.quizQuestions.length;
+        const accuracy = Math.round((this.correctCount / total) * 100);
+        const passed = accuracy >= 80;
+
+        // 計算獲得 XP
+        const baseXp = this.currentUnit.xpReward || 40;
+        const earnedXp = passed ? baseXp : Math.max(10, Math.round(baseXp * (accuracy / 100) * 0.5));
+        this.state.xp += earnedXp;
+
+        // 更新每日任務
+        this.state.dailyTasks.unitsCompleted += 1;
+        this.checkDailyGoalCompletion();
+
+        let unlockedNextTitle = null;
+
+        if (!this.isDailyChallenge) {
+          const prevRecord = this.state.completedUnits[this.currentUnit.id];
+          const wasAlreadyPassed = prevRecord && prevRecord.bestScore >= 80;
+
+          this.state.completedUnits[this.currentUnit.id] = {
+            bestScore: Math.max(accuracy, prevRecord ? prevRecord.bestScore : 0),
+            count: (prevRecord ? prevRecord.count : 0) + 1
+          };
+
+          // 若首次達標 80%，檢查下一個解鎖關卡
+          if (passed && !wasAlreadyPassed) {
+            const flat = this.getAllUnitsFlat();
+            const idx = flat.findIndex(u => u.id === this.currentUnit.id);
+            if (idx >= 0 && idx < flat.length - 1) {
+              unlockedNextTitle = flat[idx + 1].title;
+            }
+          }
+        }
+
+        this.saveState();
+        this.updateHeaderAndTasks();
+
+        // 渲染結算畫面
+        document.getElementById('summary-accuracy').textContent = `${accuracy}%`;
+        document.getElementById('summary-xp').textContent = `+${earnedXp} XP`;
+        document.getElementById('summary-streak').textContent = `${this.state.streak} 天`;
+
+        const badgeIcon = document.getElementById('summary-badge-icon');
+        const titleEl = document.getElementById('summary-title');
+        const subEl = document.getElementById('summary-subtitle');
+        const unlockBanner = document.getElementById('summary-unlock-banner');
+
+        if (passed) {
+          this.sfx.playFanfare();
+          badgeIcon.className = 'w-20 h-20 mx-auto rounded-3xl bg-amber-100 text-amber-500 flex items-center justify-center text-4xl shadow-inner';
+          badgeIcon.innerHTML = '<i class="fa-solid fa-trophy"></i>';
+          titleEl.textContent = this.isDailyChallenge ? '每日特訓挑戰成功！' : '恭喜達標過關！';
+          subEl.textContent = `答對 ${this.correctCount} / ${total} 題，日文實力又更上一層樓！`;
+
+          if (typeof confetti === 'function') {
+            confetti({ particleCount: 75, spread: 65, origin: { y: 0.6 } });
+          }
+        } else {
+          badgeIcon.className = 'w-20 h-20 mx-auto rounded-3xl bg-blue-100 text-ai flex items-center justify-center text-4xl shadow-inner';
+          badgeIcon.innerHTML = '<i class="fa-solid fa-book-reader"></i>';
+          titleEl.textContent = '練習完成！再接再厲';
+          subEl.textContent = `本次正確率 ${accuracy}%（需達 80% 才能解鎖下一關卡喔！）`;
+        }
+
+        if (unlockedNextTitle) {
+          unlockBanner.classList.remove('hidden');
+          document.getElementById('summary-unlock-text').textContent = `已解鎖新單元：「${unlockedNextTitle}」`;
+        } else {
+          unlockBanner.classList.add('hidden');
+        }
+
+        this.switchView('view-summary');
+      }
+
+      retryCurrentQuiz() {
+        if (this.isDailyChallenge) {
+          this.startDailyChallenge();
+        } else {
+          this.startQuizFromPreview();
+        }
+      }
+
+      confirmExitQuiz() {
+        this.openModal(
+          '確定要離開目前的練習嗎？',
+          '<p>離開後本回合的答題進度將不會儲存，確定要返回學習地圖嗎？</p>',
+          `
+            <button onclick="app.closeModal()" class="px-4 py-2 rounded-xl border border-stone-300 text-stone-700 font-medium hover:bg-stone-50">繼續練習</button>
+            <button onclick="app.closeModal(); app.goHome();" class="px-4 py-2 rounded-xl bg-shu text-white font-bold hover:bg-[#c44129]">確定離開</button>
+          `
+        );
+      }
+
+      toggleSettingsModal() {
+        const completedCount = Object.values(this.state.completedUnits).filter(v => v.bestScore >= 80).length;
+        const totalUnits = this.getAllUnitsFlat().length;
+
+        this.openModal(
+          '學習設定與進度管理',
+          `
+            <div class="bg-washi p-4 rounded-2xl border border-stone-200/80 space-y-2">
+              <div class="flex justify-between"><span>已完成單元數：</span><strong class="text-ai">${completedCount} / ${totalUnits} 單元</strong></div>
+              <div class="flex justify-between"><span>累積總經驗值：</span><strong class="text-matcha">${this.state.xp} XP</strong></div>
+              <div class="flex justify-between"><span>連續學習天數：</span><strong class="text-shu">${this.state.streak} 天</strong></div>
+            </div>
+            <div class="flex items-center justify-between pt-2">
+              <span class="font-medium text-stone-800">答題清脆音效</span>
+              <input type="checkbox" ${this.state.soundEnabled ? 'checked' : ''} onchange="app.toggleSound(this.checked)" class="w-4 h-4 accent-ai">
+            </div>
+            <div class="pt-3 border-t border-stone-100">
+              <p class="text-xs text-stone-400 mb-2">若想從頭體驗五十音到進階閱讀的解鎖過程，可重置所有紀錄：</p>
+              <button onclick="app.confirmResetProgress()" class="w-full py-2.5 rounded-xl border border-rose-300 text-shu hover:bg-rose-50 font-bold text-xs transition">
+                <i class="fa-solid fa-rotate-left mr-1"></i> 重置所有學習進度
+              </button>
+            </div>
+          `,
+          `<button onclick="app.closeModal()" class="px-5 py-2 rounded-xl bg-ai text-white font-bold">完成</button>`
+        );
+      }
+
+      toggleSound(enabled) {
+        this.state.soundEnabled = enabled;
+        this.sfx.enabled = enabled;
+        this.saveState();
+      }
+
+      confirmResetProgress() {
+        this.openModal(
+          '確認重置學習進度？',
+          '<p class="text-rose-700 font-medium">此操作將會清除您的所有 XP、連勝天數與關卡解鎖紀錄，且無法復原。</p>',
+          `
+            <button onclick="app.toggleSettingsModal()" class="px-4 py-2 rounded-xl border border-stone-300 text-stone-700">取消</button>
+            <button onclick="app.resetAllProgress()" class="px-4 py-2 rounded-xl bg-shu text-white font-bold">確定全部重置</button>
+          `
+        );
+      }
+
+      resetAllProgress() {
+        localStorage.removeItem(this.STORAGE_KEY);
+        this.closeModal();
+        location.reload();
+      }
+
+      openModal(title, bodyHtml, footerHtml) {
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-body').innerHTML = bodyHtml;
+        document.getElementById('modal-footer').innerHTML = footerHtml;
+        const overlay = document.getElementById('modal-overlay');
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+      }
+
+      closeModal() {
+        const overlay = document.getElementById('modal-overlay');
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+      }
+
+      showToast(msg) {
+        const toast = document.getElementById('toast');
+        document.getElementById('toast-msg').textContent = msg;
+        toast.classList.remove('opacity-0');
+        clearTimeout(this.toastTimer);
+        this.toastTimer = setTimeout(() => {
+          toast.classList.add('opacity-0');
+        }, 2800);
+      }
+    }
+
+    // 啟動應用程式
+    let app;
+    window.addEventListener('DOMContentLoaded', () => {
+      app = new NihongoStepsApp();
+    });
+  </script>
+</body>
+</html>
