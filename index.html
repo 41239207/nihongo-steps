@@ -114,7 +114,7 @@
             日語階梯
             <span class="text-xs font-normal px-2 py-0.5 rounded-full bg-washiDark text-stone-600">Nihongo Steps</span>
           </h1>
-          <p class="text-xs text-stone-500 hidden sm:block">循序漸進・每日一階</p>
+          <p class="text-xs text-stone-500 hidden sm:block">循序漸進・每日一階（5 大階層・18 關卡）</p>
         </div>
       </div>
 
@@ -157,28 +157,27 @@
       <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <!-- 每日特訓卡片 (Daily Challenge) -->
         <div class="md:col-span-2 bg-gradient-to-br from-ai via-[#2D4F7E] to-[#1E3557] text-white rounded-2xl p-5 sm:p-6 shadow-md relative overflow-hidden flex flex-col justify-between">
-          <!-- 裝飾和風圓紋 -->
           <div class="absolute -right-8 -bottom-8 w-40 h-40 rounded-full border-[16px] border-white/5 pointer-events-none"></div>
           <div class="absolute right-12 -top-10 w-28 h-28 rounded-full bg-sakura/15 blur-xl pointer-events-none"></div>
 
           <div class="relative z-10">
             <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 text-xs font-medium mb-3 backdrop-blur-sm">
               <i class="fa-solid fa-bolt text-amber-300"></i>
-              <span>間隔重複記憶強化</span>
+              <span>間隔重複記憶 ＆ 錯題優先強化</span>
             </div>
             <h2 class="text-xl sm:text-2xl font-bold mb-1.5">每日混合特訓 (Daily Challenge)</h2>
             <p class="text-sm text-blue-100/90 max-w-lg leading-relaxed">
-              系統自動從您已解鎖的關卡中抽選 6 道精選題目，融合聽力、假名、單字與句型重組，鞏固長期記憶！
+              系統優先從您的「錯題強化本」與已解鎖關卡中抽選 8 道精選題目，融合聽力、情境對話閱讀、核心文法與句型重組，徹底鞏固長期記憶！
             </p>
           </div>
 
           <div class="relative z-10 mt-5 flex flex-wrap items-center gap-3">
             <button onclick="app.startDailyChallenge()" class="px-5 py-2.5 bg-shu hover:bg-[#c44129] active:scale-95 text-white font-bold rounded-xl shadow-lg shadow-shu/30 transition flex items-center gap-2">
               <i class="fa-solid fa-play"></i>
-              <span>開始今日特訓 (+50 XP)</span>
+              <span>開始今日特訓 (+60 XP)</span>
             </button>
-            <span id="daily-challenge-status" class="text-xs text-blue-200 flex items-center gap-1">
-              <i class="fa-regular fa-clock"></i> 隨時可重複挑戰
+            <span id="mistake-book-badge" class="text-xs bg-white/15 px-3 py-1.5 rounded-full text-blue-100 flex items-center gap-1.5">
+              <i class="fa-solid fa-bookmark text-amber-300"></i> 錯題本：0 題待複習
             </span>
           </div>
         </div>
@@ -255,9 +254,9 @@
         </div>
       </section>
 
-      <!-- 四大階層課程地圖容器 -->
+      <!-- 五大階層課程地圖容器 -->
       <section id="curriculum-container" class="space-y-8 pb-10">
-        <!-- 由 JavaScript 動態渲染 4 個 Level 與各單元卡片 -->
+        <!-- 由 JavaScript 動態渲染 5 個 Level 與 18 個關卡卡片 -->
       </section>
     </div>
 
@@ -287,16 +286,16 @@
 
         <!-- 學習重點小卡列表 -->
         <div class="p-6 sm:p-8 space-y-4">
-          <div class="flex items-center justify-between">
+          <div class="flex flex-wrap items-center justify-between gap-2">
             <h3 class="font-bold text-stone-800 flex items-center gap-2">
               <i class="fa-solid fa-book-open text-ai"></i>
-              <span>本關核心知識點（點擊喇叭聆聽發音）</span>
+              <span>本關核心知識點 ＆ 情境實用對話例句</span>
             </h3>
-            <span class="text-xs text-stone-400">建議先聽熟再測驗</span>
+            <span class="text-xs text-stone-400">支援 1.0x 常速與 0.7x 慢速發音朗讀</span>
           </div>
 
-          <div id="preview-cards-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <!-- 動態產生知識點卡片 -->
+          <div id="preview-cards-list" class="grid grid-cols-1 gap-4">
+            <!-- 動態產生知識點與情境對話卡片 -->
           </div>
         </div>
 
@@ -340,33 +339,52 @@
         <div class="mb-6">
           <p id="quiz-instruction" class="text-sm text-stone-500 font-medium mb-2">請選出正確的中文意思：</p>
           
+          <!-- 長文閱讀 / 情境對話背景框（僅閱讀理解與對話填空題顯示） -->
+          <div id="quiz-reading-box" class="hidden mb-4 p-4 rounded-2xl bg-washi border border-stone-200/90 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-ai flex items-center gap-1.5">
+                <i class="fa-solid fa-book-open-reader"></i> 情境對話 / 短文閱讀
+              </span>
+              <button onclick="app.playReadingPassageAudio()" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-white hover:bg-ai hover:text-white text-ai border border-stone-200 transition flex items-center gap-1">
+                <i class="fa-solid fa-volume-high"></i> 朗讀全文
+              </button>
+            </div>
+            <div id="quiz-reading-passage" class="font-jp text-base sm:text-lg text-stone-800 leading-relaxed whitespace-pre-line"></div>
+          </div>
+
           <div class="flex flex-wrap items-center gap-3">
             <!-- 發音按鈕群 -->
             <div id="quiz-audio-controls" class="flex items-center gap-2">
-              <button onclick="app.playCurrentQuestionAudio(1.0)" class="w-12 h-12 rounded-2xl bg-ai hover:bg-aiLight active:scale-95 text-white flex items-center justify-center shadow-md shadow-ai/20 transition" title="正常語速朗讀">
+              <button onclick="app.playCurrentQuestionAudio(1.0)" class="w-12 h-12 rounded-2xl bg-ai hover:bg-aiLight active:scale-95 text-white flex items-center justify-center shadow-md shadow-ai/20 transition" title="正常語速朗讀 (1.0x)">
                 <i class="fa-solid fa-volume-high text-lg"></i>
               </button>
-              <button onclick="app.playCurrentQuestionAudio(0.65)" class="px-3 h-12 rounded-2xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-ai text-xs font-bold flex items-center gap-1 transition" title="慢速清晰朗讀">
-                <i class="fa-solid fa-snail"></i>
+              <button onclick="app.playCurrentQuestionAudio(0.7)" class="px-3 h-12 rounded-2xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-ai text-xs font-bold flex items-center gap-1 transition" title="慢速清晰朗讀 (0.7x)">
+                <i class="fa-solid fa-gauge-simple"></i>
                 <span>慢速</span>
               </button>
             </div>
 
             <!-- 題幹日文顯示區 -->
-            <div id="quiz-prompt-display" class="font-jp text-2xl sm:text-3xl font-bold text-stone-900 leading-relaxed">
+            <div id="quiz-prompt-display" class="font-jp text-xl sm:text-2xl font-bold text-stone-900 leading-relaxed">
               <!-- 動態填入題目文字或純聽力提示 -->
             </div>
           </div>
           <p id="quiz-romaji-hint" class="text-xs text-stone-400 mt-1.5 font-mono hidden"></p>
         </div>
 
-        <!-- 作答區 A：單選題 (選擇題 / 聽力題) -->
+        <!-- 作答區 A：單選題 (選擇題 / 聽力題 / 情境閱讀題) -->
         <div id="quiz-options-container" class="grid grid-cols-1 gap-3">
           <!-- 動態產生選項按鈕 -->
         </div>
 
         <!-- 作答區 B：句型重組 (Sentence Builder) -->
-        <div id="quiz-builder-container" class="hidden space-y-5">
+        <div id="quiz-builder-container" class="hidden space-y-4">
+          <div class="flex items-center justify-between text-xs text-stone-500">
+            <span>點擊下方單字卡排列，點選已排入的卡片可放回</span>
+            <button type="button" onclick="app.showBuilderHint()" class="text-ai hover:underline font-bold flex items-center gap-1">
+              <i class="fa-regular fa-lightbulb"></i> 提示第一個詞
+            </button>
+          </div>
           <!-- 組合槽 (作答區) -->
           <div class="min-h-[68px] p-3 rounded-2xl bg-washi border-2 border-dashed border-stone-300 flex flex-wrap items-center gap-2" id="builder-answer-slot">
             <span class="text-xs text-stone-400 select-none" id="builder-placeholder">請依序點擊下方的日文單字卡組合成句...</span>
@@ -503,664 +521,1987 @@
   <script>
     /**
      * ============================================================================
-     * 1. 課程資料庫 (CURRICULUM DATA)
-     *    四大進階階層：
-     *    Level 1：五十音與基礎發音
-     *    Level 2：生存旅遊與日常詞彙
-     *    Level 3：核心文法與句型結構
-     *    Level 4：情境對話與進階閱讀
+     * 1. 完整階層式課程資料庫 (LEVELS_DATA)
+     *    共 5 大階層、18 個循序漸進關卡：
+     *    - Level 1：五十音基礎與日常入門（3 關：完整平假名、完整片假名、日常寒暄與自我介紹）
+     *    - Level 2：旅遊實用詞彙與數字時間（3 關：數字時間星期、交通地點方位、美食購物詞彙）
+     *    - Level 3：核心文法與句型結構（5 關：は與を、に與で、て形＋ください、ます形時態變化、許可與禁止）
+     *    - Level 4：情境對話與進階閱讀（4 關：居酒屋餐廳、車站問路轉乘、飯店入住退房、超商藥妝購物）
+     *    - Level 5：進階文法與深度日常情境（3 關：願望與經驗、形容詞變化與比較、看病就診與行程聯絡）
      * ============================================================================
      */
-    const CURRICULUM = [
+    const LEVELS_DATA = [
+      // ==========================================================================
+      // Level 1：五十音基礎與日常入門（3 關）
+      // ==========================================================================
       {
         level: 1,
-        title: "Level 1：五十音與基礎發音",
-        subtitle: "掌握平假名、片假名核心音節與最實用的日常問候語",
+        title: "Level 1：五十音基礎與日常入門",
+        subtitle: "第一關完整練熟「平假名（あ〜ん）」、第二關完整練熟「片假名（ア〜ン）」，再學會道地日常寒暄與自我介紹",
         color: "from-emerald-600 to-teal-700",
         badgeBg: "bg-emerald-100 text-emerald-800",
         icon: "fa-seedling",
         units: [
           {
             id: "u1_1",
-            title: "平假名入門：あ行與か行",
-            desc: "認識日文最基礎的母音（あいうえお）與清音（かきくけこ），建立正確發音語感。",
-            xpReward: 30,
+            title: "STAGE 1-1：完整平假名（ひらがな あ〜ん）",
+            desc: "涵蓋あ行至わ行與撥音「ん」完整五十音對照、發音朗讀、基礎平假名單字與聽力辨識測驗。",
+            xpReward: 40,
             studyCards: [
-              { jp: "あ・い・う・え・お", romaji: "a · i · u · e · o", zh: "平假名母音（啊、衣、屋、欸、喔）", audio: "あ、い、う、え、お" },
-              { jp: "か・き・く・け・こ", romaji: "ka · ki · ku · ke · ko", zh: "平假名か行清音", audio: "か、き、く、け、こ" },
-              { jp: "<ruby>愛<rt>あい</rt></ruby>", romaji: "ai", zh: "愛、愛情", audio: "あい" },
-              { jp: "<ruby>駅<rt>えき</rt></ruby>", romaji: "eki", zh: "車站", audio: "えき" },
-              { jp: "<ruby>顔<rt>かお</rt></ruby>", romaji: "kao", zh: "臉孔", audio: "かお" },
-              { jp: "<ruby>声<rt>こえ</rt></ruby>", romaji: "koe", zh: "聲音", audio: "こえ" }
+              {
+                jp: "あ・い・う・え・お ／ か・き・く・け・こ",
+                romaji: "a i u e o / ka ki ku ke ko",
+                zh: "平假名あ行母音與か行清音",
+                audio: "あ、い、う、え、お。か、き、く、け、こ",
+                exampleJp: "あおい（藍色的）／ かお（臉孔）／ きく（聽・菊花）",
+                exampleZh: "由あ行與か行假名組成的常見基礎詞彙。",
+                exampleAudio: "あおい。かお。きく。"
+              },
+              {
+                jp: "さ・し・す・せ・そ ／ た・ち・つ・て・と",
+                romaji: "sa shi su se so / ta chi tsu te to",
+                zh: "平假名さ行與た行清音（注意 し shi・ち chi・つ tsu 特殊音）",
+                audio: "さ、し、す、せ、そ。た、ち、つ、て、と",
+                exampleJp: "すし（壽司）／ つき（月亮）／ て（手）",
+                exampleZh: "由さ行與た行假名組成的日常詞彙。",
+                exampleAudio: "すし。つき。て。"
+              },
+              {
+                jp: "な・に・ぬ・ね・の ／ は・ひ・ふ・へ・ほ",
+                romaji: "na ni nu ne no / ha hi fu he ho",
+                zh: "平假名な行與は行清音（注意 ふ fu 讀音）",
+                audio: "な、に、ぬ、ね、の。は、ひ、ふ、へ、ほ",
+                exampleJp: "なに（什麼）／ はな（花・鼻子）／ ほし（星星）",
+                exampleZh: "由な行與は行假名組成的常見單字。",
+                exampleAudio: "なに。はな。ほし。"
+              },
+              {
+                jp: "ま・み・む・め・も ／ や・ゆ・よ",
+                romaji: "ma mi mu me mo / ya yu yo",
+                zh: "平假名ま行與や行（や行僅 3 個假名：や・ゆ・よ）",
+                audio: "ま、み、む、め、も。や、ゆ、よ",
+                exampleJp: "やま（山）／ ゆき（雪）／ みみ（耳朵）",
+                exampleZh: "由ま行與や行假名組成的自然詞彙。",
+                exampleAudio: "やま。ゆき。みみ。"
+              },
+              {
+                jp: "ら・り・る・れ・ろ ／ わ・を・ん",
+                romaji: "ra ri ru re ro / wa o n",
+                zh: "平假名ら行、わ行與撥音「ん」（を 作為助詞時讀作 o）",
+                audio: "ら、り、る、れ、ろ。わ、を、ん",
+                exampleJp: "そら（天空）／ りんご（蘋果）／ ほん（書本）",
+                exampleZh: "涵蓋ら行與撥音「ん」的高頻率單字。",
+                exampleAudio: "そら。りんご。ほん。"
+              }
             ],
             questions: [
               {
+                id: "q1_1_1",
                 type: "listening",
-                instruction: "點擊喇叭聆聽發音，選出對應的平假名：",
-                audioText: "えき",
-                promptDisplay: "🔊 聆聽單字發音（「車站」的意思）",
-                options: ["えき (eki)", "あき (aki)", "いけ (ike)", "おか (oka)"],
+                instruction: "點擊喇叭聆聽平假名發音，選出正確的假名組合：",
+                audioText: "し、ち、つ",
+                promptDisplay: "🔊 聆聽さ行・た行特殊假名發音",
+                options: ["し・ち・つ (shi / chi / tsu)", "さ・た・な", "す・つ・ぬ", "せ・て・ね"],
                 answerIndex: 0,
-                fullJp: "<ruby>駅<rt>えき</rt></ruby>",
-                romaji: "eki",
-                zh: "車站",
-                explanation: "「え (e)」加上「き (ki)」讀作 eki，漢字寫作「駅」，是日本旅遊最常看到的單字之一。"
+                fullJp: "し・ち・つ",
+                romaji: "shi · chi · tsu",
+                zh: "さ行與た行特殊讀音假名",
+                explanation: "さ行與た行中有三個特殊發音假名：し(shi)、ち(chi)、つ(tsu)，練平假名時一定要特別記牢。"
               },
               {
+                id: "q1_1_2",
                 type: "choice",
-                instruction: "平假名「あ・い・う・え・お」中，哪一個字發音類似中文的「屋 (u)」？",
-                audioText: "う",
-                promptDisplay: "母音辨識：u",
-                options: ["う", "あ", "お", "え"],
+                instruction: "下列哪一組全部都是「や行」的平假名？",
+                audioText: "や、ゆ、よ",
+                promptDisplay: "辨識や行平假名",
+                options: ["や・ゆ・よ", "や・い・よ", "ゆ・う・よ", "わ・ゆ・よ"],
                 answerIndex: 0,
-                fullJp: "う",
-                romaji: "u",
-                zh: "母音 u",
-                explanation: "「あ(a)、い(i)、う(u)、え(e)、お(o)」為日文五十音的五個基本母音，發「う」時嘴唇微收不需過度突出。"
+                fullJp: "や・ゆ・よ",
+                romaji: "ya · yu · yo",
+                zh: "や行平假名",
+                explanation: "や行只有「や (ya)」、「ゆ (yu)」、「よ (yo)」三個假名，中間沒有い段與え段假名。"
               },
               {
-                type: "choice",
-                instruction: "選出「かお」的正確中文意思：",
-                audioText: "かお",
-                promptDisplay: "かお",
-                options: ["臉孔", "聲音", "秋天", "藍色"],
-                answerIndex: 0,
-                fullJp: "<ruby>顔<rt>かお</rt></ruby>",
-                romaji: "kao",
-                zh: "臉孔",
-                explanation: "「か (ka)」＋「お (o)」＝ かお (kao)，漢字為「顔」，意為臉孔。"
-              },
-              {
+                id: "q1_1_3",
                 type: "listening",
-                instruction: "聽聽看這個雙音節單字是什麼：",
-                audioText: "こえ",
-                promptDisplay: "🔊 聆聽單字發音",
-                options: ["こえ (koe)", "くい (kui)", "かお (kao)", "きく (kiku)"],
+                instruction: "聆聽平假名詞彙發音，選出正確的假名拼寫與意思：",
+                audioText: "ほん",
+                promptDisplay: "🔊 聆聽平假名單字發音",
+                options: ["ほん (hon) — 書本", "はな (hana) — 花", "やま (yama) — 山", "ゆき (yuki) — 雪"],
                 answerIndex: 0,
-                fullJp: "<ruby>声<rt>こえ</rt></ruby>",
-                romaji: "koe",
-                zh: "聲音",
-                explanation: "「こ (ko)」＋「え (e)」＝ こえ (koe)，漢字為「声」，指人或動物發出的聲音。"
+                fullJp: "ほん",
+                romaji: "hon",
+                zh: "書本",
+                explanation: "「ほ (ho)」加上撥音「ん (n)」組合成「ほん (hon)」，意思是書本。"
               },
               {
-                type: "choice",
-                instruction: "下列哪一個平假名屬於「か行」？",
-                audioText: "け",
-                promptDisplay: "け",
-                options: ["ke", "se", "te", "ne"],
+                id: "q1_1_4",
+                type: "builder",
+                instruction: "依五十音順序排列「わ・を・ん」：",
+                audioText: "わ、を、ん",
+                words: ["ん", "わ", "を"],
+                correctOrder: ["わ", "を", "ん"],
+                fullJp: "わ・を・ん",
+                romaji: "wa · o · n",
+                zh: "平假名最後三個字元",
+                explanation: "平假名五十音表最後一組是「わ」「を」，再加上獨立的撥音「ん」。"
+              },
+              {
+                id: "q1_1_5",
+                type: "reading",
+                instruction: "閱讀平假名短詞練習表，找出全部由平假名寫成的「天空」是哪一個？",
+                passage: "あおい（藍色的）　／　そら（天空）\nりんご（蘋果）　／　つき（月亮）",
+                passageAudio: "あおい。そら。りんご。つき。",
+                audioText: "そら",
+                promptDisplay: "選出「天空（そら）」對應的平假名：",
+                options: ["そら (sora)", "つき (tsuki)", "あおい (aoi)", "りんご (ringo)"],
                 answerIndex: 0,
-                fullJp: "け",
-                romaji: "ke",
-                zh: "假名 ke",
-                explanation: "か行五個假名依序為：か(ka)、き(ki)、く(ku)、け(ke)、こ(ko)。"
+                fullJp: "そら",
+                romaji: "sora",
+                zh: "天空",
+                explanation: "「そ (so)」＋「ら (ra)」拼成「そら (sora)」，意思是天空。"
               }
             ]
           },
           {
             id: "u1_2",
-            title: "片假名與外來語初體驗",
-            desc: "片假名常用於外來語與強調語氣，透過咖啡、蛋糕等生活單字輕鬆記憶！",
-            xpReward: 35,
+            title: "STAGE 1-2：完整片假名（カタカナ ア〜ン）",
+            desc: "涵蓋ア行至ワ行與撥音「ン」完整片假名對照、易混淆字形對比（シ/ツ、ン/ソ）、外來語單字與辨識測驗。",
+            xpReward: 45,
             studyCards: [
-              { jp: "コーヒー", romaji: "kōhī", zh: "咖啡 (Coffee)", audio: "コーヒー" },
-              { jp: "ケーキ", romaji: "kēki", zh: "蛋糕 (Cake)", audio: "ケーキ" },
-              { jp: "ホテル", romaji: "hoteru", zh: "飯店 (Hotel)", audio: "ホテル" },
-              { jp: "トイレ", romaji: "toire", zh: "洗手間 (Toilet)", audio: "トイレ" },
-              { jp: "タクシー", romaji: "takushī", zh: "計程車 (Taxi)", audio: "タクシー" }
+              {
+                jp: "ア・イ・ウ・エ・オ ／ カ・キ・ク・ケ・コ",
+                romaji: "a i u e o / ka ki ku ke ko",
+                zh: "片假名ア行與カ行（注意 ア／マ、ウ／ワ 字形差異）",
+                audio: "ア、イ、ウ、エ、オ。カ、キ、ク、ケ、コ",
+                exampleJp: "カメラ（camera 相機）／ ケーキ（cake 蛋糕）",
+                exampleZh: "由ア行與カ行片假名組成的常見外來語。",
+                exampleAudio: "カメラ。ケーキ。"
+              },
+              {
+                jp: "サ・シ・ス・セ・ソ ／ タ・チ・ツ・テ・ト",
+                romaji: "sa shi su se so / ta chi tsu te to",
+                zh: "片假名サ行與タ行（注意 シ／ツ 筆畫方向不同）",
+                audio: "サ、シ、ス、セ、ソ。タ、チ、ツ、テ、ト",
+                exampleJp: "タクシー（taxi 計程車）／ テスト（test 測驗）",
+                exampleZh: "由サ行與タ行片假名組成的日常外來語。",
+                exampleAudio: "タクシー。テスト。"
+              },
+              {
+                jp: "ナ・ニ・ヌ・ネ・ノ ／ ハ・ヒ・フ・ヘ・ホ",
+                romaji: "na ni nu ne no / ha hi fu he ho",
+                zh: "片假名ナ行與ハ行（注意 ノ 只有一筆、ホ 有三橫）",
+                audio: "ナ、ニ、ヌ、ネ、ノ。ハ、ヒ、フ、ヘ、ホ",
+                exampleJp: "ノート（note 筆記本）／ ホテル（hotel 飯店）",
+                exampleZh: "由ナ行與ハ行片假名組成的旅遊外來語。",
+                exampleAudio: "ノート。ホテル。"
+              },
+              {
+                jp: "マ・ミ・ム・メ・モ ／ ヤ・ユ・ヨ",
+                romaji: "ma mi mu me mo / ya yu yo",
+                zh: "片假名マ行與ヤ行（注意 マ／ム／ユ 字形辨識）",
+                audio: "マ、ミ、ム、メ、モ。ヤ、ユ、ヨ",
+                exampleJp: "メモ（memo 便條）／ ヨーグルト（yogurt 優格）",
+                exampleZh: "由マ行與ヤ行片假名組成的常見詞彙。",
+                exampleAudio: "メモ。ヨーグルト。"
+              },
+              {
+                jp: "ラ・リ・ル・レ・ロ ／ ワ・ヲ・ン",
+                romaji: "ra ri ru re ro / wa o n",
+                zh: "片假名ラ行、ワ行與ン（注意 ソ／ン 筆畫角度差異）",
+                audio: "ラ、リ、ル、レ、ロ。ワ、ヲ、ン",
+                exampleJp: "ラーメン（拉麵）／ ワイン（wine 葡萄酒）",
+                exampleZh: "涵蓋ラ行、ワ行與ン的常見詞彙。",
+                exampleAudio: "ラーメン。ワイン。"
+              }
             ],
             questions: [
               {
+                id: "q1_2_1",
                 type: "choice",
-                instruction: "在日本咖啡廳看到「コーヒー」，這是什麼飲料？",
-                audioText: "コーヒー",
-                promptDisplay: "コーヒー",
-                options: ["咖啡", "可樂", "紅茶", "牛奶"],
+                instruction: "片假名初學者最容易混淆「シ」與「ツ」，下列關於兩者筆畫的敘述何者正確？",
+                audioText: "シ、ツ",
+                promptDisplay: "字形辨識：シ vs ツ",
+                options: ["シ 的兩點偏橫向、最後一筆往上勾；ツ 的兩點偏直向、最後一筆往下撇", "シ 與 ツ 的筆畫完全一模一樣", "ツ 讀作 shi，シ 讀作 tsu", "シ 是平假名，ツ 才是片假名"],
                 answerIndex: 0,
-                fullJp: "コーヒー",
-                romaji: "kōhī",
-                zh: "咖啡",
-                explanation: "片假名中的橫線「ー」代表長音，將前一個母音拉長一拍，コーヒー即英文 Coffee 的音譯。"
+                fullJp: "シ (shi) ／ ツ (tsu)",
+                romaji: "shi / tsu",
+                zh: "片假名 シ 與 ツ 筆畫辨識",
+                explanation: "記法口訣：シ 像橫躺的微笑（由下往上勾）；ツ 像直立的水滴（由上往下撇）。"
               },
               {
+                id: "q1_2_2",
                 type: "listening",
-                instruction: "聽發音，選出在外面急需找尋的地點：",
-                audioText: "トイレ",
-                promptDisplay: "🔊 聆聽單字發音",
-                options: ["トイレ（洗手間）", "ホテル（飯店）", "ケーキ（蛋糕）", "カメラ（相機）"],
-                answerIndex: 0,
-                fullJp: "トイレ",
-                romaji: "toire",
-                zh: "洗手間 / 廁所",
-                explanation: "「トイレ (toire)」源自英文 Toilet，在車站與商場非常實用。"
-              },
-              {
-                type: "choice",
-                instruction: "「飯店、旅館」的日文片假名寫法是哪一個？",
+                instruction: "點擊喇叭聆聽片假名外來語發音，選出正確詞彙：",
                 audioText: "ホテル",
-                promptDisplay: "飯店 (Hotel)",
-                options: ["ホテル", "ケーキ", "タクシー", "テスト"],
+                promptDisplay: "🔊 聆聽片假名外來語發音",
+                options: ["ホテル (hoteru) — 飯店", "カメラ (kamera) — 相機", "ノート (nōto) — 筆記本", "ケーキ (kēki) — 蛋糕"],
                 answerIndex: 0,
                 fullJp: "ホテル",
                 romaji: "hoteru",
                 zh: "飯店",
-                explanation: "ホ(ho)＋テ(te)＋ル(ru)＝ ホテル (hoteru)。"
+                explanation: "「ホ (ho)」＋「テ (te)」＋「ル (ru)」拼成「ホテル (hoteru)」，源自英文 Hotel。"
               },
               {
+                id: "q1_2_3",
                 type: "choice",
-                instruction: "片假名單字「タクシー」中的「ー」符號代表什麼意思？",
-                audioText: "タクシー",
-                promptDisplay: "タクシー",
-                options: ["長音（拉長前一音節母音）", "停頓一拍（促音）", "重音符號", "鼻音"],
+                instruction: "外來語「ラーメン（拉麵）」與「ワイン（葡萄酒）」結尾都使用了哪一個片假名？",
+                audioText: "ラーメン、ワイン",
+                promptDisplay: "ラーメ（　） ／ ワイ（　）",
+                options: ["ン (n)", "ソ (so)", "ノ (no)", "ル (ru)"],
                 answerIndex: 0,
-                fullJp: "タクシー",
-                romaji: "takushī",
-                zh: "計程車",
-                explanation: "片假名長音符號「ー」表示將「シ (shi)」的母音 i 拉長一拍，讀作 takushī。"
+                fullJp: "ン (n)",
+                romaji: "n",
+                zh: "片假名撥音 ン",
+                explanation: "「ラーメン」與「ワイン」結尾的鼻音皆為片假名「ン」；「ソ」的起筆較平、收筆較斜，與「ン」不同。"
+              },
+              {
+                id: "q1_2_4",
+                type: "builder",
+                instruction: "用片假名卡片拼出「相機（カメラ）」：",
+                audioText: "カメラ",
+                words: ["ラ", "カ", "メ"],
+                correctOrder: ["カ", "メ", "ラ"],
+                fullJp: "カメラ",
+                romaji: "kamera",
+                zh: "相機",
+                explanation: "「カ (ka)」＋「メ (me)」＋「ラ (ra)」＝「カメラ (kamera)」。"
+              },
+              {
+                id: "q1_2_5",
+                type: "reading",
+                instruction: "閱讀旅遊購物小清單，找出「筆記本」對應的片假名詞彙：",
+                passage: "買い物メモ：\n・ノート（筆記本）\n・ケーキ（蛋糕）\n・メモ（便條）",
+                passageAudio: "ノート。ケーキ。メモ。",
+                audioText: "ノート",
+                promptDisplay: "清單中代表「筆記本」的是哪一個？",
+                options: ["ノート (nōto)", "ケーキ (kēki)", "メモ (memo)", "カメラ (kamera)"],
+                answerIndex: 0,
+                fullJp: "ノート",
+                romaji: "nōto",
+                zh: "筆記本",
+                explanation: "「ノート (nōto)」源自英文 Note，在日文中常見於筆記本或筆記的意思。"
               }
             ]
           },
           {
             id: "u1_3",
-            title: "每日必備問候語與禮貌表達",
-            desc: "學會早安、午安、謝謝與不好意思，開啟有禮貌的第一句日文對話。",
-            xpReward: 40,
+            title: "STAGE 1-3：日常寒暄與自我介紹",
+            desc: "學會早安、午安、晚安、謝謝、不好意思，以及初次見面與自我介紹的實用句型。",
+            xpReward: 45,
             studyCards: [
-              { jp: "おはようございます", romaji: "ohayō gozaimasu", zh: "早安（禮貌說法）", audio: "おはようございます" },
-              { jp: "こんにちは", romaji: "konnichiwa", zh: "午安 / 你好", audio: "こんにちは" },
-              { jp: "ありがとうございます", romaji: "arigatō gozaimasu", zh: "非常謝謝您", audio: "ありがとうございます" },
-              { jp: "すみません", romaji: "sumimasen", zh: "不好意思 / 請問一下 / 對不起", audio: "すみません" },
-              { jp: "お<ruby>願<rt>ねが</rt></ruby>いします", romaji: "onegaishimasu", zh: "拜託您了 / 麻煩您了", audio: "おねがいします" }
+              {
+                jp: "おはようございます ／ こんにちは ／ こんばんは",
+                romaji: "ohayō gozaimasu / konnichiwa / konbanwa",
+                zh: "早安（禮貌） ／ 午安（白天問候） ／ 晚安（晚上見面問候）",
+                audio: "おはようございます。こんにちは。こんばんは",
+                exampleJp: "おはようございます。<ruby>今日<rt>きょう</rt></ruby>もいい<ruby>天気<rt>てんき</rt></ruby>ですね。",
+                exampleZh: "早安，今天也是好天氣呢。",
+                exampleAudio: "おはようございます。きょうもいい天気ですね。"
+              },
+              {
+                jp: "ありがとうございます ／ すみません",
+                romaji: "arigatō gozaimasu / sumimasen",
+                zh: "非常謝謝 ／ 不好意思・對不起・借過一下",
+                audio: "ありがとうございます。すみません",
+                exampleJp: "すみません、ちょっとお<ruby>聞<rt>き</rt></ruby>きしてもいいですか。／ はい、どうぞ。",
+                exampleZh: "不好意思，請問可以請教您一下嗎？ ／ 好的，請說。",
+                exampleAudio: "すみません、ちょっとおききしてもいいですか。はい、どうぞ。"
+              },
+              {
+                jp: "はじめまして、<ruby>私<rt>わたし</rt></ruby>は<ruby>林<rt>はやし</rt></ruby>です",
+                romaji: "hajimemashite, watashi wa Hayashi desu",
+                zh: "初次見面，我姓林（自我介紹開頭必備）",
+                audio: "はじめまして、わたしはやしです",
+                exampleJp: "はじめまして、<ruby>台湾<rt>たいわん</rt></ruby>から<ruby>来<rt>き</rt></ruby>ました<ruby>林<rt>はやし</rt></ruby>です。",
+                exampleZh: "初次見面，我是從台灣來的林。",
+                exampleAudio: "はじめまして、たいわんからきましたはやしです。"
+              },
+              {
+                jp: "よろしくお<ruby>願<rt>ねが</rt></ruby>いします",
+                romaji: "yoroshiku onegaishimasu",
+                zh: "請多多指教（自我介紹結尾或拜託別人時使用）",
+                audio: "よろしくおねがいします",
+                exampleJp: "こちらこそ、よろしくお<ruby>願<rt>ねが</rt></ruby>いします。",
+                exampleZh: "我才要請您多多指教（回應對方的問候）。",
+                exampleAudio: "こちらこそ、よろしくおねがいします。"
+              }
             ],
             questions: [
               {
+                id: "q1_3_1",
                 type: "choice",
-                instruction: "早上走進日本便利商店或學校時，最有禮貌的打招呼方式是？",
-                audioText: "おはようございます",
-                promptDisplay: "早上打招呼",
-                options: ["おはようございます", "こんばんは", "さようなら", "おやすみなさい"],
+                instruction: "晚上 7 點在飯店電梯裡遇到其他房客，見面打招呼應該說哪一句？",
+                audioText: "こんばんは",
+                promptDisplay: "晚上見面問候語",
+                options: ["こんばんは (konbanwa)", "おやすみなさい (oyasuminasai)", "おはようございます", "さようなら"],
                 answerIndex: 0,
-                fullJp: "おはようございます",
-                romaji: "ohayō gozaimasu",
-                zh: "早安",
-                explanation: "「おはよう」用於熟人，加上「ございます」成為敬語，對長輩、老師或店員都適用。"
+                fullJp: "こんばんは。",
+                romaji: "konbanwa",
+                zh: "晚上好（晚安）。",
+                explanation: "「こんばんは」是晚上見面時的打招呼；「おやすみなさい」則是睡前道晚安時說的。"
               },
               {
-                type: "choice",
-                instruction: "在餐廳想呼叫店員點餐，或不小心碰到別人時，最萬用的詞是？",
-                audioText: "すみません",
-                promptDisplay: "萬用禮貌語",
-                options: ["すみません", "いただきます", "ごちそうさま", "はじめまして"],
-                answerIndex: 0,
-                fullJp: "すみません",
-                romaji: "sumimasen",
-                zh: "不好意思 / 請問一下 / 對不起",
-                explanation: "「すみません」兼具『對不起』、『謝謝（讓您費心了）』以及『請問一下（呼叫店員）』三重功能！"
-              },
-              {
-                type: "builder",
-                instruction: "請將單字卡組合成「非常謝謝您」：",
-                audioText: "ありがとうございます",
-                words: ["ございます", "ありがとう"],
-                correctOrder: ["ありがとう", "ございます"],
-                fullJp: "ありがとうございます",
-                romaji: "arigatō gozaimasu",
-                zh: "非常謝謝您",
-                explanation: "「ありがとう（謝謝）」加上「ございます」表示鄭重感謝。"
-              },
-              {
+                id: "q1_3_2",
                 type: "listening",
-                instruction: "聆聽語音，選出這句話的適用情境：",
-                audioText: "おねがいします",
-                promptDisplay: "🔊 聆聽禮貌用語",
-                options: ["點餐或請對方幫忙時（拜託您了）", "準備睡覺前（晚安）", "吃飽飯後（謝謝款待）", "初次見面時（請多指教）"],
+                instruction: "聆聽語音，對方正在表達什麼意思？",
+                audioText: "はじめまして、どうぞよろしくおねがいします",
+                promptDisplay: "🔊 聆聽自我介紹用語",
+                options: ["初次見面，請多多指教", "非常謝謝您的幫忙", "不好意思，請借過一下", "我先下班告辭了"],
                 answerIndex: 0,
-                fullJp: "お<ruby>願<rt>ねが</rt></ruby>いします",
-                romaji: "onegaishimasu",
-                zh: "拜託您了 / 麻煩您了",
-                explanation: "點完餐或遞交物品給對方時說「お願いします」，展現道地的日語禮貌。"
+                fullJp: "はじめまして、どうぞよろしくお<ruby>願<rt>ねが</rt></ruby>いします。",
+                romaji: "hajimemashite, dōzo yoroshiku onegaishimasu",
+                zh: "初次見面，請多多指教。",
+                explanation: "「はじめまして（初次見面）」與「よろしくお願いします（請多多指教）」是初次見面自我介紹的黃金組合。"
+              },
+              {
+                id: "q1_3_3",
+                type: "builder",
+                instruction: "重組自我介紹句子：「初次見面，我是田中。」",
+                audioText: "はじめまして、わたしはたなかです",
+                words: ["<ruby>田中<rt>たなか</rt></ruby>です", "はじめまして、", "<ruby>私<rt>わたし</rt></ruby>は"],
+                correctOrder: ["はじめまして、", "<ruby>私<rt>わたし</rt></ruby>は", "<ruby>田中<rt>たなか</rt></ruby>です"],
+                fullJp: "はじめまして、<ruby>私<rt>わたし</rt></ruby>は<ruby>田中<rt>たなか</rt></ruby>です。",
+                romaji: "hajimemashite, watashi wa Tanaka desu",
+                zh: "初次見面，我是田中。",
+                explanation: "先說「はじめまして」，接著用「私は（我是）＋名字＋です」介紹自己。"
+              },
+              {
+                id: "q1_3_4",
+                type: "choice",
+                instruction: "在擁擠的電車上想請前面的人借過，或要叫住餐廳店員時，最萬用的禮貌詞是？",
+                audioText: "すみません",
+                promptDisplay: "喚起注意 / 借過 / 道歉",
+                options: ["すみません (sumimasen)", "いただきます", "ごちそうさまでした", "おかえりなさい"],
+                answerIndex: 0,
+                fullJp: "すみません。",
+                romaji: "sumimasen",
+                zh: "不好意思 / 對不起 / 勞駕。",
+                explanation: "「すみません」兼具『對不起』、『借過一下』以及『呼叫店員』三種超實用功能。"
+              },
+              {
+                id: "q1_3_5",
+                type: "reading",
+                instruction: "閱讀下方兩位新同事的初次見面對話，請問小王（王さん）來自哪裡？",
+                passage: "<ruby>佐藤<rt>さとう</rt></ruby>：おはようございます。<ruby>佐藤<rt>さとう</rt></ruby>です。\n<ruby>王<rt>おう</rt></ruby>：おはようございます。はじめまして、<ruby>台湾<rt>たいわん</rt></ruby>から<ruby>来<rt>き</rt></ruby>ました<ruby>王<rt>おう</rt></ruby>です。よろしくお<ruby>願<rt>ねが</rt></ruby>いします。",
+                passageAudio: "おはようございます。さとうです。おはようございます。はじめまして、たいわんからきましたおうです。よろしくおねがいします。",
+                audioText: "たいわんからきましたおうです",
+                promptDisplay: "根據對話，關於王先生的敘述何者正確？",
+                options: ["從台灣來的，今天早上第一次和佐藤見面", "從東京來的，已經和佐藤認識很多年", "正在向佐藤道別下班", "正在向佐藤詢問車站方向"],
+                answerIndex: 0,
+                fullJp: "<ruby>台湾<rt>たいわん</rt></ruby>から<ruby>来<rt>き</rt></ruby>ました<ruby>王<rt>おう</rt></ruby>です。",
+                romaji: "Taiwan kara kimashita Ō desu",
+                zh: "我是從台灣來的王。",
+                explanation: "「〜から来ました（从⋯⋯來的）」，加上「はじめまして（初次見面）」，可知王先生從台灣來且剛與佐藤認識。"
               }
             ]
           }
         ]
       },
+
+      // ==========================================================================
+      // Level 2：旅遊實用詞彙與數字時間（3 關）
+      // ==========================================================================
       {
         level: 2,
-        title: "Level 2：生存旅遊與日常詞彙",
-        subtitle: "掌握數字計數、時間表達、餐廳點餐與交通方向核心單字",
+        title: "Level 2：旅遊實用詞彙與數字時間",
+        subtitle: "自由行必備基礎字彙庫！掌握數字與時間星期、交通方位詞彙，以及餐廳美食與購物常用單字",
         color: "from-sky-600 to-blue-700",
         badgeBg: "bg-sky-100 text-sky-800",
         icon: "fa-plane-departure",
         units: [
           {
             id: "u2_1",
-            title: "數字 1～10 與購物問價錢",
-            desc: "學會日文數字念法，在商店輕鬆聽懂價格並詢問「這個多少錢？」。",
-            xpReward: 40,
+            title: "STAGE 2-1：數字、時間與星期表達",
+            desc: "學會 1〜100 數字念法、幾點幾分（注意 4 點與 9 點的特殊讀音）、星期一到星期日與實用時間例句。",
+            xpReward: 45,
             studyCards: [
-              { jp: "<ruby>一<rt>いち</rt></ruby>・<ruby>二<rt>に</rt></ruby>・<ruby>三<rt>さん</rt></ruby>・<ruby>四<rt>よん</rt></ruby>・<ruby>五<rt>ご</rt></ruby>", romaji: "ichi · ni · san · yon · go", zh: "數字 1、2、3、4、5", audio: "いち、に、さん、よん、ご" },
-              { jp: "<ruby>百<rt>ひゃく</rt></ruby>・<ruby>千<rt>せん</rt></ruby>・<ruby>一万<rt>いちまん</rt></ruby>", romaji: "hyaku · sen · ichiman", zh: "一百、一千、一萬", audio: "ひゃく、せん、いちまん" },
-              { jp: "いくらですか", romaji: "ikura desu ka", zh: "多少錢呢？", audio: "いくらですか" },
-              { jp: "これ", romaji: "kore", zh: "這個（離說話者近）", audio: "これ" },
-              { jp: "<ruby>円<rt>えん</rt></ruby>", romaji: "en", zh: "日圓（貨幣單位）", audio: "えん" }
+              {
+                jp: "<ruby>一<rt>いち</rt></ruby>・<ruby>二<rt>に</rt></ruby>・<ruby>三<rt>さん</rt></ruby>・<ruby>四<rt>よん</rt></ruby>・<ruby>五<rt>ご</rt></ruby>・<ruby>六<rt>ろく</rt></ruby>・<ruby>七<rt>なな</rt></ruby>・<ruby>八<rt>はち</rt></ruby>・<ruby>九<rt>きゅう</rt></ruby>・<ruby>十<rt>じゅう</rt></ruby>・<ruby>百<rt>ひゃく</rt></ruby>",
+                romaji: "ichi ni san yon go roku nana hachi kyū jū hyaku",
+                zh: "基本數字 1 到 10 與 100（百＝ひゃく）",
+                audio: "いち、に、さん、よん、ご、ろく、なな、はち、きゅう、じゅう、ひゃく",
+                exampleJp: "<ruby>二十五<rt>にじゅうご</rt></ruby>（25）／ <ruby>八十<rt>はちじゅう</rt></ruby>（80）／ <ruby>百円<rt>ひゃくえん</rt></ruby>（100日圓）",
+                exampleZh: "兩位數由「十位數＋じゅう＋個位數」組合而成。",
+                exampleAudio: "にじゅうご。はちじゅう。ひゃくえん。"
+              },
+              {
+                jp: "<ruby>四時<rt>よじ</rt></ruby> ／ <ruby>七時<rt>しちじ</rt></ruby> ／ <ruby>九時<rt>くじ</rt></ruby>",
+                romaji: "yoji / shichiji / kuji",
+                zh: "時間特殊讀音：4點(yoji)、7點(shichiji)、9點(kuji)",
+                audio: "よじ、しちじ、くじ",
+                exampleJp: "<ruby>飛行機<rt>ひこうき</rt></ruby>は<ruby>午後<rt>ごご</rt></ruby><ruby>四時<rt>よじ</rt></ruby><ruby>半<rt>はん</rt></ruby>に<ruby>出発<rt>しゅっぱつ</rt></ruby>します。",
+                exampleZh: "飛機在下午四點半出發。",
+                exampleAudio: "ひこうきはごごよじはんにしゅっぱつします。"
+              },
+              {
+                jp: "<ruby>月曜日<rt>げつようび</rt></ruby>〜<ruby>日曜日<rt>にちようび</rt></ruby>",
+                romaji: "getsuyōbi ~ nichiyōbi",
+                zh: "星期一(月) ・ 二(火) ・ 三(水) ・ 四(木) ・ 五(金) ・ 六(土) ・ 日(日)",
+                audio: "げつようび、かようび、すいようび、もくようび、きんようび、どようび、にちようび",
+                exampleJp: "<ruby>美術館<rt>びじゅつかん</rt></ruby>は<ruby>月曜日<rt>げつようび</rt></ruby>がお<ruby>休<rt>やす</rt></ruby>みです。",
+                exampleZh: "美術館星期一公休。",
+                exampleAudio: "びじゅつかんはげつようびがおやすみです。"
+              },
+              {
+                jp: "<ruby>今日<rt>きょう</rt></ruby>・<ruby>明日<rt>あした</rt></ruby>・<ruby>昨日<rt>きのう</rt></ruby>",
+                romaji: "kyō · ashita · kinō",
+                zh: "今天、明天、昨天（日常安排行程必備時間詞）",
+                audio: "きょう、あした、きのう",
+                exampleJp: "<ruby>明日<rt>あした</rt></ruby>の<ruby>朝<rt>あさ</rt></ruby>、<ruby>九時<rt>くじ</rt></ruby>にロビーで<ruby>会<rt>あ</rt></ruby>いましょう。",
+                exampleZh: "明天早上九點在大廳見面吧。",
+                exampleAudio: "あしたのあさ、くじにロビーであいましょう。"
+              }
             ],
             questions: [
               {
+                id: "q2_1_1",
                 type: "choice",
-                instruction: "在紀念品店指著眼前的商品問「這個多少錢？」，該怎麼說？",
-                audioText: "これはいくらですか",
-                promptDisplay: "詢問價格",
-                options: ["これはいくらですか。", "これはなんですか。", "どこですか。", "なんじですか。"],
+                instruction: "日文時間「4 點鐘」的正確讀音是哪一個？",
+                audioText: "よじ",
+                promptDisplay: "<ruby>四時<rt>　　</rt></ruby>",
+                options: ["よじ (yoji)", "よんじ (yonji)", "しじ (shiji)", "よっじ (yojji)"],
                 answerIndex: 0,
-                fullJp: "これはいくらですか。",
-                romaji: "kore wa ikura desu ka",
-                zh: "這個多少錢？",
-                explanation: "「これ」是這個，「いくら」是多少錢，「ですか」形成禮貌疑問句。"
+                fullJp: "<ruby>四時<rt>よじ</rt></ruby>",
+                romaji: "yoji",
+                zh: "四點鐘",
+                explanation: "4 點把 ん 去掉念作「よじ (yoji)」；9 點念作「くじ (kuji)」。"
               },
               {
+                id: "q2_1_2",
                 type: "listening",
-                instruction: "聽店員報價，這件商品是多少日圓？",
-                audioText: "さんぜんえん",
-                promptDisplay: "🔊 聆聽價格",
-                options: ["3,000 日圓", "300 日圓", "1,300 日圓", "30,000 日圓"],
+                instruction: "聆聽數字發音，選出正確的阿拉伯數字：",
+                audioText: "ななじゅうご",
+                promptDisplay: "🔊 聆聽兩位數日文發音",
+                options: ["75", "57", "45", "95"],
                 answerIndex: 0,
-                fullJp: "<ruby>三千円<rt>さんぜんえん</rt></ruby>",
-                romaji: "sanzen en",
-                zh: "三千日圓",
-                explanation: "注意音變！三(さん)＋千(せん)會發生連濁音變，讀作「さんぜん (sanzen)」。"
+                fullJp: "<ruby>七十五<rt>ななじゅうご</rt></ruby>",
+                romaji: "nanajū go",
+                zh: "75",
+                explanation: "「なな (7)」＋「じゅう (10)」＋「ご (5)」＝ 75。"
               },
               {
-                type: "builder",
-                instruction: "重組句子：「請給我這個。」",
-                audioText: "これをください",
-                words: ["ください", "これ", "を"],
-                correctOrder: ["これ", "を", "ください"],
-                fullJp: "これをください。",
-                romaji: "kore o kudasai",
-                zh: "請給我這個。",
-                explanation: "「名詞 + を + ください」是購物與點餐最實用的萬用句型，意為「請給我⋯⋯」。"
-              },
-              {
+                id: "q2_1_3",
                 type: "choice",
-                instruction: "日文數字「1、2、3、4、5」的正確讀音順序是？",
-                audioText: "いち、に、さん、よん、ご",
-                promptDisplay: "1・2・3・4・5",
-                options: ["ichi, ni, san, yon, go", "ichi, san, ni, go, yon", "hitotsu, futatsu, mittsu, yottsu, itsutsu", "rei, ichi, ni, san, shi"],
+                instruction: "日本許多博物館在「月曜日」公休，請問「月曜日」是星期幾？",
+                audioText: "げつようび",
+                promptDisplay: "<ruby>月曜日<rt>げつようび</rt></ruby>",
+                options: ["星期一", "星期二", "星期五", "星期日"],
                 answerIndex: 0,
-                fullJp: "<ruby>一<rt>いち</rt></ruby>・<ruby>二<rt>に</rt></ruby>・<ruby>三<rt>さん</rt></ruby>・<ruby>四<rt>よん</rt></ruby>・<ruby>五<rt>ご</rt></ruby>",
-                romaji: "ichi, ni, san, yon, go",
-                zh: "一、二、三、四、五",
-                explanation: "數字 4 有「よん (yon)」與「し (shi)」兩種讀法，日常報數與時間多使用「よん」。"
+                fullJp: "<ruby>月曜日<rt>げつようび</rt></ruby>",
+                romaji: "getsuyōbi",
+                zh: "星期一",
+                explanation: "日文星期依序為：月(一)、火(二)、水(三)、木(四)、金(五)、土(六)、日(日)。"
+              },
+              {
+                id: "q2_1_4",
+                type: "builder",
+                instruction: "重組句子：「現在是九點半。」（現在＝いま、九點半＝くじはん）",
+                audioText: "いま、くじはんです",
+                words: ["<ruby>九時半<rt>くじはん</rt></ruby>です", "<ruby>今<rt>いま</rt></ruby>、"],
+                correctOrder: ["<ruby>今<rt>いま</rt></ruby>、", "<ruby>九時半<rt>くじはん</rt></ruby>です"],
+                fullJp: "<ruby>今<rt>いま</rt></ruby>、<ruby>九時半<rt>くじはん</rt></ruby>です。",
+                romaji: "ima, kujihan desu",
+                zh: "現在是九點半。",
+                explanation: "時間後面加上「半（はん）」表示 30 分，9 點念作「くじ」。"
+              },
+              {
+                id: "q2_1_5",
+                type: "reading",
+                instruction: "閱讀下方商店營業公告牌，請問這間店星期幾公休、幾點開門？",
+                passage: "【カフェ・サクラ】\n<ruby>営業時間<rt>えいぎょうじかん</rt></ruby>：<ruby>午前<rt>ごぜん</rt></ruby><ruby>九時<rt>くじ</rt></ruby>〜<ruby>午後<rt>ごご</rt></ruby><ruby>七時<rt>しちじ</rt></ruby>\n<ruby>定休日<rt>ていきゅうび</rt></ruby>：<ruby>水曜日<rt>すいようび</rt></ruby>",
+                passageAudio: "えいぎょうじかんは、ごぜんくじからごごしちじまでです。ていきゅうびはすいようびです。",
+                audioText: "すいようび",
+                promptDisplay: "根據公告，正確的營業資訊是？",
+                options: ["星期三公休，上午 9 點開門", "星期日公休，上午 7 點開門", "星期三公休，上午 4 點開門", "星期五公休，晚上 9 點關門"],
+                answerIndex: 0,
+                fullJp: "<ruby>午前<rt>ごぜん</rt></ruby><ruby>九時<rt>くじ</rt></ruby>〜<ruby>午後<rt>ごご</rt></ruby><ruby>七時<rt>しちじ</rt></ruby>・<ruby>水曜日<rt>すいようび</rt></ruby><ruby>定休<rt>ていきゅう</rt></ruby>",
+                romaji: "gozen kuji ~ gogo shichiji / suiyōbi teikyū",
+                zh: "上午 9 點至下午 7 點，星期三公休",
+                explanation: "「午前九時」是上午 9 點，「定休日」是公休日，「水曜日」是星期三。"
               }
             ]
           },
           {
             id: "u2_2",
-            title: "餐廳美食與點餐必備詞彙",
-            desc: "看懂日本餐廳常見料理名稱，學會點水、點拉麵以及稱讚「很好吃！」。",
-            xpReward: 45,
+            title: "STAGE 2-2：交通與地點方位詞彙",
+            desc: "掌握車站、地鐵、出口、左右前後、公車與購票相關高頻單字與實用指路例句。",
+            xpReward: 50,
             studyCards: [
-              { jp: "ラーメン", romaji: "rāmen", zh: "拉麵", audio: "ラーメン" },
-              { jp: "お<ruby>水<rt>みず</rt></ruby>", romaji: "omizu", zh: "水（飲用水）", audio: "おみず" },
-              { jp: "メニュー", romaji: "menyū", zh: "菜單 (Menu)", audio: "メニュー" },
-              { jp: "おいしいです", romaji: "oishii desu", zh: "很好吃", audio: "おいしいです" },
-              { jp: "お<ruby>会計<rt>かいけい</rt></ruby>", romaji: "okaikei", zh: "結帳", audio: "おかいけい" }
+              {
+                jp: "<ruby>駅<rt>えき</rt></ruby>・<ruby>地下鉄<rt>ちかてつ</rt></ruby>・<ruby>バス停<rt>てい</rt></ruby>・<ruby>空港<rt>くうこう</rt></ruby>",
+                romaji: "eki · chikatetsu · basutei · kūkō",
+                zh: "車站、地鐵、公車站牌、機場",
+                audio: "えき、ちかてつ、バスてい、くうこう",
+                exampleJp: "<ruby>空港<rt>くうこう</rt></ruby>から<ruby>市内<rt>しない</rt></ruby>まで<ruby>地下鉄<rt>ちかてつ</rt></ruby>で<ruby>三十分<rt>さんじゅっぷん</rt></ruby>です。",
+                exampleZh: "從機場到市區搭地鐵要 30 分鐘。",
+                exampleAudio: "くうこうからしないまでちかてつでさんじゅっぷんです。"
+              },
+              {
+                jp: "<ruby>右<rt>みぎ</rt></ruby>・<ruby>左<rt>ひだり</rt></ruby>・<ruby>前<rt>まえ</rt></ruby>・<ruby>後<rt>うし</rt></ruby>ろ・まっすぐ",
+                romaji: "migi · hidari · mae · ushiro · massugu",
+                zh: "右邊、左邊、前面、後面、直走",
+                audio: "みぎ、ひだり、まえ、うしろ、まっすぐ",
+                exampleJp: "コンビニは<ruby>駅<rt>えき</rt></ruby>の<ruby>前<rt>まえ</rt></ruby>にあります。",
+                exampleZh: "便利商店就在車站前面。",
+                exampleAudio: "コンビニはえきのまえにあります。"
+              },
+              {
+                jp: "<ruby>東口<rt>ひがしぐち</rt></ruby>・<ruby>西口<rt>にしぐち</rt></ruby>・<ruby>南口<rt>みなみぐち</rt></ruby>・<ruby>北口<rt>きたぐち</rt></ruby>",
+                romaji: "higashiguchi · nishiguchi · minamiguchi · kitaguchi",
+                zh: "東口、西口、南口、北口（車站出口念作 〜ぐち）",
+                audio: "ひがしぐち、にしぐち、みなみぐち、きたぐち",
+                exampleJp: "<ruby>西口<rt>にしぐち</rt></ruby>を<ruby>出<rt>で</rt></ruby>て、<ruby>左<rt>ひだり</rt></ruby>に<ruby>曲<rt>ま</rt></ruby>がってください。",
+                exampleZh: "請從西口出去後向左轉。",
+                exampleAudio: "にしぐちをでて、ひだりにまがってください。"
+              },
+              {
+                jp: "<ruby>切符<rt>きっぷ</rt></ruby>・<ruby>往復<rt>おうふく</rt></ruby>・<ruby>片道<rt>かたみち</rt></ruby>・<ruby>乗<rt>の</rt></ruby>り<ruby>換<rt>か</rt></ruby>え",
+                romaji: "kippu · ōfuku · katamichi · norikae",
+                zh: "車票、來回票、單程票、轉乘換車",
+                audio: "きっぷ、おうふく、かたみち、のりかえ",
+                exampleJp: "<ruby>横浜<rt>よこはま</rt></ruby>までの<ruby>往復<rt>おうふく</rt></ruby><ruby>切符<rt>きっぷ</rt></ruby>を<ruby>一枚<rt>いちまい</rt></ruby>ください。",
+                exampleZh: "請給我一張到橫濱的來回車票。",
+                exampleAudio: "よこはままでのおうふくきっぷをいちまいください。"
+              }
             ],
             questions: [
               {
+                id: "q2_2_1",
                 type: "choice",
-                instruction: "用餐結束準備離開餐廳時，想請店員結帳該說什麼？",
-                audioText: "おかいけいをおねがいします",
-                promptDisplay: "請幫我結帳",
-                options: ["お会計をお願いします。", "メニューをお願いします。", "お水をお願いします。", "いただきます。"],
+                instruction: "在自動售票機買票時，畫面上出現「往復」與「片道」，請問「往復（おうふく）」是什麼意思？",
+                audioText: "おうふくきっぷ",
+                promptDisplay: "<ruby>往復<rt>おうふく</rt></ruby><ruby>切符<rt>きっぷ</rt></ruby>",
+                options: ["來回票", "單程票", "兒童半票", "特急指定席券"],
                 answerIndex: 0,
-                fullJp: "お<ruby>会計<rt>かいけい</rt></ruby>をお<ruby>願<rt>ねが</rt></ruby>いします。",
-                romaji: "okaikei o onegaishimasu",
-                zh: "麻煩幫我結帳。",
-                explanation: "「お会計（おかいけい）」是結帳的意思，搭配「をお願いします」非常自然有禮。"
+                fullJp: "<ruby>往復<rt>おうふく</rt></ruby><ruby>切符<rt>きっぷ</rt></ruby>",
+                romaji: "ōfuku kippu",
+                zh: "來回車票",
+                explanation: "「往復（おうふく）」是去程加回程的『來回票』；單趟則稱為「片道（かたみち）」。"
               },
               {
-                type: "builder",
-                instruction: "組合句子：「請給我菜單。」",
-                audioText: "メニューをください",
-                words: ["を", "メニュー", "ください"],
-                correctOrder: ["メニュー", "を", "ください"],
-                fullJp: "メニューをください。",
-                romaji: "menyū o kudasai",
-                zh: "請給我菜單。",
-                explanation: "外來語「メニュー (Menu)」加上助詞「を」與「ください」。"
-              },
-              {
-                type: "choice",
-                instruction: "吃到美味的拉麵時，想跟老闆稱讚「非常好吃！」，應該說：",
-                audioText: "とてもおいしいです",
-                promptDisplay: "稱讚料理美味",
-                options: ["とてもおいしいです！", "とてもたかいです！", "とてもおおきいです！", "とてもさむいです！"],
-                answerIndex: 0,
-                fullJp: "とてもおいしいです！",
-                romaji: "totemo oishii desu",
-                zh: "非常好吃！",
-                explanation: "「とても」是很、非常；「おいしい」是好吃的（い形容詞）。"
-              },
-              {
+                id: "q2_2_2",
                 type: "listening",
-                instruction: "聆聽單字，選出客人向店員索取的物品：",
-                audioText: "おみず",
-                promptDisplay: "🔊 聆聽單字發音",
-                options: ["飲用水 (お水)", "綠茶 (お茶)", "白飯 (ご飯)", "筷子 (お箸)"],
+                instruction: "聆聽方位描述，建築物在車站的哪個位置？",
+                audioText: "ぎんこうはえきのうしろにあります",
+                promptDisplay: "🔊 聆聽建築物方位",
+                options: ["在車站的後面", "在車站的前面", "在車站的右邊", "在車站的左邊"],
                 answerIndex: 0,
-                fullJp: "お<ruby>水<rt>みず</rt></ruby>",
-                romaji: "omizu",
-                zh: "水",
-                explanation: "「水（みず）」前面加上美化語「お」，變成「お水（おみず）」，指飲用水。"
+                fullJp: "<ruby>銀行<rt>ぎんこう</rt></ruby>は<ruby>駅<rt>えき</rt></ruby>の<ruby>後<rt>うし</rt></ruby>ろにあります。",
+                romaji: "ginkō wa eki no ushiro ni arimasu",
+                zh: "銀行在車站的後面。",
+                explanation: "「後ろ（うしろ）」是後面；「前（まえ）」是前面。"
+              },
+              {
+                id: "q2_2_3",
+                type: "builder",
+                instruction: "重組句子：「請問地鐵車站在哪裡？」",
+                audioText: "ちかてつのえきはどこですか",
+                words: ["どこですか", "<ruby>地下鉄<rt>ちかてつ</rt></ruby>の", "<ruby>駅<rt>えき</rt></ruby>は"],
+                correctOrder: ["<ruby>地下鉄<rt>ちかてつ</rt></ruby>の", "<ruby>駅<rt>えき</rt></ruby>は", "どこですか"],
+                fullJp: "<ruby>地下鉄<rt>ちかてつ</rt></ruby>の<ruby>駅<rt>えき</rt></ruby>はどこですか。",
+                romaji: "chikatetsu no eki wa doko desu ka",
+                zh: "請問地鐵車站在哪裡？",
+                explanation: "用「の」連接兩個名詞：「地下鉄の駅（地鐵的車站）」＋「はどこですか（在哪裡呢）」。"
+              },
+              {
+                id: "q2_2_4",
+                type: "choice",
+                instruction: "車站指標上寫著「のりかえ（乗り換え）」，代表什麼意思？",
+                audioText: "のりかえ",
+                promptDisplay: "<ruby>乗<rt>の</rt></ruby>り<ruby>換<rt>か</rt></ruby>え",
+                options: ["轉乘 / 換車", "售票機", "剪票口", "失物招領處"],
+                answerIndex: 0,
+                fullJp: "<ruby>乗<rt>の</rt></ruby>り<ruby>換<rt>か</rt></ruby>え",
+                romaji: "norikae",
+                zh: "轉乘 / 換車",
+                explanation: "在日本電車站看到「乗り換え」指標，就是引導旅客轉乘其他路線的通道。"
+              },
+              {
+                id: "q2_2_5",
+                type: "reading",
+                instruction: "閱讀下方路線提示，請問去機場該搭什麼交通工具，車票要買哪一種？",
+                passage: "<ruby>ホテル<rt>ほてる</rt></ruby>の<ruby>前<rt>まえ</rt></ruby>のバス<ruby>停<rt>てい</rt></ruby>から<ruby>空港<rt>くうこう</rt></ruby>までバスが<ruby>出<rt>で</rt></ruby>ています。<ruby>片道<rt>かたみち</rt></ruby><ruby>切符<rt>きっぷ</rt></ruby>は<ruby>千円<rt>せんえん</rt></ruby>です。",
+                passageAudio: "ホテルのまえのバスていからくうこうまでバスがでています。かたみちきっぷはせんえんです。",
+                audioText: "かたみちきっぷはせんえんです",
+                promptDisplay: "根據公告內容，下列敘述何者正確？",
+                options: ["從飯店前面的公車站有直達機場的巴士，單程票 1000 日圓", "從飯店後面的地鐵站去機場，來回票 1000 日圓", "需要轉乘兩次電車才能到機場", "公車票只能在機場購買"],
+                answerIndex: 0,
+                fullJp: "<ruby>ホテル<rt>ほてる</rt></ruby>の<ruby>前<rt>まえ</rt></ruby>から<ruby>空港<rt>くうこう</rt></ruby>までバス、<ruby>片道<rt>かたみち</rt></ruby><ruby>千円<rt>せんえん</rt></ruby>",
+                romaji: "hoteru no mae kara kūkō made basu, katamichi sen-en",
+                zh: "從飯店前面搭公車到機場，單程 1000 日圓",
+                explanation: "「ホテルの前のバス停（飯店前面的公車站）」、「片道切符（單程票）」。"
               }
             ]
           },
           {
             id: "u2_3",
-            title: "時間、星期與交通方向",
-            desc: "掌握「幾點鐘」、「今天/明天」以及「右轉、左轉、直走」等關鍵方向詞。",
-            xpReward: 45,
+            title: "STAGE 2-3：美食與購物常用詞彙",
+            desc: "掌握菜單、推薦菜色、結帳、刷卡、免稅以及服飾尺寸、顏色等日本旅遊購物必備詞彙。",
+            xpReward: 50,
             studyCards: [
-              { jp: "<ruby>今<rt>いま</rt></ruby>、<ruby>何時<rt>なんじ</rt></ruby>ですか", romaji: "ima, nanji desu ka", zh: "現在幾點呢？", audio: "いま、なんじですか" },
-              { jp: "<ruby>今日<rt>きょう</rt></ruby>・<ruby>明日<rt>あした</rt></ruby>", romaji: "kyō · ashita", zh: "今天・明天", audio: "きょう、あした" },
-              { jp: "<ruby>右<rt>みぎ</rt></ruby>・<ruby>左<rt>ひだり</rt></ruby>・まっすぐ", romaji: "migi · hidari · massugu", zh: "右邊・左邊・直走", audio: "みぎ、ひだり、まっすぐ" },
-              { jp: "<ruby>地下鉄<rt>ちかてつ</rt></ruby>", romaji: "chikatetsu", zh: "地下鐵 / 捷運", audio: "ちかてつ" }
+              {
+                jp: "メニュー・おすすめ・<ruby>注文<rt>ちゅうもん</rt></ruby>・お<ruby>会計<rt>かいけい</rt></ruby>",
+                romaji: "menyū · osusume · chūmon · okaikei",
+                zh: "菜單、推薦（招牌）、點餐、結帳",
+                audio: "メニュー、おすすめ、ちゅうもん、おかいけい",
+                exampleJp: "このお<ruby>店<rt>みせ</rt></ruby>のおすすめは<ruby>何<rt>なん</rt></ruby>ですか。",
+                exampleZh: "請問這間店的推薦菜色是什麼？",
+                exampleAudio: "このおみせのおすすめはなんですか。"
+              },
+              {
+                jp: "<ruby>現金<rt>げんきん</rt></ruby>・クレジットカード・<ruby>電子マネー<rt>でんしまねー</rt></ruby>",
+                romaji: "genkin · kurejitto kādo · denshi manē",
+                zh: "現金、信用卡、電子支付（Suica/IC卡等）",
+                audio: "げんきん、クレジットカード、でんしマネー",
+                exampleJp: "クレジットカードで<ruby>払<rt>はら</rt></ruby>ってもいいですか。",
+                exampleZh: "請問可以用信用卡付款嗎？",
+                exampleAudio: "クレジットカードではらってもいいですか。"
+              },
+              {
+                jp: "<ruby>免税<rt>めんぜい</rt></ruby>・<ruby>割引<rt>わりびき</rt></ruby>・レシート・<ruby>袋<rt>ふくろ</rt></ruby>",
+                romaji: "menzei · waribiki · reshīto · fukuro",
+                zh: "免稅、折扣、收據、袋子",
+                audio: "めんぜい、わりびき、レシート、ふくろ",
+                exampleJp: "<ruby>免税<rt>めんぜい</rt></ruby>カウンターは<ruby>何階<rt>なんがい</rt></ruby>にありますか。",
+                exampleZh: "請問免稅櫃檯在幾樓呢？",
+                exampleAudio: "めんぜいカウンターはなんがいにありますか。"
+              },
+              {
+                jp: "サイズ（S・M・L）／ <ruby>白<rt>しろ</rt></ruby>・<ruby>黒<rt>くろ</rt></ruby>・<ruby>赤<rt>あか</rt></ruby>・<ruby>青<rt>あお</rt></ruby>",
+                romaji: "saizu / shiro · kuro · aka · ao",
+                zh: "尺寸 ／ 白色、黑色、紅色、藍色",
+                audio: "サイズ、しろ、くろ、あか、あお",
+                exampleJp: "これの<ruby>黒<rt>くろ</rt></ruby>いMサイズはありますか。",
+                exampleZh: "請問這件有黑色的 M 號嗎？",
+                exampleAudio: "これのくろいMサイズはありますか。"
+              }
             ],
             questions: [
               {
+                id: "q2_3_1",
                 type: "choice",
-                instruction: "漢字「明日」在日文中的正確讀音與意思是？",
-                audioText: "あした",
-                promptDisplay: "明日",
-                options: ["あした (ashita) — 明天", "きのう (kinō) — 昨天", "きょう (kyō) — 今天", "まいにち (mainichi) — 每天"],
+                instruction: "在餐廳不知道要點什麼，想問店員「這家店的推薦菜色是什麼？」，關鍵詞是哪一個？",
+                audioText: "おすすめはなんですか",
+                promptDisplay: "このお<ruby>店<rt>みせ</rt></ruby>の（　　　）は<ruby>何<rt>なん</rt></ruby>ですか。",
+                options: ["おすすめ (osusume)", "お会計 (okaikei)", "免税 (menzei)", "割引 (waribiki)"],
                 answerIndex: 0,
-                fullJp: "<ruby>明日<rt>あした</rt></ruby>",
-                romaji: "ashita",
-                zh: "明天",
-                explanation: "「明日」屬於熟字訓，不按單字音讀，而是整體讀作「あした (ashita)」。"
+                fullJp: "このお<ruby>店<rt>みせ</rt></ruby>のおすすめは<ruby>何<rt>なん</rt></ruby>ですか。",
+                romaji: "kono omise no osusume wa nan desu ka",
+                zh: "這家店的推薦菜色是什麼？",
+                explanation: "「おすすめ」是『推薦、招牌』的意思，在餐廳或商店詢問推薦商品非常好用。"
               },
               {
+                id: "q2_3_2",
                 type: "listening",
-                instruction: "問路時聽到路人指示方向，他叫你往哪邊走？",
-                audioText: "まっすぐいってください",
-                promptDisplay: "🔊 聆聽指路說明",
-                options: ["請直走", "請向右轉", "請向左轉", "請在這裡停下"],
+                instruction: "聆聽客人在服飾店的詢問，他想找什麼顏色與尺寸的衣服？",
+                audioText: "しろいLサイズはありますか",
+                promptDisplay: "🔊 聆聽服飾店詢問",
+                options: ["白色的 L 號", "黑色的 M 號", "紅色的 S 號", "藍色的 L 號"],
                 answerIndex: 0,
-                fullJp: "まっすぐ<ruby>行<rt>い</rt></ruby>ってください。",
-                romaji: "massugu itte kudasai",
-                zh: "請直走。",
-                explanation: "「まっすぐ」是筆直地；「行ってください」是請走、請前往。"
+                fullJp: "<ruby>白<rt>しろ</rt></ruby>いLサイズはありますか。",
+                romaji: "shiroi eru saizu wa arimasu ka",
+                zh: "請問有白色的 L 號嗎？",
+                explanation: "「白い（しろい）」是白色的，「Lサイズ」是 L 尺寸。"
               },
               {
+                id: "q2_3_3",
                 type: "builder",
-                instruction: "重組句子：「現在幾點呢？」",
-                audioText: "いまなんじですか",
-                words: ["ですか", "いま", "なんじ"],
-                correctOrder: ["いま", "なんじ", "ですか"],
-                fullJp: "<ruby>今<rt>いま</rt></ruby><ruby>何時<rt>なんじ</rt></ruby>ですか。",
-                romaji: "ima nanji desu ka",
-                zh: "現在幾點呢？",
-                explanation: "「今（いま）」是現在，「何時（なんじ）」是幾點。"
+                instruction: "重組句子：「可以使用信用卡嗎？」",
+                audioText: "クレジットカードはつかえますか",
+                words: ["<ruby>使<rt>つか</rt></ruby>えますか", "クレジットカードは"],
+                correctOrder: ["クレジットカードは", "<ruby>使<rt>つか</rt></ruby>えますか"],
+                fullJp: "クレジットカードは<ruby>使<rt>つか</rt></ruby>えますか。",
+                romaji: "kurejitto kādo wa tsukaemasu ka",
+                zh: "可以使用信用卡嗎？",
+                explanation: "「使えますか（つかえますか）」是『可以使用嗎？』，結帳前確認支付方式必備。"
+              },
+              {
+                id: "q2_3_4",
+                type: "choice",
+                instruction: "百貨公司專櫃牌子上寫著「免税（めんぜい）」，代表這家店提供什麼服務？",
+                audioText: "めんぜい",
+                promptDisplay: "<ruby>免税<rt>めんぜい</rt></ruby>",
+                options: ["外國旅客退稅／免稅服務", "全館五折大拍賣", "只收現金不收刷卡", "免費宅配到府"],
+                answerIndex: 0,
+                fullJp: "<ruby>免税<rt>めんぜい</rt></ruby>",
+                romaji: "menzei",
+                zh: "免稅",
+                explanation: "「免税（めんぜい）」即 Tax-Free，購物滿額出示護照即可辦理免稅。"
+              },
+              {
+                id: "q2_3_5",
+                type: "reading",
+                instruction: "閱讀下方商店結帳告示牌，請問在這間店可以用哪些方式付款？",
+                passage: "【お<ruby>支払<rt>しはら</rt></ruby>い<ruby>方法<rt>ほうほう</rt></ruby>】\n・<ruby>現金<rt>げんきん</rt></ruby>\n・クレジットカード\n※<ruby>電子マネー<rt>でんしまねー</rt></ruby>は<ruby>使<rt>つか</rt></ruby>えません。",
+                passageAudio: "おしはらいほうほうは、げんきんとクレジットカードです。でんしマネーはつかえません。",
+                audioText: "げんきんとクレジットカード",
+                promptDisplay: "根據告示牌，下列哪種方式「不能」使用？",
+                options: ["電子支付（電子マネー）", "現金（現金）", "信用卡（クレジットカード）", "以上皆可使用"],
+                answerIndex: 0,
+                fullJp: "<ruby>電子マネー<rt>でんしまねー</rt></ruby>は<ruby>使<rt>つか</rt></ruby>えません。",
+                romaji: "denshi manē wa tsukaemasen",
+                zh: "不能使用電子支付。",
+                explanation: "「使えません（つかえません）」是『無法使用』，因此電子支付不能用，僅收現金與信用卡。"
               }
             ]
           }
         ]
       },
+
+      // ==========================================================================
+      // Level 3：核心文法與句型結構（共 5 關）
+      // ==========================================================================
       {
         level: 3,
         title: "Level 3：核心文法與句型結構",
-        subtitle: "打通日文句子骨幹！精通助詞（は/を/に/で）與動詞ます形、て形變化",
+        subtitle: "打通日文句子骨幹！精通助詞（は/を/に/で）、動詞ます形時態變化、て形請求以及許可與禁止句型",
         color: "from-ai to-indigo-800",
         badgeBg: "bg-indigo-100 text-ai",
         icon: "fa-cubes",
         units: [
           {
             id: "u3_1",
-            title: "日文句型骨幹：助詞「は」與「を」",
-            desc: "理解「A 是 B」的判斷句，以及動作對象助詞「を」的正確擺放位置。",
+            title: "STAGE 3-1：日文句型骨幹：助詞「は」與「を」",
+            desc: "理解「AはBです」的判斷句，以及動作對象助詞「を」的正確擺放位置。",
             xpReward: 50,
             studyCards: [
-              { jp: "<ruby>私<rt>わたし</rt></ruby>は<ruby>学生<rt>がくせい</rt></ruby>です", romaji: "watashi wa gakusei desu", zh: "我是學生（は讀作 wa）", audio: "わたしはがくせいです" },
-              { jp: "パンを<ruby>食<rt>た</rt></ruby>べます", romaji: "pan o tabemasu", zh: "吃麵包（を標示動作對象）", audio: "パンをたべます" },
-              { jp: "<ruby>日本語<rt>にほんご</rt></ruby>を<ruby>勉強<rt>べんきょう</rt></ruby>します", romaji: "nihongo o benkyō shimasu", zh: "學習日文", audio: "にほんごをべんきょうします" }
+              {
+                jp: "<ruby>私<rt>わたし</rt></ruby>は<ruby>会社員<rt>かいしゃいん</rt></ruby>です",
+                romaji: "watashi wa kaishain desu",
+                zh: "我是上班族（A は B です＝A 是 B，助詞 は 讀作 wa）",
+                audio: "わたしはかいしゃいんです",
+                exampleJp: "<ruby>佐藤<rt>さとう</rt></ruby>さんは<ruby>日本語<rt>にほんご</rt></ruby>の<ruby>先生<rt>せんせい</rt></ruby>です。",
+                exampleZh: "佐藤先生是日文老師。",
+                exampleAudio: "さとうさんはにほんごのせんせいです。"
+              },
+              {
+                jp: "これは<ruby>私<rt>わたし</rt></ruby>の<ruby>傘<rt>かさ</rt></ruby>ではありません",
+                romaji: "kore wa watashi no kasa dewa arimasen",
+                zh: "這不是我的雨傘（A は B ではありません＝A 不是 B）",
+                audio: "これはわたしのかさではありません",
+                exampleJp: "あの<ruby>建物<rt>たてもの</rt></ruby>は<ruby>病院<rt>びょういん</rt></ruby>ではありません、<ruby>銀行<rt>ぎんこう</rt></ruby>です。",
+                exampleZh: "那棟建築物不是醫院，是銀行。",
+                exampleAudio: "あのたてものはびょういんではありません、ぎんこうです。"
+              },
+              {
+                jp: "<ruby>私<rt>わたし</rt></ruby>は<ruby>毎日<rt>まいにち</rt></ruby>コーヒーを<ruby>飲<rt>の</rt></ruby>みます",
+                romaji: "watashi wa mainichi kōhī o nomimasu",
+                zh: "我每天喝咖啡（受詞＋を＋他動詞，助詞 を 讀作 o）",
+                audio: "わたしはまいにちコーヒーをのみます",
+                exampleJp: "<ruby>朝<rt>あさ</rt></ruby>ごはんにパンと<ruby>卵<rt>たまご</rt></ruby>を<ruby>食<rt>た</rt></ruby>べます。",
+                exampleZh: "早餐吃麵包和雞蛋。",
+                exampleAudio: "あさごはんにパンとたまごをたべます。"
+              },
+              {
+                jp: "<ruby>音楽<rt>おんがく</rt></ruby>を<ruby>聞<rt>き</rt></ruby>きます ／ <ruby>本<rt>ほん</rt></ruby>を<ruby>読<rt>よ</rt></ruby>みます",
+                romaji: "ongaku o kikimasu / hon o yomimasu",
+                zh: "聽音樂 ／ 看書（日文語序為「受詞＋を＋動詞」）",
+                audio: "おんがくをききます。ほんをよみます",
+                exampleJp: "<ruby>夜<rt>よる</rt></ruby>、<ruby>部屋<rt>へや</rt></ruby>で<ruby>日本語<rt>にほんご</rt></ruby>の<ruby>本<rt>ほん</rt></ruby>を<ruby>読<rt>よ</rt></ruby>みます。",
+                exampleZh: "晚上在房間裡看日文書。",
+                exampleAudio: "よる、へやでにほんごのほんをよみます。"
+              }
             ],
             questions: [
               {
+                id: "q3_1_1",
                 type: "choice",
-                instruction: "選出正確的助詞填入空格：「私（　）台湾人です。」（我是台灣人。）",
-                audioText: "わたしはたいわんじんです",
-                promptDisplay: "<ruby>私<rt>わたし</rt></ruby>（　）<ruby>台湾人<rt>たいわんじん</rt></ruby>です。",
-                options: ["は (wa)", "を (o)", "に (ni)", "で (de)"],
+                instruction: "「我喝水（私は水＿＿飲みます）。」標示動作對象的助詞應該填哪一個？",
+                audioText: "わたしはみずをのみます",
+                promptDisplay: "<ruby>私<rt>わたし</rt></ruby>は<ruby>水<rt>みず</rt></ruby>（　）<ruby>飲<rt>の</rt></ruby>みます。",
+                options: ["を (o)", "は (wa)", "の (no)", "も (mo)"],
                 answerIndex: 0,
-                fullJp: "<ruby>私<rt>わたし</rt></ruby>は<ruby>台湾人<rt>たいわんじん</rt></ruby>です。",
-                romaji: "watashi wa taiwanjin desu",
-                zh: "我是台灣人。",
-                explanation: "提示主題的助詞寫作「は」，但發音必須讀作「wa」喔！"
+                fullJp: "<ruby>私<rt>わたし</rt></ruby>は<ruby>水<rt>みず</rt></ruby>を<ruby>飲<rt>の</rt></ruby>みます。",
+                romaji: "watashi wa mizu o nomimasu",
+                zh: "我喝水。",
+                explanation: "「水を飲みます」中，受詞「水」後面必須接動作對象助詞「を」。"
               },
               {
+                id: "q3_1_2",
+                type: "choice",
+                instruction: "判斷句「AはBです」中的助詞「は」，在句子裡應該怎麼發音？",
+                audioText: "わたしはがくせいです",
+                promptDisplay: "<ruby>私<rt>わたし</rt></ruby>は<ruby>学生<rt>がくせい</rt></ruby>です。",
+                options: ["wa（念作 わ）", "ha（念作 は）", "o（念作 お）", "e（念作 え）"],
+                answerIndex: 0,
+                fullJp: "<ruby>私<rt>わたし</rt></ruby>は<ruby>学生<rt>がくせい</rt></ruby>です。",
+                romaji: "watashi wa gakusei desu",
+                zh: "我是學生。",
+                explanation: "假名「は」當作主題助詞使用時，固定念作「wa」。"
+              },
+              {
+                id: "q3_1_3",
                 type: "builder",
-                instruction: "將單字組合成日文語序（主詞＋受詞＋動詞）：「我喝咖啡。」",
-                audioText: "わたしはコーヒーをのみます",
-                words: ["<ruby>飲<rt>の</rt></ruby>みます", "コーヒー", "<ruby>私<rt>わたし</rt></ruby>は", "を"],
-                correctOrder: ["<ruby>私<rt>わたし</rt></ruby>は", "コーヒー", "を", "<ruby>飲<rt>の</rt></ruby>みます"],
-                fullJp: "<ruby>私<rt>わたし</rt></ruby>はコーヒーを<ruby>飲<rt>の</rt></ruby>みます。",
-                romaji: "watashi wa kōhī o nomimasu",
-                zh: "我喝咖啡。",
-                explanation: "日文動詞永遠放在句尾！「受詞（コーヒー）＋を＋動詞（飲みます）」是核心語序。"
+                instruction: "重組句子：「小李每天看報紙。」（報紙＝新聞、看＝読みます）",
+                audioText: "りさんはまいにちしんぶんをよみます",
+                words: ["<ruby>読<rt>よ</rt></ruby>みます", "<ruby>毎日<rt>まいにち</rt></ruby>", "<ruby>新聞<rt>しんぶん</rt></ruby>を", "<ruby>李<rt>り</rt></ruby>さんは"],
+                correctOrder: ["<ruby>李<rt>り</rt></ruby>さんは", "<ruby>毎日<rt>まいにち</rt></ruby>", "<ruby>新聞<rt>しんぶん</rt></ruby>を", "<ruby>読<rt>よ</rt></ruby>みます"],
+                fullJp: "<ruby>李<rt>り</rt></ruby>さんは<ruby>毎日<rt>まいにち</rt></ruby><ruby>新聞<rt>しんぶん</rt></ruby>を<ruby>読<rt>よ</rt></ruby>みます。",
+                romaji: "Ri-san wa mainichi shinbun o yomimasu",
+                zh: "小李每天看報紙。",
+                explanation: "主題「李さんは」＋時間頻率「毎日」＋受詞「新聞を」＋動詞「読みます」。"
               },
               {
-                type: "choice",
-                instruction: "「毎日日本語（　）勉強します。」括弧中應該填入哪個助詞？",
-                audioText: "まいにちにほんごをべんきょうします",
-                promptDisplay: "<ruby>毎日<rt>まいにち</rt></ruby><ruby>日本語<rt>にほんご</rt></ruby>（　）<ruby>勉強<rt>べんきょう</rt></ruby>します。",
-                options: ["を", "は", "へ", "と"],
+                id: "q3_1_4",
+                type: "listening",
+                instruction: "聆聽句子，選出正確的中文翻譯：",
+                audioText: "わたしはしゃしんをとります",
+                promptDisplay: "🔊 聆聽日文句子",
+                options: ["我拍照", "我買相機", "我看電影", "我寫信"],
                 answerIndex: 0,
-                fullJp: "<ruby>毎日<rt>まいにち</rt></ruby><ruby>日本語<rt>にほんご</rt></ruby>を<ruby>勉強<rt>べんきょう</rt></ruby>します。",
-                romaji: "mainichi nihongo o benkyō shimasu",
-                zh: "每天學習日文。",
-                explanation: "「勉強します（學習）」是他動詞，學習的內容「日本語」後面需接助詞「を」。"
+                fullJp: "<ruby>私<rt>わたし</rt></ruby>は<ruby>写真<rt>しゃしん</rt></ruby>を<ruby>撮<rt>と</rt></ruby>ります。",
+                romaji: "watashi wa shashin o torimasu",
+                zh: "我拍照。",
+                explanation: "「写真を撮ります（しゃしんをとります）」是『拍照』的固定搭配。"
+              },
+              {
+                id: "q3_1_5",
+                type: "reading",
+                instruction: "閱讀下方自我介紹短文，請問山田先生的職業是什麼？",
+                passage: "はじめまして、<ruby>山田<rt>やまだ</rt></ruby>です。<ruby>私<rt>わたし</rt></ruby>は<ruby>医者<rt>いしゃ</rt></ruby>ではありません。<ruby>東京<rt>とうきょう</rt></ruby>の<ruby>高校<rt>こうこう</rt></ruby>の<ruby>先生<rt>せんせい</rt></ruby>です。",
+                passageAudio: "はじめまして、やまだです。わたしはいしゃではありません。とうきょうのこうこうのせんせいです。",
+                audioText: "とうきょうのこうこうのせんせいです",
+                promptDisplay: "根據短文，山田先生是做什麼工作的？",
+                options: ["東京的高中老師", "東京的醫院醫生", "大阪的大學學生", "京都的銀行職員"],
+                answerIndex: 0,
+                fullJp: "<ruby>東京<rt>とうきょう</rt></ruby>の<ruby>高校<rt>こうこう</rt></ruby>の<ruby>先生<rt>せんせい</rt></ruby>です。",
+                romaji: "Tōkyō no kōkō no sensei desu",
+                zh: "是東京的高中老師。",
+                explanation: "文中先用「医者ではありません（不是醫生）」否定，接著說明「高校の先生です（是高中老師）」。"
               }
             ]
           },
           {
             id: "u3_2",
-            title: "場所助詞「に」與「で」的黃金區別",
+            title: "STAGE 3-2：場所助詞「に」與「で」的黃金區別",
             desc: "徹底分清移動目的地「に/へ」與動作發生地點「で」，不再搞混！",
             xpReward: 55,
             studyCards: [
-              { jp: "<ruby>東京<rt>とうきょう</rt></ruby>に<ruby>行<rt>い</rt></ruby>きます", romaji: "Tōkyō ni ikimasu", zh: "去東京（に＝移動目的地）", audio: "とうきょうにいきます" },
-              { jp: "カフェで<ruby>本<rt>ほん</rt></ruby>を<ruby>読<rt>よ</rt></ruby>みます", romaji: "kafe de hon o yomimasu", zh: "在咖啡廳看書（で＝動作發生地）", audio: "カフェでほんをよみます" },
-              { jp: "<ruby>電車<rt>でんしゃ</rt></ruby>で<ruby>行<rt>い</rt></ruby>きます", romaji: "densha de ikimasu", zh: "搭電車去（で＝交通工具/手段）", audio: "でんしゃでいきます" }
+              {
+                jp: "<ruby>図書館<rt>としょかん</rt></ruby>で<ruby>勉強<rt>べんきょう</rt></ruby>します",
+                romaji: "toshokan de benkyō shimasu",
+                zh: "在圖書館讀書（で＝動作發生的場所）",
+                audio: "としょかんでべんきょうします",
+                exampleJp: "カフェで<ruby>友達<rt>ともだち</rt></ruby>とコーヒーを<ruby>飲<rt>の</rt></ruby>みます。",
+                exampleZh: "在咖啡廳和朋友喝咖啡。",
+                exampleAudio: "カフェでともだちとコーヒーをのみます。"
+              },
+              {
+                jp: "<ruby>日本<rt>にほん</rt></ruby>に（へ）<ruby>行<rt>い</rt></ruby>きます",
+                romaji: "Nihon ni (e) ikimasu",
+                zh: "去日本（に/へ＝移動動詞「行きます・来ます・帰ります」的目的地）",
+                audio: "にほんにいきます",
+                exampleJp: "<ruby>来週<rt>らいしゅう</rt></ruby>、<ruby>京都<rt>きょうと</rt></ruby>へ<ruby>行<rt>い</rt></ruby>きます。",
+                exampleZh: "下週要去京都（助詞 へ 讀作 e）。",
+                exampleAudio: "らいしゅう、きょうとへいきます。"
+              },
+              {
+                jp: "<ruby>部屋<rt>へや</rt></ruby>に<ruby>机<rt>つくえ</rt></ruby>があります ／ <ruby>猫<rt>ねこ</rt></ruby>がいます",
+                romaji: "heya ni tsukue ga arimasu / neko ga imasu",
+                zh: "房間裡有桌子 ／ 有貓（に＝靜態存在「あります・います」的場所）",
+                audio: "へやにつくえがあります。ねこがいます",
+                exampleJp: "<ruby>駅<rt>えき</rt></ruby>の<ruby>近<rt>ちか</rt></ruby>くにおいしいラーメン<ruby>屋<rt>や</rt></ruby>があります。",
+                exampleZh: "車站附近有好吃的拉麵店。",
+                exampleAudio: "えきのちかくにおいしいラーメンやがあります。"
+              },
+              {
+                jp: "<ruby>電車<rt>でんしゃ</rt></ruby>で<ruby>会社<rt>かいしゃ</rt></ruby>に<ruby>行<rt>い</rt></ruby>きます",
+                romaji: "densha de kaisha ni ikimasu",
+                zh: "搭電車去公司（で＝交通工具手段、に＝目的地）",
+                audio: "でんしゃでかいしゃにいきます",
+                exampleJp: "<ruby>新幹線<rt>しんかんせん</rt></ruby>で<ruby>大阪<rt>おおさか</rt></ruby>へ<ruby>行<rt>い</rt></ruby>きます。",
+                exampleZh: "搭新幹線去大阪。",
+                exampleAudio: "しんかんせんでおおさかへいきます。"
+              }
             ],
             questions: [
               {
+                id: "q3_2_1",
                 type: "choice",
-                instruction: "「在圖書館看書」的「在」應該用哪個助詞？",
-                audioText: "としょかんでほんをよみます",
-                promptDisplay: "<ruby>図書館<rt>としょかん</rt></ruby>（　）<ruby>本<rt>ほん</rt></ruby>を<ruby>読<rt>よ</rt></ruby>みます。",
-                options: ["で", "に", "を", "は"],
+                instruction: "「在超市買蘋果（スーパー＿＿りんごを買います）。」動作發生的地點應該用哪個助詞？",
+                audioText: "スーパーでりんごをかいます",
+                promptDisplay: "スーパー（　）りんごを<ruby>買<rt>か</rt></ruby>います。",
+                options: ["で", "に", "へ", "を"],
                 answerIndex: 0,
-                fullJp: "<ruby>図書館<rt>としょかん</rt></ruby>で<ruby>本<rt>ほん</rt></ruby>を<ruby>読<rt>よ</rt></ruby>みます。",
-                romaji: "toshokan de hon o yomimasu",
-                zh: "在圖書館看書。",
-                explanation: "「看書（読みます）」是一個動態行為，發生動作的場所一律使用助詞「で」！",
+                fullJp: "スーパーでりんごを<ruby>買<rt>か</rt></ruby>います。",
+                romaji: "sūpā de ringo o kaimasu",
+                zh: "在超市買蘋果。",
+                explanation: "「買います（買）」是具體動作，動作發生的地點必須使用助詞「で」。"
               },
               {
+                id: "q3_2_2",
                 type: "choice",
-                instruction: "「明天要去京都。」移動的目的地應該用哪個助詞？",
-                audioText: "あしたきょうとにいきます",
-                promptDisplay: "<ruby>明日<rt>あした</rt></ruby><ruby>京都<rt>きょうと</rt></ruby>（　）<ruby>行<rt>い</rt></ruby>きます。",
-                options: ["に", "で", "を", "が"],
+                instruction: "「公園裡有很多人（公園＿＿人がたくさんいます）。」存在句的地點助詞應該用？",
+                audioText: "こうえんにひとがたくさんいます",
+                promptDisplay: "<ruby>公園<rt>こうえん</rt></ruby>（　）<ruby>人<rt>ひと</rt></ruby>がたくさんいます。",
+                options: ["に", "で", "を", "へ"],
                 answerIndex: 0,
-                fullJp: "<ruby>明日<rt>あした</rt></ruby><ruby>京都<rt>きょうと</rt></ruby>に<ruby>行<rt>い</rt></ruby>きます。",
-                romaji: "ashita Kyōto ni ikimasu",
-                zh: "明天要去京都。",
-                explanation: "搭配「行きます（去）、来ます（來）、帰ります（回）」等移動動詞時，目的地使用「に」或「へ」。"
+                fullJp: "<ruby>公園<rt>こうえん</rt></ruby>に<ruby>人<rt>ひと</rt></ruby>がたくさんいます。",
+                romaji: "kōen ni hito ga takusan imasu",
+                zh: "公園裡有很多人。",
+                explanation: "表示人事物存在的「います・あります」，存在場所固定使用「に」。"
               },
               {
+                id: "q3_2_3",
                 type: "builder",
-                instruction: "組合句子：「搭新幹線去大阪。」",
-                audioText: "しんかんせんでおおさかにいきます",
-                words: ["<ruby>行<rt>い</rt></ruby>きます", "<ruby>大阪<rt>おおさか</rt></ruby>に", "<ruby>新幹線<rt>しんかんせん</rt></ruby>で"],
-                correctOrder: ["<ruby>新幹線<rt>しんかんせん</rt></ruby>で", "<ruby>大阪<rt>おおさか</rt></ruby>に", "<ruby>行<rt>い</rt></ruby>きます"],
-                fullJp: "<ruby>新幹線<rt>しんかんせん</rt></ruby>で<ruby>大阪<rt>おおさか</rt></ruby>に<ruby>行<rt>い</rt></ruby>きます。",
-                romaji: "shinkansen de Ōsaka ni ikimasu",
-                zh: "搭新幹線去大阪。",
-                explanation: "交通工具「新幹線」＋「で」（手段），目的地「大阪」＋「に」（方向），最後接動詞「行きます」。"
+                instruction: "重組句子：「搭公車去學校。」",
+                audioText: "バスでがっこうにいきます",
+                words: ["<ruby>学校<rt>がっこう</rt></ruby>に", "バスで", "<ruby>行<rt>い</rt></ruby>きます"],
+                correctOrder: ["バスで", "<ruby>学校<rt>がっこう</rt></ruby>に", "<ruby>行<rt>い</rt></ruby>きます"],
+                fullJp: "バスで<ruby>学校<rt>がっこう</rt></ruby>に<ruby>行<rt>い</rt></ruby>きます。",
+                romaji: "basu de gakkō ni ikimasu",
+                zh: "搭公車去學校。",
+                explanation: "交通工具用「で（バスで）」，移動目的地用「に（学校に）」。"
+              },
+              {
+                id: "q3_2_4",
+                type: "listening",
+                instruction: "聆聽句子，這個人是在哪裡吃午餐的？",
+                audioText: "きょうしつでひるごはんをたべます",
+                promptDisplay: "🔊 聆聽午餐地點",
+                options: ["在教室吃午餐", "在餐廳吃午餐", "在公園吃午餐", "在家裡吃午餐"],
+                answerIndex: 0,
+                fullJp: "<ruby>教室<rt>きょうしつ</rt></ruby>で<ruby>昼<rt>ひる</rt></ruby>ごはんを<ruby>食<rt>た</rt></ruby>べます。",
+                romaji: "kyōshitsu de hirugohan o tabemasu",
+                zh: "在教室吃午餐。",
+                explanation: "「教室（きょうしつ）」是教室，加上動作場所助詞「で」。"
+              },
+              {
+                id: "q3_2_5",
+                type: "reading",
+                instruction: "閱讀下方周末計畫短文，請問作者星期六要去哪裡、在哪裡買書？",
+                passage: "<ruby>土曜日<rt>どようび</rt></ruby>は<ruby>電車<rt>でんしゃ</rt></ruby>で<ruby>新宿<rt>しんじゅく</rt></ruby>に<ruby>行<rt>い</rt></ruby>きます。そして、<ruby>新宿<rt>しんじゅく</rt></ruby>の<ruby>本屋<rt>ほんや</rt></ruby>で<ruby>日本語<rt>にほんご</rt></ruby>の<ruby>本<rt>ほん</rt></ruby>を<ruby>買<rt>か</rt></ruby>います。",
+                passageAudio: "どようびはでんしゃでしんじゅくにいきます。そして、しんじゅくのほんやでにほんごのほんをかいます。",
+                audioText: "しんじゅくのほんやでにほんごのほんをかいます",
+                promptDisplay: "根據短文，助詞使用與文意完全符合的是？",
+                options: ["目的地是新宿（に），買書的場所是書店（で）", "目的地是書店（で），搭電車是（に）", "在新宿（に）買電車票", "去圖書館（で）借書"],
+                answerIndex: 0,
+                fullJp: "<ruby>新宿<rt>しんじゅく</rt></ruby>に<ruby>行<rt>い</rt></ruby>きます。<ruby>本屋<rt>ほんや</rt></ruby>で<ruby>本<rt>ほん</rt></ruby>を<ruby>買<rt>か</rt></ruby>います。",
+                romaji: "Shinjuku ni ikimasu. honya de hon o kaimasu",
+                zh: "去新宿。在書店買書。",
+                explanation: "「新宿に行きます（移動目的地用 に）」、「本屋で買います（動作場所用 で）」。"
               }
             ]
           },
           {
             id: "u3_3",
-            title: "實用請求句型：動詞「て形＋ください」",
+            title: "STAGE 3-3：實用請求句型：動詞「て形＋ください」",
             desc: "學會日文文法中最關鍵的「て形」，禮貌地請別人做某件事！",
             xpReward: 60,
             studyCards: [
-              { jp: "ちょっと<ruby>待<rt>ま</rt></ruby>ってください", romaji: "chotto matte kudasai", zh: "請稍等一下（待つ → 待って）", audio: "ちょっとまってください" },
-              { jp: "ここに<ruby>名前<rt>なまえ</rt></ruby>を<ruby>書<rt>か</rt></ruby>いてください", romaji: "koko ni namae o kaite kudasai", zh: "請在這裡寫名字（書く → 書いて）", audio: "ここになまえをかいてください" },
-              { jp: "<ruby>写真<rt>しゃしん</rt></ruby>を<ruby>撮<rt>と</rt></ruby>ってください", romaji: "shashin o totte kudasai", zh: "請幫我拍張照（撮る → 撮って）", audio: "しゃしんをとってください" }
+              {
+                jp: "ここに<ruby>名前<rt>なまえ</rt></ruby>を<ruby>書<rt>か</rt></ruby>いてください",
+                romaji: "koko ni namae o kaite kudasai",
+                zh: "請在這裡寫下名字（書きます → 書いて＋ください）",
+                audio: "ここになまえをかいてください",
+                exampleJp: "この<ruby>紙<rt>かみ</rt></ruby>に<ruby>住所<rt>じゅうしょ</rt></ruby>と<ruby>電話番号<rt>でんわばんごう</rt></ruby>を<ruby>書<rt>か</rt></ruby>いてください。",
+                exampleZh: "請在這張紙上寫下地址和電話號碼。",
+                exampleAudio: "このかみにじゅうしょとでんわばんごうをかいてください。"
+              },
+              {
+                jp: "もう<ruby>一度<rt>いちど</rt></ruby>ゆっくり<ruby>言<rt>い</rt></ruby>ってください",
+                romaji: "mō ichido yukkuri itte kudasai",
+                zh: "請再慢慢說一次（言います → 言って＋ください）",
+                audio: "もういちどゆっくりいってください",
+                exampleJp: "すみません、よく<ruby>聞<rt>き</rt></ruby>こえませんでした。もう<ruby>一度<rt>いちど</rt></ruby><ruby>言<rt>い</rt></ruby>ってください。",
+                exampleZh: "不好意思，剛才沒聽清楚，請再說一次。",
+                exampleAudio: "すみません、よくきこえませんでした。もういちどいってください。"
+              },
+              {
+                jp: "パスポートを<ruby>見<rt>み</rt></ruby>せてください",
+                romaji: "pasupōto o misete kudasai",
+                zh: "請出示您的護照（見せます → 見せて＋ください）",
+                audio: "パスポートをみせてください",
+                exampleJp: "ちょっとその<ruby>写真<rt>しゃしん</rt></ruby>を<ruby>見<rt>み</rt></ruby>せてください。",
+                exampleZh: "請讓我看看那張照片。",
+                exampleAudio: "ちょっとそのしゃしんをみせてください。"
+              },
+              {
+                jp: "<ruby>少々<rt>しょうしょう</rt></ruby>お<ruby>待<rt>ま</rt></ruby>ちください ／ <ruby>座<rt>すわ</rt></ruby>ってください",
+                romaji: "shōshō omachi kudasai / suwatte kudasai",
+                zh: "請稍等一下 ／ 請坐（待ちます → 待って、座ります → 座って）",
+                audio: "しょうしょうおまちください。すわってください",
+                exampleJp: "どうぞ、こちらのいすに<ruby>座<rt>すわ</rt></ruby>ってください。",
+                exampleZh: "請坐這邊的椅子。",
+                exampleAudio: "どうぞ、こちらのいすにすわってください。"
+              }
             ],
             questions: [
               {
+                id: "q3_3_1",
                 type: "choice",
-                instruction: "想請路人幫忙拍張紀念照，最自然的說法是？",
-                audioText: "しゃしんをとってください",
-                promptDisplay: "請幫我拍照",
-                options: ["写真を撮ってください。", "写真を見ます。", "写真を撮りました。", "写真を撮りません。"],
+                instruction: "將動詞「書きます（寫）」變成「て形＋ください（請寫）」，正確形態是？",
+                audioText: "ここにかいてください",
+                promptDisplay: "ここに（　　　）ください。",
+                options: ["書いて", "書きます", "書きました", "書かない"],
                 answerIndex: 0,
-                fullJp: "<ruby>写真<rt>しゃしん</rt></ruby>を<ruby>撮<rt>と</rt></ruby>ってください。",
-                romaji: "shashin o totte kudasai",
-                zh: "請幫我拍張照。",
-                explanation: "動詞「撮ります（拍）」的て形為「撮って」，加上「ください」表示「請做⋯⋯」。"
+                fullJp: "ここに<ruby>書<rt>か</rt></ruby>いてください。",
+                romaji: "koko ni kaite kudasai",
+                zh: "請寫在這裡。",
+                explanation: "第一類動詞詞尾「きます」變て形時，會音變成「いて」→「書いて（かいて）」。"
               },
               {
+                id: "q3_3_2",
                 type: "builder",
-                instruction: "組合句子：「請稍等一下。」",
+                instruction: "重組句子：「請稍等一下。」（一下＝ちょっと、等＝待って）",
                 audioText: "ちょっとまってください",
                 words: ["ください", "ちょっと", "<ruby>待<rt>ま</rt></ruby>って"],
                 correctOrder: ["ちょっと", "<ruby>待<rt>ま</rt></ruby>って", "ください"],
                 fullJp: "ちょっと<ruby>待<rt>ま</rt></ruby>ってください。",
                 romaji: "chotto matte kudasai",
                 zh: "請稍等一下。",
-                explanation: "「ちょっと（稍微、一下）」＋「待って（等待的て形）」＋「ください（請）」。"
+                explanation: "「待ちます（まちます）」的て形是促音變「待って（まって）」。"
               },
               {
+                id: "q3_3_3",
                 type: "listening",
-                instruction: "在飯店櫃檯辦理入住時，櫃檯人員請你做什麼？",
-                audioText: "ここになまえをかいてください",
-                promptDisplay: "🔊 聆聽櫃檯人員指示",
-                options: ["請在這裡寫下名字", "請在這裡脫鞋子", "請在這裡等候", "請出示護照"],
+                instruction: "聆聽語音，對方請你做什麼動作？",
+                audioText: "この本をよんでください",
+                promptDisplay: "🔊 聆聽請求指令",
+                options: ["請閱讀這本書", "請買這本書", "請寫這本書", "請把這本書給別人"],
                 answerIndex: 0,
-                fullJp: "ここに<ruby>名前<rt>なまえ</rt></ruby>を<ruby>書<rt>か</rt></ruby>いてください。",
-                romaji: "koko ni namae o kaite kudasai",
-                zh: "請在這裡寫下名字。",
-                explanation: "「ここ（這裡）」＋「に（附著點）」＋「名前（名字）」＋「書いてください（請寫）」。"
+                fullJp: "この<ruby>本<rt>ほん</rt></ruby>を<ruby>読<rt>よ</rt></ruby>んでください。",
+                romaji: "kono hon o yonde kudasai",
+                zh: "請讀這本書。",
+                explanation: "「読みます（よみます）」詞尾「みます」變て形為撥音便「読んで（よんで）」。"
+              },
+              {
+                id: "q3_3_4",
+                type: "choice",
+                instruction: "聽不懂對方說的日文時，想請對方「再說一次」，應該說？",
+                audioText: "もういちどいってください",
+                promptDisplay: "請求再說一次",
+                options: ["もう一度言ってください。", "もう一度食べてください。", "もう一度行ってください。", "もう一度買ってください。"],
+                answerIndex: 0,
+                fullJp: "もう<ruby>一度<rt>いちど</rt></ruby><ruby>言<rt>い</rt></ruby>ってください。",
+                romaji: "mō ichido itte kudasai",
+                zh: "請再說一次。",
+                explanation: "「言います（いいます，說）」的て形是「言って（いって）」。"
+              },
+              {
+                id: "q3_3_5",
+                type: "reading",
+                instruction: "閱讀下方醫院櫃檯護士的說明，請問病人現在要做哪兩件事？",
+                passage: "看護師：<ruby>初<rt>はじ</rt></ruby>めてですね。まず、この<ruby>紙<rt>かみ</rt></ruby>に<ruby>名前<rt>なまえ</rt></ruby>を<ruby>書<rt>か</rt></ruby>いてください。それから、あちらのいすに<ruby>座<rt>すわ</rt></ruby>って<ruby>待<rt>ま</rt></ruby>ってください。",
+                passageAudio: "はじめてですね。まず、このかみになまえをかいてください。それから、あちらのいすにすわってまってください。",
+                audioText: "なまえをかいてください",
+                promptDisplay: "根據護士的指示，病人應該？",
+                options: ["先在紙上寫下名字，然後坐在那邊的椅子上等", "先去付錢，然後回家等電話", "先量體溫，然後直接進診間", "出示護照後站著等"],
+                answerIndex: 0,
+                fullJp: "<ruby>紙<rt>かみ</rt></ruby>に<ruby>名前<rt>なまえ</rt></ruby>を<ruby>書<rt>か</rt></ruby>いて、いすに<ruby>座<rt>すわ</rt></ruby>って<ruby>待<rt>ま</rt></ruby>ってください。",
+                romaji: "kami ni namae o kaite, isu ni suwatte matte kudasai",
+                zh: "在紙上寫名字，然後坐在椅子上等。",
+                explanation: "「名前を書いてください（請寫名字）」與「座って待ってください（請坐著等）」。"
+              }
+            ]
+          },
+          {
+            id: "u3_4",
+            title: "STAGE 3-4：動詞ます形現在／過去／否定變化",
+            desc: "徹底掌握「〜ます、〜ません、〜ました、〜ませんでした」四種時態與肯定否定變化。",
+            xpReward: 60,
+            studyCards: [
+              {
+                jp: "<ruby>行<rt>い</rt></ruby>きます ／ <ruby>行<rt>い</rt></ruby>きません",
+                romaji: "ikimasu / ikimasen",
+                zh: "去（現在・未來肯定）／ 不去（現在・未來否定）",
+                audio: "いきます。いきません",
+                exampleJp: "<ruby>明日<rt>あした</rt></ruby>は<ruby>雨<rt>あめ</rt></ruby>ですから、どこも<ruby>行<rt>い</rt></ruby>きません。",
+                exampleZh: "因為明天下雨，所以哪裡都不去。",
+                exampleAudio: "あしたはあめですから、どこもいきません。"
+              },
+              {
+                jp: "<ruby>行<rt>い</rt></ruby>きました ／ <ruby>行<rt>い</rt></ruby>きませんでした",
+                romaji: "ikimashita / ikimasen deshita",
+                zh: "去了（過去肯定）／ 沒去（過去否定）",
+                audio: "いきました。いきませんでした",
+                exampleJp: "<ruby>昨日<rt>きのう</rt></ruby>は<ruby>忙<rt>いそが</rt></ruby>しかったので、ジムへ<ruby>行<rt>い</rt></ruby>きませんでした。",
+                exampleZh: "昨天因為很忙，所以沒有去健身房。",
+                exampleAudio: "きのうはいそがしかったので、ジムへいきませんでした。"
+              },
+              {
+                jp: "<ruby>食<rt>た</rt></ruby>べます → <ruby>食<rt>た</rt></ruby>べました → <ruby>食<rt>た</rt></ruby>べませんでした",
+                romaji: "tabemasu → tabemashita → tabemasen deshita",
+                zh: "吃 → 吃了 → 沒吃（過去否定一律在 〜ません 後加 でした）",
+                audio: "たべます、たべました、たべませんでした",
+                exampleJp: "<ruby>今朝<rt>けさ</rt></ruby>は<ruby>時間<rt>じかん</rt></ruby>がなかったので、<ruby>朝<rt>あさ</rt></ruby>ごはんを<ruby>食<rt>た</rt></ruby>べませんでした。",
+                exampleZh: "今天早上因為沒時間，所以沒有吃早餐。",
+                exampleAudio: "けさはじかんがなかったので、あさごはんをたべませんでした。"
+              },
+              {
+                jp: "<ruby>飲<rt>の</rt></ruby>みます・<ruby>見<rt>み</rt></ruby>ます・します・<ruby>来<rt>き</rt></ruby>ます",
+                romaji: "nomimasu · mimasu · shimasu · kimasu",
+                zh: "高頻率動詞時態套用（喝、看、做、來）",
+                audio: "のみます、みます、します、きます",
+                exampleJp: "<ruby>先週<rt>せんしゅう</rt></ruby>の<ruby>日曜日<rt>にちようび</rt></ruby>、<ruby>友達<rt>ともだち</rt></ruby>と<ruby>映画<rt>えいが</rt></ruby>を<ruby>見<rt>み</rt></ruby>ました。",
+                exampleZh: "上週日和朋友一起看了電影。",
+                exampleAudio: "せんしゅうのにちようび、ともだちとえいがをみました。"
+              }
+            ],
+            questions: [
+              {
+                id: "q3_4_1",
+                type: "choice",
+                instruction: "將動詞「飲みます（喝）」變成「過去否定形（昨天沒喝）」，正確寫法是？",
+                audioText: "きのうはコーヒーをのみませんでした",
+                promptDisplay: "<ruby>昨日<rt>きのう</rt></ruby>はコーヒーを（　　　　　）。",
+                options: ["飲みませんでした", "飲みません", "飲みました", "飲みます"],
+                answerIndex: 0,
+                fullJp: "<ruby>昨日<rt>きのう</rt></ruby>はコーヒーを<ruby>飲<rt>の</rt></ruby>みませんでした。",
+                romaji: "kinō wa kōhī o nomimasen deshita",
+                zh: "昨天沒有喝咖啡。",
+                explanation: "禮貌體過去否定形固定在「〜ません」後面加上「でした」→「飲みませんでした」。"
+              },
+              {
+                id: "q3_4_2",
+                type: "listening",
+                instruction: "聆聽對話，判斷說話者「已經吃過午餐了」還是「還沒吃」？",
+                audioText: "もうひるごはんをたべました",
+                promptDisplay: "🔊 聆聽午餐狀態",
+                options: ["已經吃過午餐了", "還沒吃午餐", "明天不吃午餐", "每天都不吃午餐"],
+                answerIndex: 0,
+                fullJp: "もう<ruby>昼<rt>ひる</rt></ruby>ごはんを<ruby>食<rt>た</rt></ruby>べました。",
+                romaji: "mō hirugohan o tabemashita",
+                zh: "已經吃過午餐了。",
+                explanation: "副詞「もう（已經）」搭配過去式「食べました」，表示動作已完成。"
+              },
+              {
+                id: "q3_4_3",
+                type: "builder",
+                instruction: "重組句子：「昨天沒有學習日文。」（學習＝勉強しませんでした）",
+                audioText: "きのうはにほんごをべんきょうしませんでした",
+                words: ["<ruby>勉強<rt>べんきょう</rt></ruby>しませんでした", "<ruby>日本語<rt>にほんご</rt></ruby>を", "<ruby>昨日<rt>きのう</rt></ruby>は"],
+                correctOrder: ["<ruby>昨日<rt>きのう</rt></ruby>は", "<ruby>日本語<rt>にほんご</rt></ruby>を", "<ruby>勉強<rt>べんきょう</rt></ruby>しませんでした"],
+                fullJp: "<ruby>昨日<rt>きのう</rt></ruby>は<ruby>日本語<rt>にほんご</rt></ruby>を<ruby>勉強<rt>べんきょう</rt></ruby>しませんでした。",
+                romaji: "kinō wa nihongo o benkyō shimasen deshita",
+                zh: "昨天沒有學習日文。",
+                explanation: "時間「昨日は」＋受詞「日本語を」＋過去否定「勉強しませんでした」。"
+              },
+              {
+                id: "q3_4_4",
+                type: "choice",
+                instruction: "詢問朋友「明天要去東京嗎？（明日、東京に行きますか。）」，若回答「不，我不去」，該怎麼回？",
+                audioText: "いいえ、いきません",
+                promptDisplay: "否定回答未來的計畫",
+                options: ["いいえ、行きません。", "いいえ、行きませんでした。", "はい、行きました。", "いいえ、行きます。"],
+                answerIndex: 0,
+                fullJp: "いいえ、<ruby>行<rt>い</rt></ruby>きません。",
+                romaji: "iie, ikimasen",
+                zh: "不，我不去。",
+                explanation: "日文「〜ません」表示現在或未來的否定，回答明天的計畫用「行きません」。"
+              },
+              {
+                id: "q3_4_5",
+                type: "reading",
+                instruction: "閱讀下方周末日記，請問田中先生星期日做了什麼？",
+                passage: "<ruby>土曜日<rt>どようび</rt></ruby>は<ruby>友達<rt>ともだち</rt></ruby>とテニスをしました。でも、<ruby>日曜日<rt>にちようび</rt></ruby>はどこも<ruby>行<rt>い</rt></ruby>きませんでした。<ruby>家<rt>いえ</rt></ruby>で<ruby>映画<rt>えいが</rt></ruby>を<ruby>見<rt>み</rt></ruby>ました。",
+                passageAudio: "どようびはともだちとテニスをしました。でも、にちようびはどこもいきませんでした。いえでえいがをみました。",
+                audioText: "いえでえいがをみました",
+                promptDisplay: "根據短文，田中先生星期日的行程是？",
+                options: ["哪裡都沒去，在家裡看了電影", "和朋友去打網球", "去電影院看了電影", "去百貨公司買東西"],
+                answerIndex: 0,
+                fullJp: "どこも<ruby>行<rt>い</rt></ruby>きませんでした。<ruby>家<rt>いえ</rt></ruby>で<ruby>映画<rt>えいが</rt></ruby>を<ruby>見<rt>み</rt></ruby>ました。",
+                romaji: "doko mo ikimasen deshita. ie de eiga o mimashita",
+                zh: "哪裡都沒去，在家看了電影。",
+                explanation: "「日曜日はどこも行きませんでした（星期日哪裡都沒去）」、「家で映画を見ました（在家看了電影）」。"
+              }
+            ]
+          },
+          {
+            id: "u3_5",
+            title: "STAGE 3-5：許可與禁止表達：「〜てもいいですか」與「〜てはいけません」",
+            desc: "學會禮貌徵求許可（「可以⋯⋯嗎？」）與理解公共場所的規則禁止標語（「不可以⋯⋯」）。",
+            xpReward: 65,
+            studyCards: [
+              {
+                jp: "ここで<ruby>写真<rt>しゃしん</rt></ruby>を<ruby>撮<rt>と</rt></ruby>ってもいいですか",
+                romaji: "koko de shashin o totte mo ii desu ka",
+                zh: "請問在這裡可以拍照嗎？（動詞て形＋もいいですか＝詢問許可）",
+                audio: "ここでしゃしんをとってもいいですか",
+                exampleJp: "はい、いいですよ。／ すみません、ここはちょっと……。",
+                exampleZh: "可以喔。 ／ 抱歉，這裡不太方便（委婉拒絕）。",
+                exampleAudio: "はい、いいですよ。すみません、ここはちょっと。"
+              },
+              {
+                jp: "この<ruby>席<rt>せき</rt></ruby>に<ruby>座<rt>すわ</rt></ruby>ってもいいですか",
+                romaji: "kono seki ni suwatte mo ii desu ka",
+                zh: "請問我可以坐這個座位嗎？",
+                audio: "このせきにすわってもいいですか",
+                exampleJp: "はい、どうぞ。<ruby>空<rt>あ</rt></ruby>いていますよ。",
+                exampleZh: "好的，請坐，這裡是空著的喔。",
+                exampleAudio: "はい、どうぞ。あいていますよ。"
+              },
+              {
+                jp: "ここに<ruby>車<rt>くるま</rt></ruby>を<ruby>止<rt>と</rt></ruby>めてはいけません",
+                romaji: "koko ni kuruma o tomete wa ikemasen",
+                zh: "這裡禁止停車（動詞て形＋はいけません＝禁止、不可以）",
+                audio: "ここにくるまをとめてはいけません",
+                exampleJp: "<ruby>美術館<rt>びじゅつかん</rt></ruby>の<ruby>中<rt>なか</rt></ruby>で<ruby>大<rt>おお</rt></ruby>きい<ruby>声<rt>こえ</rt></ruby>で<ruby>話<rt>はな</rt></ruby>してはいけません。",
+                exampleZh: "在美術館裡面不可以大聲說話。",
+                exampleAudio: "びじゅつかんのなかでおおきいこえではなしてはいけません。"
+              },
+              {
+                jp: "ここでタバコを<ruby>吸<rt>す</rt></ruby>ってはいけません",
+                romaji: "koko de tabako o sutte wa ikemasen",
+                zh: "這裡禁止抽菸（吸います → 吸って＋はいけません）",
+                audio: "ここでタバコをすってはいけません",
+                exampleJp: "<ruby>喫煙所<rt>きつえんじょ</rt></ruby>は<ruby>外<rt>そと</rt></ruby>にあります。",
+                exampleZh: "吸菸區在外面。",
+                exampleAudio: "きつえんじょはそとにあります。"
+              }
+            ],
+            questions: [
+              {
+                id: "q3_5_1",
+                type: "choice",
+                instruction: "在寺廟或咖啡廳想禮貌詢問店員「可以在這裡拍照嗎？」，應該用哪個句型？",
+                audioText: "ここでしゃしんをとってもいいですか",
+                promptDisplay: "請求允許拍照",
+                options: ["ここで写真を撮ってもいいですか。", "ここで写真を撮ってはいけません。", "ここで写真を撮ってください。", "ここで写真を撮りました。"],
+                answerIndex: 0,
+                fullJp: "ここで<ruby>写真<rt>しゃしん</rt></ruby>を<ruby>撮<rt>と</rt></ruby>ってもいいですか。",
+                romaji: "koko de shashin o totte mo ii desu ka",
+                zh: "請問在這裡可以拍照嗎？",
+                explanation: "「動詞て形＋もいいですか」用來徵求對方許可，意為『我可以做⋯⋯嗎？』。"
+              },
+              {
+                id: "q3_5_2",
+                type: "choice",
+                instruction: "圖書館牆上貼著「ここで電話をしてはいけません」，這句警告標語的意思是？",
+                audioText: "ここででんわをしてはいけません",
+                promptDisplay: "ここで<ruby>電話<rt>でんわ</rt></ruby>をしてはいけません。",
+                options: ["這裡禁止講電話", "請在這裡講電話", "可以在這裡講電話", "現在正在講電話"],
+                answerIndex: 0,
+                fullJp: "ここで<ruby>電話<rt>でんわ</rt></ruby>をしてはいけません。",
+                romaji: "koko de denwa o shite wa ikemasen",
+                zh: "這裡不可以講電話。",
+                explanation: "「動詞て形＋はいけません」表示規定或規則上的『禁止、不可以做⋯⋯』。"
+              },
+              {
+                id: "q3_5_3",
+                type: "builder",
+                instruction: "重組句子：「請問我可以試穿這件衣服嗎？」（試穿＝着て）",
+                audioText: "これをきてもいいですか",
+                words: ["いいですか", "これを", "<ruby>着<rt>き</rt></ruby>ても"],
+                correctOrder: ["これを", "<ruby>着<rt>き</rt></ruby>ても", "いいですか"],
+                fullJp: "これを<ruby>着<rt>き</rt></ruby>てもいいですか。",
+                romaji: "kore o kite mo ii desu ka",
+                zh: "請問我可以試穿這件嗎？",
+                explanation: "「着ます（きます，穿）」的て形為「着て」，接上「もいいですか」即『可以試穿嗎？』。"
+              },
+              {
+                id: "q3_5_4",
+                type: "listening",
+                instruction: "聆聽提醒語音，工作人員禁止大家做什麼事？",
+                audioText: "えにさわってはいけません",
+                promptDisplay: "🔊 聆聽展覽館規則提醒",
+                options: ["禁止觸摸畫作", "禁止拍照", "禁止喝水", "禁止進入"],
+                answerIndex: 0,
+                fullJp: "<ruby>絵<rt>え</rt></ruby>に<ruby>触<rt>さわ</rt></ruby>ってはいけません。",
+                romaji: "e ni sawatte wa ikemasen",
+                zh: "不可以觸摸畫作。",
+                explanation: "「絵（え，畫）」＋「触ります（さわります，觸摸）」→「触ってはいけません」。"
+              },
+              {
+                id: "q3_5_5",
+                type: "reading",
+                instruction: "閱讀下方美術館服務台對話，請問遊客可以做哪一件事？",
+                passage: "客：すみません、<ruby>美術館<rt>びじゅつかん</rt></ruby>の<ruby>中<rt>なか</rt></ruby>で<ruby>写真<rt>しゃしん</rt></ruby>を<ruby>撮<rt>と</rt></ruby>ってもいいですか。\nスタッフ：すみません、<ruby>写真<rt>しゃしん</rt></ruby>を<ruby>撮<rt>と</rt></ruby>ってはいけません。でも、<ruby>鉛筆<rt>えんぴつ</rt></ruby>でメモを<ruby>書<rt>か</rt></ruby>いてもいいですよ。",
+                passageAudio: "すみません、びじゅつかんのなかでしゃしんをとってもいいですか。すみません、しゃしんをとってはいけません。でも、えんぴつでメモをかいてもいいですよ。",
+                audioText: "えんぴつでメモをかいてもいいですよ",
+                promptDisplay: "根據對話，美術館內的規定是？",
+                options: ["禁止拍照，但可以用鉛筆寫筆記", "可以自由拍照，但禁止寫筆記", "拍照和寫筆記都完全禁止", "必須付費才能拍照"],
+                answerIndex: 0,
+                fullJp: "<ruby>写真<rt>しゃしん</rt></ruby>を<ruby>撮<rt>と</rt></ruby>ってはいけません。メモを<ruby>書<rt>か</rt></ruby>いてもいいです。",
+                romaji: "shashin o totte wa ikemasen. memo o kaite mo ii desu",
+                zh: "不可以拍照，但可以寫筆記。",
+                explanation: "工作人員說「写真を撮ってはいけません（不可以拍照）」，接著用「でも（但是）」補充「メモを書いてもいいですよ（可以寫筆記喔）」。"
               }
             ]
           }
         ]
       },
+
+      // ==========================================================================
+      // Level 4：情境對話與進階閱讀（共 4 關）
+      // ==========================================================================
       {
         level: 4,
         title: "Level 4：情境對話與進階閱讀",
-        subtitle: "整合聽力與長句理解，從容應對日本餐廳點餐、問路與商場購物實戰",
+        subtitle: "整合聽力與長句理解，從容應對日本居酒屋點餐、車站轉乘問路、飯店入住與超商藥妝購物實戰",
         color: "from-shu to-rose-700",
         badgeBg: "bg-rose-100 text-shu",
         icon: "fa-torii-gate",
         units: [
           {
             id: "u4_1",
-            title: "實戰情境一：居酒屋與餐廳完整對話",
-            desc: "從進門告知人數、詢問推薦菜色到結帳，掌握完整餐廳互動流程。",
+            title: "STAGE 4-1：實戰情境一：居酒屋與餐廳完整對話",
+            desc: "從進門告知人數、詢問推薦菜色、加點與過敏忌口到結帳，掌握完整餐廳互動流程。",
             xpReward: 65,
             studyCards: [
-              { jp: "<ruby>二人<rt>ふたり</rt></ruby>です", romaji: "futari desu", zh: "我們有兩位（一人：ひとり / 兩人：ふたり）", audio: "ふたりです" },
-              { jp: "おすすめは<ruby>何<rt>なん</rt></ruby>ですか", romaji: "osusume wa nan desu ka", zh: "請問推薦菜色是什麼？", audio: "おすすめはなんですか" },
-              { jp: "カードで<ruby>払<rt>はら</rt></ruby>えますか", romaji: "kādo de haraemasu ka", zh: "可以用信用卡付款嗎？（可能形）", audio: "カードではらえますか" }
+              {
+                jp: "<ruby>二人<rt>ふたり</rt></ruby>です。<ruby>禁煙席<rt>きんえんせき</rt></ruby>をお<ruby>願<rt>ねが</rt></ruby>いします",
+                romaji: "futari desu. kin'enseki o onegaishimasu",
+                zh: "我們有兩位，麻煩安排禁菸席（一人＝ひとり、二人＝ふたり、三人＝さんにん）",
+                audio: "ふたりです。きんえんせきをおねがいします",
+                exampleJp: "店員：<ruby>何名様<rt>なんめいさま</rt></ruby>ですか。／ 客：<ruby>三人<rt>さんにん</rt></ruby>です。<ruby>予約<rt>よやく</rt></ruby>していません。",
+                exampleZh: "店員：請問幾位呢？ ／ 客人：三位，我們沒有預約。",
+                exampleAudio: "なんめいさまですか。さんにんです。よやくしていません。"
+              },
+              {
+                jp: "とりあえず、生ビールを<ruby>二<rt>ふた</rt></ruby>つください",
+                romaji: "toriaezu, namabīru o futatsu kudasai",
+                zh: "先來兩杯生啤酒吧！（居酒屋點飲料經典開場「とりあえず」）",
+                audio: "とりあえず、なまビールをふたってください",
+                exampleJp: "<ruby>焼<rt>や</rt></ruby>き<ruby>鳥<rt>とり</rt></ruby>の<ruby>盛<rt>も</rt></ruby>り<ruby>合<rt>あ</rt></ruby>わせを<ruby>一<rt>ひと</rt></ruby>つと、えだまめをください。",
+                exampleZh: "請給我一份綜合烤雞肉串和毛豆。",
+                exampleAudio: "やきとりのもりあわせをひとつと、えだまめをください。"
+              },
+              {
+                jp: "すみません、もう<ruby>少<rt>すこ</rt></ruby>し<ruby>追加<rt>ついか</rt></ruby>でお<ruby>願<rt>ねが</rt></ruby>いします",
+                romaji: "sumimasen, mō sukoshi tsuika de onegaishimasu",
+                zh: "不好意思，我們想再加點一些菜（追加＝ついか）",
+                audio: "すみません、もうすこしついかでおねがいします",
+                exampleJp: "このからあげをもう<ruby>一皿<rt>ひとさら</rt></ruby>、<ruby>追加<rt>ついか</rt></ruby>でお<ruby>願<rt>ねが</rt></ruby>いします。",
+                exampleZh: "請再加點一盤這個炸雞塊。",
+                exampleAudio: "このからあげをもうひとさら、ついかでおねがいします。"
+              },
+              {
+                jp: "お<ruby>会計<rt>かいけい</rt></ruby>をお<ruby>願<rt>ねが</rt></ruby>いします。<ruby>別々<rt>べつべつ</rt></ruby>でもいいですか",
+                romaji: "okaikei o onegaishimasu. betsubetsu demo ii desu ka",
+                zh: "麻煩結帳，請問可以分開付嗎？",
+                audio: "おかいけいをおねがいします。べつべつでもいいですか",
+                exampleJp: "ごちそうさまでした。とてもおいしかったです。",
+                exampleZh: "謝謝款待，非常好吃！",
+                exampleAudio: "ごちそうさまでした。とてもおいしかったです。"
+              }
             ],
             questions: [
               {
+                id: "q4_1_1",
                 type: "choice",
-                instruction: "店員問：「何名様ですか？（請問幾位呢？）」若你們有兩個人，該怎麼回答？",
+                instruction: "走進居酒屋時，店員問「何名様ですか（請問幾位？）」，如果是「2 個人」，日文應該回答？",
                 audioText: "ふたりです",
                 promptDisplay: "店員：<ruby>何名様<rt>なんめいさま</rt></ruby>ですか。",
-                options: ["二人（ふたり）です。", "二円（にえん）です。", "二時（にじ）です。", "二階（にかい）です。"],
+                options: ["二人（ふたり）です。", "二つ（ふたつ）です。", "二枚（にまい）です。", "二本（にほん）です。"],
                 answerIndex: 0,
                 fullJp: "<ruby>二人<rt>ふたり</rt></ruby>です。",
                 romaji: "futari desu",
-                zh: "兩位。",
-                explanation: "日文計算人數時，1人讀作「ひとり」、2人讀作「ふたり」，3人以上才是「さんにん、よにん⋯⋯」。"
+                zh: "我們兩位。",
+                explanation: "人數計算：1 人是「ひとり」、2 人是「ふたり」、3 人起用「さんにん、よにん⋯⋯」。"
               },
               {
-                type: "builder",
-                instruction: "組合句子：「請問推薦的料理是什麼？」",
-                audioText: "おすすめのりょうりはなんですか",
-                words: ["<ruby>何<rt>なん</rt></ruby>ですか", "<ruby>料理<rt>りょうり</rt></ruby>は", "おすすめの"],
-                correctOrder: ["おすすめの", "<ruby>料理<rt>りょうり</rt></ruby>は", "<ruby>何<rt>なん</rt></ruby>ですか"],
-                fullJp: "おすすめの<ruby>料理<rt>りょうり</rt></ruby>は<ruby>何<rt>なん</rt></ruby>ですか。",
-                romaji: "osusume no ryōri wa nan desu ka",
-                zh: "請問推薦的料理是什麼？",
-                explanation: "「おすすめ（推薦）」透過助詞「の」修飾名詞「料理（りょうり）」。"
-              },
-              {
+                id: "q4_1_2",
                 type: "listening",
-                instruction: "聆聽結帳時的詢問，客人在確認什麼？",
-                audioText: "クレジットカードではらえますか",
-                promptDisplay: "🔊 聆聽結帳對話",
-                options: ["詢問是否可以使用信用卡付款", "詢問是否可以外帶", "詢問是否可以分開結帳", "詢問是否有免稅服務"],
+                instruction: "聆聽客人在餐廳的加點需求，他想要再加點什麼？",
+                audioText: "すみません、やきとりをもうひとつ、ついかでおねがいします",
+                promptDisplay: "🔊 聆聽餐廳加點對話",
+                options: ["再加點一份烤雞肉串", "取消原本點的烤雞肉串", "請店員幫忙結帳", "詢問洗手間在哪裡"],
                 answerIndex: 0,
-                fullJp: "クレジットカードで<ruby>払<rt>はら</rt></ruby>えますか。",
-                romaji: "kurejittokādo de haraemasu ka",
-                zh: "可以用信用卡付款嗎？",
-                explanation: "「払えます（haraemasu）」是動詞「払います（付款）」的可能形，表示『能夠支付』。"
+                fullJp: "すみません、<ruby>焼<rt>や</rt></ruby>き<ruby>鳥<rt>とり</rt></ruby>をもう<ruby>一<rt>ひと</rt></ruby>つ、<ruby>追加<rt>ついか</rt></ruby>でお<ruby>願<rt>ねが</rt></ruby>いします。",
+                romaji: "sumimasen, yakitori o mō hitotsu, tsuika de onegaishimasu",
+                zh: "不好意思，請再加點一份烤雞肉串。",
+                explanation: "「もう一つ（再一份）」＋「追加でお願いします（麻煩加點）」。"
+              },
+              {
+                id: "q4_1_3",
+                type: "builder",
+                instruction: "重組句子：「請問可以分開結帳嗎？」",
+                audioText: "おかいけいはべつべつでもいいですか",
+                words: ["いいですか", "<ruby>別々<rt>べつべつ</rt></ruby>でも", "お<ruby>会計<rt>かいけい</rt></ruby>は"],
+                correctOrder: ["お<ruby>会計<rt>かいけい</rt></ruby>は", "<ruby>別々<rt>べつべつ</rt></ruby>でも", "いいですか"],
+                fullJp: "お<ruby>会計<rt>かいけい</rt></ruby>は<ruby>別々<rt>べつべつ</rt></ruby>でもいいですか。",
+                romaji: "okaikei wa betsubetsu demo ii desu ka",
+                zh: "請問結帳可以分開算嗎？",
+                explanation: "「別々（べつべつ）」表示各付各的、分開結帳。"
+              },
+              {
+                id: "q4_1_4",
+                type: "reading",
+                instruction: "閱讀下方居酒屋完整點餐對話，請問客人最後點了哪些東西？",
+                passage: "店員：いらっしゃいませ。<ruby>何名様<rt>なんめいさま</rt></ruby>ですか。\n客：<ruby>二人<rt>ふたり</rt></ruby>です。<ruby>禁煙席<rt>きんえんせき</rt></ruby>をお<ruby>願<rt>ねが</rt></ruby>いします。\n店員：かしこまりました。お<ruby>飲<rt>の</rt></ruby>み<ruby>物<rt>もの</rt></ruby>はいかがですか。\n客：とりあえず、ウーロン<ruby>茶<rt>ちゃ</rt></ruby>を<ruby>二<rt>ふた</rt></ruby>つと、このお<ruby>店<rt>みせ</rt></ruby>のおすすめの<ruby>刺身<rt>さしみ</rt></ruby><ruby>盛<rt>も</rt></ruby>り<ruby>合<rt>あ</rt></ruby>わせを<ruby>一<rt>ひと</rt></ruby>つください。",
+                passageAudio: "いらっしゃいませ。なんめいさまですか。ふたりです。きんえんせきをおねがいします。おのみものはいかがですか。とりあえず、ウーロンちゃをふたつと、このおみせのおすすめのさしみもりあわせをひとつください。",
+                audioText: "ウーロンちゃをふたつと、さしみもりあわせをひとつ",
+                promptDisplay: "根據對話，客人的座位與餐點要求是？",
+                options: ["兩位坐禁菸席，點兩杯烏龍茶與一份推薦綜合生魚片", "兩位坐吸菸席，點兩杯生啤酒與一份炸雞", "三位坐禁菸席，只點了兩杯烏龍茶", "一位坐吧台，點了一份拉麵"],
+                answerIndex: 0,
+                fullJp: "<ruby>二人<rt>ふたり</rt></ruby>・<ruby>禁煙席<rt>きんえんせき</rt></ruby>・ウーロン<ruby>茶<rt>ちゃ</rt></ruby><ruby>二<rt>ふた</rt></ruby>つ・<ruby>刺身<rt>さしみ</rt></ruby><ruby>盛<rt>も</rt></ruby>り<ruby>合<rt>あ</rt></ruby>わせ<ruby>一<rt>ひと</rt></ruby>つ",
+                romaji: "futari / kin'enseki / ūroncha futatsu / sashimi moriawase hitotsu",
+                zh: "兩位、禁菸席、兩杯烏龍茶、一份綜合生魚片",
+                explanation: "從對話可抓出四個關鍵資訊：二人（兩位）、禁煙席（禁菸區）、ウーロン茶を二つ（兩杯烏龍茶）、刺身盛り合わせを一つ（一份綜合生魚片）。"
               }
             ]
           },
           {
             id: "u4_2",
-            title: "實戰情境二：車站問路與轉乘長句閱讀",
-            desc: "訓練閱讀路人與站務員的複合句指引，抓出關鍵地標與出口資訊。",
+            title: "STAGE 4-2：實戰情境二：車站問路與轉乘長句閱讀",
+            desc: "訓練閱讀路人與站務員的複合句指引，抓出關鍵地標、轉乘路線與出口資訊。",
             xpReward: 75,
             studyCards: [
-              { jp: "<ruby>駅<rt>えき</rt></ruby>までどうやって<ruby>行<rt>い</rt></ruby>きますか", romaji: "eki made dōyatte ikimasu ka", zh: "請問到車站要怎麼去？", audio: "えきまでどうやっていきますか" },
-              { jp: "<ruby>三番線<rt>さんばんせん</rt></ruby>に<ruby>乗<rt>の</rt></ruby>ってください", romaji: "sanbansen ni notte kudasai", zh: "請搭乘第3月台的電車", audio: "さんばんせんにのってください" },
-              { jp: "<ruby>北口<rt>きたぐち</rt></ruby>を<ruby>出<rt>で</rt></ruby>て、<ruby>右<rt>みぎ</rt></ruby>に<ruby>曲<rt>ま</rt></ruby>がります", romaji: "kitaguchi o dete, migi ni magarimasu", zh: "出了北口之後，向右轉", audio: "きたぐちをでて、みぎにまがります" }
+              {
+                jp: "<ruby>次<rt>つぎ</rt></ruby>の<ruby>駅<rt>えき</rt></ruby>で<ruby>山手線<rt>やまのてせん</rt></ruby>に<ruby>乗<rt>の</rt></ruby>り<ruby>換<rt>か</rt></ruby>えてください",
+                romaji: "tsugi no eki de Yamanote-sen ni norikaete kudasai",
+                zh: "請在下一站轉乘山手線（〜で＋路線＋に乗り換えます）",
+                audio: "つぎのえきでやまのてせんにのりかえてください",
+                exampleJp: "<ruby>快速<rt>かいそく</rt></ruby><ruby>電車<rt>でんしゃ</rt></ruby>は<ruby>止<rt>と</rt></ruby>まりませんから、<ruby>普通<rt>ふつう</rt></ruby>に<ruby>乗<rt>の</rt></ruby>ってください。",
+                exampleZh: "因為快速電車不停那一站，請搭乘普通車。",
+                exampleAudio: "かいそくでんしゃはとまりませんから、ふつうにのってください。"
+              },
+              {
+                jp: "まっすぐ<ruby>行<rt>い</rt></ruby>って、二つ目の<ruby>信号<rt>しんごう</rt></ruby>を<ruby>右<rt>みぎ</rt></ruby>に<ruby>曲<rt>ま</rt></ruby>がります",
+                romaji: "massugu itte, futatsume no shingō o migi ni magarimasu",
+                zh: "直走之後，在第二個紅綠燈向右轉（〜つ目の＝第幾個⋯⋯）",
+                audio: "まっすぐいって、ふたつめのしんごうをみぎにまがります",
+                exampleJp: "すると、<ruby>左手<rt>ひだりて</rt></ruby>に<ruby>大<rt>おお</rt></ruby>きい<ruby>郵便局<rt>ゆうびんきょく</rt></ruby>が<ruby>見<rt>み</rt></ruby>えます。",
+                exampleZh: "接著在左手邊就會看到一間大郵局。",
+                exampleAudio: "すると、ひだりてにおおきいゆうびんきょくがみえます。"
+              },
+              {
+                jp: "<ruby>中央改札<rt>ちゅうおうかいさつ</rt></ruby>を<ruby>出<rt>で</rt></ruby>て、<ruby>東口<rt>ひがしぐち</rt></ruby>のほうへ<ruby>進<rt>すす</rt></ruby>んでください",
+                romaji: "chūō kaisatsu o dete, higashiguchi no hō e susunde kudasai",
+                zh: "出了中央剪票口後，請往東口的方向前進",
+                audio: "ちゅうおうかいさつをでて、ひがしぐちのほうへすすんでください",
+                exampleJp: "<ruby>階段<rt>かいだん</rt></ruby>を<ruby>上<rt>あ</rt></ruby>がると、すぐ<ruby>前<rt>まえ</rt></ruby>にバス<ruby>乗<rt>の</rt></ruby>り<ruby>場<rt>ば</rt></ruby>があります。",
+                exampleZh: "走上樓梯後，正前方就是公車乘車處。",
+                exampleAudio: "かいだんをあがると、すぐまえにバスのりばがあります。"
+              }
             ],
             questions: [
               {
+                id: "q4_2_1",
                 type: "choice",
-                instruction: "閱讀站務員的指引長句，請問走出「北口」後應該往哪個方向轉？",
-                audioText: "きたぐちをでて、みぎにまがってください",
-                promptDisplay: "<ruby>北口<rt>きたぐち</rt></ruby>を<ruby>出<rt>で</rt></ruby>て、<ruby>右<rt>みぎ</rt></ruby>に<ruby>曲<rt>ま</rt></ruby>がってください。",
-                options: ["向右轉", "向左轉", "往回走", "搭電梯上樓"],
+                instruction: "路人指路說「二つ目の角（かど）を左に曲がってください」，請問要在哪裡左轉？",
+                audioText: "ふたつめのかどをひだりにまがってください",
+                promptDisplay: "<ruby>二<rt>ふた</rt></ruby>つ<ruby>目<rt>め</rt></ruby>の<ruby>角<rt>かど</rt></ruby>を<ruby>左<rt>ひだり</rt></ruby>に<ruby>曲<rt>ま</rt></ruby>がってください。",
+                options: ["第二個轉角處", "第一個紅綠燈", "第三個十字路口", "車站的對面"],
                 answerIndex: 0,
-                fullJp: "<ruby>北口<rt>きたぐち</rt></ruby>を<ruby>出<rt>で</rt></ruby>て、<ruby>右<rt>みぎ</rt></ruby>に<ruby>曲<rt>ま</rt></ruby>がってください。",
-                romaji: "kitaguchi o dete, migi ni magatte kudasai",
-                zh: "請從北口出去，然後向右轉。",
-                explanation: "「北口を出る（離開北口）」接「て形（出て）」表示動作先後順序，接著「右に曲がる（向右轉）」。"
+                fullJp: "<ruby>二<rt>ふた</rt></ruby>つ<ruby>目<rt>め</rt></ruby>の<ruby>角<rt>かど</rt></ruby>を<ruby>左<rt>ひだり</rt></ruby>に<ruby>曲<rt>ま</rt></ruby>がってください。",
+                romaji: "futatsume no kado o hidari ni magatte kudasai",
+                zh: "請在第二個轉角向左轉。",
+                explanation: "「二つ目（ふたつめ）」是『第二個』，「角（かど）」是『街角、轉角』。"
               },
               {
-                type: "builder",
-                instruction: "重組長句：「請搭乘第 3 月台的電車。」",
-                audioText: "さんばんせんのでんしゃにのってください",
-                words: ["<ruby>乗<rt>の</rt></ruby>ってください", "<ruby>三番線<rt>さんばんせん</rt></ruby>の", "<ruby>電車<rt>でんしゃ</rt></ruby>に"],
-                correctOrder: ["<ruby>三番線<rt>さんばんせん</rt></ruby>の", "<ruby>電車<rt>でんしゃ</rt></ruby>に", "<ruby>乗<rt>の</rt></ruby>ってください"],
-                fullJp: "<ruby>三番線<rt>さんばんせん</rt></ruby>の<ruby>電車<rt>でんしゃ</rt></ruby>に<ruby>乗<rt>の</rt></ruby>ってください。",
-                romaji: "sanbansen no densha ni notte kudasai",
-                zh: "請搭乘第 3 月台的電車。",
-                explanation: "搭乘交通工具固定搭配助詞「に」＋「乗ります（て形為乗って）」。"
-              },
-              {
+                id: "q4_2_2",
                 type: "listening",
-                instruction: "綜合聽力挑戰：仔細聽這段對話，目的地距離這裡走路大約需要幾分鐘？",
-                audioText: "ここからあるいてごふんぐらいです",
-                promptDisplay: "🔊 聆聽路人回答步行時間",
-                options: ["走路大約 5 分鐘", "走路大約 15 分鐘", "搭車大約 5 分鐘", "走路大約 50 分鐘"],
+                instruction: "聆聽站務員的廣播提醒，旅客需要注意什麼？",
+                audioText: "このでんしゃはしぶやにはとまりません。つぎのえきでのりかえてください",
+                promptDisplay: "🔊 聆聽車站月台廣播",
+                options: ["這班電車不停澀谷，請在下一站轉車", "這班電車終點站就是澀谷", "澀谷站今天暫停開放", "請改搭計程車前往澀谷"],
                 answerIndex: 0,
-                fullJp: "ここから<ruby>歩<rt>ある</rt></ruby>いて<ruby>五分<rt>ごふん</rt></ruby>ぐらいです。",
-                romaji: "koko kara aruite gofun gurai desu",
-                zh: "從這裡走路大約五分鐘。",
-                explanation: "「ここから（從這裡）」＋「歩いて（走路）」＋「五分ぐらい（大約五分鐘）」。恭喜完成全系列核心課程！"
+                fullJp: "この<ruby>電車<rt>でんしゃ</rt></ruby>は<ruby>渋谷<rt>しぶや</rt></ruby>には<ruby>止<rt>と</rt></ruby>まりません。<ruby>次<rt>つぎ</rt></ruby>の<ruby>駅<rt>えき</rt></ruby>で<ruby>乗<rt>の</rt></ruby>り<ruby>換<rt>か</rt></ruby>えてください。",
+                romaji: "kono densha wa Shibuya ni wa tomarimasen. tsugi no eki de norikaete kudasai",
+                zh: "這班電車不停澀谷，請在下一站轉車。",
+                explanation: "「止まりません（不停靠）」、「次の駅で乗り換えてください（請在下一站換車）」。"
+              },
+              {
+                id: "q4_2_3",
+                type: "builder",
+                instruction: "重組句子：「請在新宿站轉乘中央線。」",
+                audioText: "しんじゅくえきでちゅうおうせんにのりかえてください",
+                words: ["<ruby>乗<rt>の</rt></ruby>り<ruby>換<rt>か</rt></ruby>えてください", "<ruby>新宿駅<rt>しんじゅくえき</rt></ruby>で", "<ruby>中央線<rt>ちゅうおうせん</rt></ruby>に"],
+                correctOrder: ["<ruby>新宿駅<rt>しんじゅくえき</rt></ruby>で", "<ruby>中央線<rt>ちゅうおうせん</rt></ruby>に", "<ruby>乗<rt>の</rt></ruby>り<ruby>換<rt>か</rt></ruby>えてください"],
+                fullJp: "<ruby>新宿駅<rt>しんじゅくえき</rt></ruby>で<ruby>中央線<rt>ちゅうおうせん</rt></ruby>に<ruby>乗<rt>の</rt></ruby>り<ruby>換<rt>か</rt></ruby>えてください。",
+                romaji: "Shinjuku-eki de Chūō-sen ni norikaete kudasai",
+                zh: "請在新宿站轉乘中央線。",
+                explanation: "轉乘車站用「で」，要轉乘的新路線用「に」。"
+              },
+              {
+                id: "q4_2_4",
+                type: "reading",
+                instruction: "【長句閱讀】閱讀下方站務員的詳細指路對話，選出完全正確的走法：",
+                passage: "客：すみません、さくら<ruby>美術館<rt>びじゅつかん</rt></ruby>へはどう<ruby>行<rt>い</rt></ruby>きますか。\n駅員：<ruby>北口<rt>きたぐち</rt></ruby>の<ruby>改札<rt>かいさつ</rt></ruby>を<ruby>出<rt>で</rt></ruby>て、まっすぐ<ruby>三分<rt>さんぷん</rt></ruby>ぐらい<ruby>歩<rt>ある</rt></ruby>いてください。<ruby>一<rt>ひと</rt></ruby>つ<ruby>目<rt>め</rt></ruby>の<ruby>信号<rt>しんごう</rt></ruby>を<ruby>渡<rt>わた</rt></ruby>って<ruby>右<rt>みぎ</rt></ruby>に<ruby>曲<rt>ま</rt></ruby>がると、<ruby>左手<rt>ひだりて</rt></ruby>に<ruby>白<rt>しろ</rt></ruby>い<ruby>建物<rt>たてもの</rt></ruby>が<ruby>見<rt>み</rt></ruby>えます。それが<ruby>美術館<rt>びじゅつかん</rt></ruby>ですよ。",
+                passageAudio: "すみません、さくらびじゅつかんへはどういきますか。きたぐちのかいさつをでて、まっすぐさんぷんぐらいあるいてください。ひとつめのしんごうをわたってみぎにまがると、ひだりてにしろいたてものがみえます。それがびじゅつかんですよ。",
+                audioText: "ひとつめのしんごうをわたってみぎにまがると、ひだりてにしおい建物がみえます",
+                promptDisplay: "根據站務員說明，到達美術館的正確路線是？",
+                options: ["出北口剪票口直走約 3 分鐘，過第一個紅綠燈右轉，左手邊的白色建築", "出南口剪票口左轉走 10 分鐘，右手邊的紅色建築", "出北口直接右轉，過兩個紅綠燈後的黑色大樓", "必須轉乘公車才能到達"],
+                answerIndex: 0,
+                fullJp: "<ruby>北口<rt>きたぐち</rt></ruby>→まっすぐ<ruby>三分<rt>さんぷん</rt></ruby>→<ruby>一<rt>ひと</rt></ruby>つ<ruby>目<rt>め</rt></ruby>の<ruby>信号<rt>しんごう</rt></ruby>を<ruby>右<rt>みぎ</rt></ruby>→<ruby>左手<rt>ひだりて</rt></ruby>の<ruby>白<rt>しろ</rt></ruby>い<ruby>建物<rt>たてもの</rt></ruby>",
+                romaji: "kitaguchi → massugu sanpun → hitotsume no shingō o migi → hidarite no shiroi tatemono",
+                zh: "北口 → 直走 3 分鐘 → 第一個紅綠燈右轉 → 左手邊白色建築",
+                explanation: "抓出四個路標順序：北口（きたぐち）→ 直走三分（まっすぐ三分）→ 過第一個紅綠燈右轉（一つ目の信号を渡って右に曲がる）→ 左手邊白色建築（左手に白い建物）。"
+              }
+            ]
+          },
+          {
+            id: "u4_3",
+            title: "STAGE 4-3：實戰情境三：飯店入住、寄放行李與退房對話",
+            desc: "掌握 Check-in、預約確認、早餐時間與地點詢問，以及退房後寄放行李的完整櫃檯溝通。",
+            xpReward: 75,
+            studyCards: [
+              {
+                jp: "<ruby>予約<rt>よやく</rt></ruby>した<ruby>林<rt>はやし</rt></ruby>です。チェックインをお<ruby>願<rt>ねが</rt></ruby>いします",
+                romaji: "yoyaku shita Hayashi desu. chekkuin o onegaishimasu",
+                zh: "我是有預約的林，麻煩請幫我辦理入住",
+                audio: "よやくしたはやしです。チェックインをおねがいします",
+                exampleJp: "<ruby>二泊<rt>にはく</rt></ruby>で<ruby>予約<rt>よやく</rt></ruby>しています。パスポートをお<ruby>願<rt>ねが</rt></ruby>いします。",
+                exampleZh: "您預約的是兩晚住宿，請出示您的護照。",
+                exampleAudio: "にはくでよやくしています。パスポートをおねがいします。"
+              },
+              {
+                jp: "<ruby>朝食<rt>ちょうしょく</rt></ruby>は<ruby>何時<rt>なんじ</rt></ruby>から<ruby>何時<rt>なんじ</rt></ruby>までですか",
+                romaji: "chōshoku wa nanji kara nanji made desu ka",
+                zh: "請問早餐是幾點到幾點呢？（朝食＝ちょうしょく）",
+                audio: "ちょうしょくはなんじからなんじまでですか",
+                exampleJp: "<ruby>朝<rt>あさ</rt></ruby><ruby>七時<rt>しちじ</rt></ruby>から<ruby>十時<rt>じゅうじ</rt></ruby>まで、<ruby>二階<rt>にかい</rt></ruby>のレストランでございます。",
+                exampleZh: "早上 7 點到 10 點，在二樓的餐廳用餐。",
+                exampleAudio: "あさしちじからじゅうじまで、にかいのレストランでございます。"
+              },
+              {
+                jp: "チェックアウトの<ruby>後<rt>あと</rt></ruby>も、<ruby>荷物<rt>にもつ</rt></ruby>を<ruby>預<rt>あず</rt></ruby>かってもらえますか",
+                romaji: "chekkuauto no ato mo, nimotsu o azukatte moraemasu ka",
+                zh: "請問退房之後也可以幫我寄放行李嗎？",
+                audio: "チェックアウトのあとも、にもつをあずかってもらえますか",
+                exampleJp: "はい、<ruby>当日<rt>とうじつ</rt></ruby>中でしたらフロントでお<ruby>預<rt>あず</rt></ruby>かりいたします。",
+                exampleZh: "可以的，只要是當天之內都可以寄放在櫃檯。",
+                exampleAudio: "はい、とうじつちゅうでしたらフロントでおあずかりいたします。"
+              }
+            ],
+            questions: [
+              {
+                id: "q4_3_1",
+                type: "choice",
+                instruction: "在飯店櫃檯辦理入住時，服務人員確認「二泊（にはく）ですね」，請問「二泊」是什麼意思？",
+                audioText: "にはくですね",
+                promptDisplay: "<ruby>二泊<rt>にはく</rt></ruby>（2 nights）",
+                options: ["住宿兩晚", "兩間單人房", "兩點退房", "兩份早餐券"],
+                answerIndex: 0,
+                fullJp: "<ruby>二泊<rt>にはく</rt></ruby>です。",
+                romaji: "nihaku desu",
+                zh: "住宿兩晚。",
+                explanation: "計算住宿晚數的量詞為「泊（はく／ぱく）」：一泊（1晚）、二泊（2晚）、三泊（3晚）。"
+              },
+              {
+                id: "q4_3_2",
+                type: "listening",
+                instruction: "聆聽櫃檯人員說明早餐資訊，請問早餐幾點開始、在哪裡吃？",
+                audioText: "ちょうしょくは、あさしちじからじゅうじまで、いっかいのレストランです",
+                promptDisplay: "🔊 聆聽飯店早餐說明",
+                options: ["早上 7 點到 10 點，在一樓餐廳", "早上 6 點到 9 點，在二樓餐廳", "早上 8 點到 11 點，送到房間內", "本飯店不提供早餐"],
+                answerIndex: 0,
+                fullJp: "<ruby>朝食<rt>ちょうしょく</rt></ruby>は<ruby>朝<rt>あさ</rt></ruby><ruby>七時<rt>しちじ</rt></ruby>から<ruby>十時<rt>じゅうじ</rt></ruby>まで、<ruby>一階<rt>いっかい</rt></ruby>のレストランです。",
+                romaji: "chōshoku wa asa shichiji kara jūji made, ikkai no resutoran desu",
+                zh: "早餐從早上 7 點到 10 點，在一樓餐廳。",
+                explanation: "「七時（しちじ，7點）」、「十時（じゅうじ，10點）」、「一階（いっかい，1樓）」。"
+              },
+              {
+                id: "q4_3_3",
+                type: "builder",
+                instruction: "重組句子：「請問可以寄放行李嗎？」",
+                audioText: "にもつをあずかってもらえますか",
+                words: ["もらえますか", "<ruby>荷物<rt>にもつ</rt></ruby>を", "<ruby>預<rt>あず</rt></ruby>かって"],
+                correctOrder: ["<ruby>荷物<rt>にもつ</rt></ruby>を", "<ruby>預<rt>あず</rt></ruby>かって", "もらえますか"],
+                fullJp: "<ruby>荷物<rt>にもつ</rt></ruby>を<ruby>預<rt>あず</rt></ruby>かってもらえますか。",
+                romaji: "nimotsu o azukatte moraemasu ka",
+                zh: "請問可以幫我寄放行李嗎？",
+                explanation: "「預かって（寄放）」＋「もらえますか（可以請您幫我⋯⋯嗎）」。"
+              },
+              {
+                id: "q4_3_4",
+                type: "reading",
+                instruction: "閱讀下方飯店櫃檯對話，請問客人什麼時候會回來拿行李？",
+                passage: "客：チェックアウトをお<ruby>願<rt>ねが</rt></ruby>いします。あのう、<ruby>夕方<rt>ゆうがた</rt></ruby>の<ruby>五時<rt>ごじ</rt></ruby>ごろまで<ruby>荷物<rt>にもつ</rt></ruby>を<ruby>預<rt>あず</rt></ruby>かってもらえますか。\nフロント：はい、かしこまりました。お<ruby>戻<rt>もど</rt></ruby>りの<ruby>際<rt>さい</rt></ruby>にこの<ruby>番号札<rt>ばんごうふだ</rt></ruby>をお<ruby>見<rt>み</rt></ruby>せください。",
+                passageAudio: "チェックアウトをおねがいします。あのう、ゆうがたのごじごろまでにもつをあずかってもらえますか。はい、かしこまりました。お戻りのさいにこのばんごうふだをおみせください。",
+                audioText: "ゆうがたのごじごろまで",
+                promptDisplay: "根據對話，關於寄放行李的細節何者正確？",
+                options: ["寄放到傍晚 5 點左右，領取時需出示號碼牌", "寄放到明天早上，領取時需再付費", "飯店無法寄放行李，請改用車站置物櫃", "寄放到中午 12 點，需出示護照領取"],
+                answerIndex: 0,
+                fullJp: "<ruby>夕方<rt>ゆうがた</rt></ruby>の<ruby>五時<rt>ごじ</rt></ruby>ごろまで・<ruby>番号札<rt>ばんごうふだ</rt></ruby>をお<ruby>見<rt>み</rt></ruby>せください",
+                romaji: "yūgata no goji goro made / bangōfuda o omise kudasai",
+                zh: "到傍晚 5 點左右、請出示號碼牌",
+                explanation: "「夕方の五時ごろまで（到傍晚 5 點左右）」，領回時出示「番号札（ばんごうふだ，號碼牌）」。"
+              }
+            ]
+          },
+          {
+            id: "u4_4",
+            title: "STAGE 4-4：實戰情境四：超商結帳與藥妝店詢問情境",
+            desc: "聽懂超商店員必問的微波加熱與塑膠袋需求，以及在藥妝店尋找特定藥品與辦理免稅的完整對話。",
+            xpReward: 75,
+            studyCards: [
+              {
+                jp: "お<ruby>弁当<rt>べんとう</rt></ruby>は<ruby>温<rt>あたた</rt></ruby>めますか ／ レジ<ruby>袋<rt>ぶくろ</rt></ruby>はいりません",
+                romaji: "obentō wa atatamemasu ka / rejibukuro wa irimasen",
+                zh: "便當要微波加熱嗎？ ／ 不需要塑膠袋",
+                audio: "おべんとうはあたためますか。レジぶくろはいりません",
+                exampleJp: "はい、お<ruby>願<rt>ねが</rt></ruby>いします。<ruby>袋<rt>ふくろ</rt></ruby>は<ruby>一枚<rt>いちまい</rt></ruby>ください。",
+                exampleZh: "要加熱，麻煩您；塑膠袋請給我一個。",
+                exampleAudio: "はい、おねがいします。ふくろはいちまいください。"
+              },
+              {
+                jp: "すみません、<ruby>胃薬<rt>いぐすり</rt></ruby>（<ruby>風邪薬<rt>かぜぐすり</rt></ruby>）はどこにありますか",
+                romaji: "sumimasen, igusuri (kazegusuri) wa doko ni arimasu ka",
+                zh: "不好意思，請問胃藥（感冒藥）放在哪裡呢？",
+                audio: "すみません、いぐすりはどこにありますか",
+                exampleJp: "あちらの<ruby>棚<rt>たな</rt></ruby>の<ruby>二段目<rt>にだんめ</rt></ruby>にございます。",
+                exampleZh: "在那邊貨架的第二層。",
+                exampleAudio: "あちらのたなのにだんめにございます。"
+              },
+              {
+                jp: "<ruby>免税<rt>めんぜい</rt></ruby>レジはどちらですか。<ruby>五千円<rt>ごせんえん</rt></ruby><ruby>以上<rt>いじょう</rt></ruby>買いました",
+                romaji: "menzei reji wa dochira desu ka. gosen-en ijō kaimashita",
+                zh: "請問免稅結帳櫃檯在哪裡？我買超過 5,000 日圓了",
+                audio: "めんぜいレジはどちらですか。ごせんえんいじょうかいました",
+                exampleJp: "<ruby>消耗品<rt>しょうもうひん</rt></ruby>は<ruby>日本<rt>にほん</rt></ruby><ruby>国内<rt>こくない</rt></ruby>で<ruby>開<rt>あ</rt></ruby>けないでください。",
+                exampleZh: "免稅消耗品請不要在日本國內拆封。",
+                exampleAudio: "しょうもうひんはにほんこくないであけないでください。"
+              }
+            ],
+            questions: [
+              {
+                id: "q4_4_1",
+                type: "listening",
+                instruction: "在超商結帳時店員問了這句話，他在問什麼？",
+                audioText: "おべんとうはあたためますか",
+                promptDisplay: "🔊 聆聽超商店員提問",
+                options: ["便當需要微波加熱嗎？", "需要附幾雙筷子？", "需要買塑膠袋嗎？", "要用信用卡結帳嗎？"],
+                answerIndex: 0,
+                fullJp: "お<ruby>弁当<rt>べんとう</rt></ruby>は<ruby>温<rt>あたた</rt></ruby>めますか。",
+                romaji: "obentō wa atatamemasu ka",
+                zh: "便當需要加熱嗎？",
+                explanation: "「温めます（あたためます）」是『微波加熱』的意思。"
+              },
+              {
+                id: "q4_4_2",
+                type: "choice",
+                instruction: "在藥妝店想買「感冒藥」，日文是哪一個詞彙？",
+                audioText: "かぜぐすり",
+                promptDisplay: "尋找感冒藥",
+                options: ["風邪薬（かぜぐすり）", "胃薬（いぐすり）", "目薬（めぐすり）", "日焼け止め（ひやけどめ）"],
+                answerIndex: 0,
+                fullJp: "<ruby>風邪薬<rt>かぜぐすり</rt></ruby>",
+                romaji: "kazegusuri",
+                zh: "感冒藥",
+                explanation: "「風邪（かぜ）」是感冒，加上「薬（くすり）」連濁變成「風邪薬（かぜぐすり）」。"
+              },
+              {
+                id: "q4_4_3",
+                type: "builder",
+                instruction: "重組句子：「請問免稅櫃檯在哪裡？」",
+                audioText: "めんぜいカウンターはどこですか",
+                words: ["どこですか", "<ruby>免税<rt>めんぜい</rt></ruby>カウンターは"],
+                correctOrder: ["<ruby>免税<rt>めんぜい</rt></ruby>カウンターは", "どこですか"],
+                fullJp: "<ruby>免税<rt>めんぜい</rt></ruby>カウンターはどこですか。",
+                romaji: "menzei kauntā wa doko desu ka",
+                zh: "請問免稅櫃檯在哪裡？",
+                explanation: "「免税カウンター（免稅櫃檯）」＋「はどこですか（在哪裡）」。"
+              },
+              {
+                id: "q4_4_4",
+                type: "reading",
+                instruction: "閱讀下方藥妝店店員的免稅說明，請問店員提醒旅客什麼注意事項？",
+                passage: "店員：<ruby>免税<rt>めんぜい</rt></ruby>ですね。パスポートをお<ruby>預<rt>あず</rt></ruby>かりします。なお、お<ruby>菓子<rt>かし</rt></ruby>や<ruby>化粧品<rt>けしょうひん</rt></ruby>などの<ruby>消耗品<rt>しょうもうひん</rt></ruby>は、<ruby>日本<rt>にほん</rt></ruby>にいる<ruby>間<rt>あいだ</rt></ruby>は<ruby>袋<rt>ふくろ</rt></ruby>を<ruby>開<rt>あ</rt></ruby>けないでください。",
+                passageAudio: "めんぜいですね。パスポートをおあずかりします。なお、おかしやけしょうひんなどのしょうもうひんは、にほんにいるあいだはふくろをあけないでください。",
+                audioText: "にほんにいるあいだはふくろをあけないでください",
+                promptDisplay: "根據店員說明，免稅商品的規定是？",
+                options: ["零食與化妝品等消耗品，在日本境內期間請勿拆開免稅袋", "所有免稅商品都必須在店門口立刻拆封檢查", "辦理免稅不需要出示護照", "零食與化妝品不能辦理免稅"],
+                answerIndex: 0,
+                fullJp: "<ruby>日本<rt>にほん</rt></ruby>にいる<ruby>間<rt>あいだ</rt></ruby>は<ruby>袋<rt>ふくろ</rt></ruby>を<ruby>開<rt>あ</rt></ruby>けないでください。",
+                romaji: "Nihon ni iru aida wa fukuro o akenaide kudasai",
+                zh: "在日本期間請不要打開袋子。",
+                explanation: "「開けないでください（請不要打開）」，指零食（お菓子）與化妝品（化粧品）在離境前不可拆封。"
+              }
+            ]
+          }
+        ]
+      },
+
+      // ==========================================================================
+      // Level 5：進階文法與深度日常情境（共 3 關，總計 18 關）
+      // ==========================================================================
+      {
+        level: 5,
+        title: "Level 5：進階文法與深度日常情境",
+        subtitle: "邁向流利日語溝通！掌握願望與過去經驗句型、形容詞變化與比較表達，以及看病就診與行程變更聯絡",
+        color: "from-violet-600 to-purple-800",
+        badgeBg: "bg-purple-100 text-purple-800",
+        icon: "fa-comments",
+        units: [
+          {
+            id: "u5_1",
+            title: "STAGE 5-1：願望與經驗表達：「〜たいです」與「〜たことがあります」",
+            desc: "學會表達「我想做某事（〜たいです）」以及「我曾經做過⋯⋯（〜たことがあります）」。",
+            xpReward: 75,
+            studyCards: [
+              {
+                jp: "<ruby>日本<rt>にほん</rt></ruby>へ<ruby>行<rt>い</rt></ruby>きたいです",
+                romaji: "Nihon e ikitai desu",
+                zh: "我想去日本（動詞ます形去ます＋たいです＝想要做⋯⋯）",
+                audio: "にほんへいきたいです",
+                exampleJp: "<ruby>北海道<rt>ほっかいどう</rt></ruby>で<ruby>新鮮<rt>しんせん</rt></ruby>なお<ruby>寿司<rt>すし</rt></ruby>が<ruby>食<rt>た</rt></ruby>べたいです。",
+                exampleZh: "我想在北海道吃新鮮的壽司。",
+                exampleAudio: "ほっかいどうでしんせんなおすしがたべたいです。"
+              },
+              {
+                jp: "<ruby>今<rt>いま</rt></ruby>、何も<ruby>買<rt>か</rt></ruby>いたくないです",
+                romaji: "ima, nanimo kaitakunai desu",
+                zh: "現在什麼都不想買（〜たい 變否定＝〜たくないです）",
+                audio: "いま、なにもかいたくないです",
+                exampleJp: "<ruby>疲<rt>つか</rt></ruby>れましたから、どこへも<ruby>行<rt>い</rt></ruby>きたくないです。",
+                exampleZh: "因為累了，哪裡都不想去。",
+                exampleAudio: "つかれましたから、どこへもいきたくないです。"
+              },
+              {
+                jp: "<ruby>富士山<rt>ふじさん</rt></ruby>に<ruby>登<rt>のぼ</rt></ruby>ったことがあります",
+                romaji: "Fujisan ni nobotta koto ga arimasu",
+                zh: "我曾經爬過富士山（動詞た形＋ことがあります＝有過⋯⋯經驗）",
+                audio: "ふじさんにのぼったことがあります",
+                exampleJp: "<ruby>納豆<rt>なっとう</rt></ruby>を<ruby>食<rt>た</rt></ruby>べたことがありますか。／ はい、<ruby>一度<rt>いちど</rt></ruby>あります。",
+                exampleZh: "你吃過納豆嗎？ ／ 有，吃過一次。",
+                exampleAudio: "なっとうをたべたことがありますか。はい、いちどあります。"
+              },
+              {
+                jp: "<ruby>一度<rt>いちど</rt></ruby>もスキーをしたことがありません",
+                romaji: "ichido mo sukī o shita koto ga arimasen",
+                zh: "我一次也沒有滑過雪（一度も＋〜たことがありません）",
+                audio: "いちどもスキーをしたことがありません",
+                exampleJp: "<ruby>今年<rt>ことし</rt></ruby>の<ruby>冬<rt>ふゆ</rt></ruby>、ぜひ<ruby>挑戦<rt>ちょうせん</rt></ruby>してみたいです。",
+                exampleZh: "今年冬天我非常想挑戰看看。",
+                exampleAudio: "ことしのふゆ、ぜひちょうせんしてみたいです。"
+              }
+            ],
+            questions: [
+              {
+                id: "q5_1_1",
+                type: "builder",
+                instruction: "重組句子：「我想喝冰抹茶。」（冰的＝冷たい、想喝＝飲みたいです）",
+                audioText: "つめたいまっちゃがのみたいです",
+                words: ["<ruby>飲<rt>の</rt></ruby>みたいです", "<ruby>冷<rt>つめ</rt></ruby>たい", "<ruby>抹茶<rt>まっちゃ</rt></ruby>が"],
+                correctOrder: ["<ruby>冷<rt>つめ</rt></ruby>たい", "<ruby>抹茶<rt>まっちゃ</rt></ruby>が", "<ruby>飲<rt>の</rt></ruby>みたいです"],
+                fullJp: "<ruby>冷<rt>つめ</rt></ruby>たい<ruby>抹茶<rt>まっちゃ</rt></ruby>が<ruby>飲<rt>の</rt></ruby>みたいです。",
+                romaji: "tsumetai matcha ga nomitai desu",
+                zh: "我想喝冰抹茶。",
+                explanation: "動詞「飲みます」去掉ます接「たいです」＝「飲みたいです（想喝）」。"
+              },
+              {
+                id: "q5_1_2",
+                type: "choice",
+                instruction: "詢問朋友「你去過沖繩嗎？」，正確的經驗句型是？",
+                audioText: "おきなわへいったことがありますか",
+                promptDisplay: "<ruby>沖縄<rt>おきなわ</rt></ruby>へ（　　　　　）ことがありますか。",
+                options: ["行った（た形）", "行きます（ます形）", "行って（て形）", "行かない（ない形）"],
+                answerIndex: 0,
+                fullJp: "<ruby>沖縄<rt>おきなわ</rt></ruby>へ<ruby>行<rt>い</rt></ruby>ったことがありますか。",
+                romaji: "Okinawa e itta koto ga arimasu ka",
+                zh: "你曾經去過沖繩嗎？",
+                explanation: "表達人生經驗「曾經做過某事」，必須使用「動詞た形＋ことがあります」。"
+              },
+              {
+                id: "q5_1_3",
+                type: "listening",
+                instruction: "聆聽句子，這個人對日本的溫泉有什麼經驗？",
+                audioText: "わたしはいちどもにほんのおんせんにはいったことがありません",
+                promptDisplay: "🔊 聆聽個人經驗描述",
+                options: ["一次也沒有泡過日本的溫泉", "每天都去泡日本的溫泉", "上週剛去泡過溫泉", "不想去泡溫泉"],
+                answerIndex: 0,
+                fullJp: "<ruby>私<rt>わたし</rt></ruby>は<ruby>一度<rt>いちど</rt></ruby>も<ruby>日本<rt>にほん</rt></ruby>の<ruby>温泉<rt>おんせん</rt></ruby>に<ruby>入<rt>はい</rt></ruby>ったことがありません。",
+                romaji: "watashi wa ichido mo Nihon no onsen ni haitta koto ga arimasen",
+                zh: "我一次也沒有泡過日本的溫泉。",
+                explanation: "「一度も（一次也⋯⋯）」搭配「〜たことがありません」強調完全沒有該經驗。"
+              },
+              {
+                id: "q5_1_4",
+                type: "reading",
+                instruction: "閱讀下方兩位朋友的對話，請問小李（李さん）今年冬天想做什麼？",
+                passage: "佐藤：<ruby>李<rt>り</rt></ruby>さんはスキーをしたことがありますか。\n李：いいえ、<ruby>一度<rt>いちど</rt></ruby>もありません。でも、<ruby>今年<rt>ことし</rt></ruby>の<ruby>冬<rt>ふゆ</rt></ruby>は<ruby>北海道<rt>ほっかいどう</rt></ruby>へ<ruby>行<rt>い</rt></ruby>って、スキーがしたいです。",
+                passageAudio: "りさんはスキーをしたことがありますか。いいえ、いちどもありません。でも、ことしのふゆはほっかいどうへいって、スキーがしたいです。",
+                audioText: "ほっかいどうへいって、スキーがしたいです",
+                promptDisplay: "根據對話，關於小李的敘述何者正確？",
+                options: ["從沒滑過雪，今年冬天想去北海道滑雪", "以前滑過很多次雪，今年不想去了", "今年冬天想留在台灣", "已經在北海道滑完雪回來了"],
+                answerIndex: 0,
+                fullJp: "<ruby>今年<rt>ことし</rt></ruby>の<ruby>冬<rt>ふゆ</rt></ruby>は<ruby>北海道<rt>ほっかいどう</rt></ruby>へ<ruby>行<rt>い</rt></ruby>って、スキーがしたいです。",
+                romaji: "kotoshi no fuyu wa Hokkaidō e itte, sukī ga shitai desu",
+                zh: "今年冬天想去北海道滑雪。",
+                explanation: "「一度もありません（一次也沒滑過）」、「スキーがしたいです（想滑雪）」。"
+              }
+            ]
+          },
+          {
+            id: "u5_2",
+            title: "STAGE 5-2：形容詞變化與比較表達：「〜より〜ほうが」",
+            desc: "掌握い形容詞與な形容詞的肯定、否定、過去式活用，以及兩者比較句型「AはBより〜です」。",
+            xpReward: 80,
+            studyCards: [
+              {
+                jp: "おいしい → おいしくない → おいしかったです",
+                romaji: "oishii → oishikunai → oishikatta desu",
+                zh: "好吃 → 不好吃 → 以前很好吃（い形容詞去 い 加 くない／かった）",
+                audio: "おいしい、おいしくない、おいしかったです",
+                exampleJp: "<ruby>昨日<rt>きのう</rt></ruby>のラーメンはとてもおいしかったです。",
+                exampleZh: "昨天的拉麵非常好吃。",
+                exampleAudio: "きのうのラーメンはとてもおいしかったです。"
+              },
+              {
+                jp: "<ruby>静<rt>しず</rt></ruby>か → <ruby>静<rt>しず</rt></ruby>かではありません ／ <ruby>綺麗<rt>きれい</rt></ruby>な<ruby>町<rt>まち</rt></ruby>",
+                romaji: "shizuka → shizuka dewa arimasen / kirei na machi",
+                zh: "安靜 → 不安靜（な形容詞修飾名詞加 な，注意 綺麗・有名 是な形容詞）",
+                audio: "しずかではありません。きれいなまち",
+                exampleJp: "<ruby>京都<rt>きょうと</rt></ruby>は<ruby>綺麗<rt>きれい</rt></ruby>で<ruby>有名<rt>ゆうめい</rt></ruby>な<ruby>町<rt>まち</rt></ruby>です。",
+                exampleZh: "京都是既漂亮又有名氣的城市。",
+                exampleAudio: "きょうとはきれいでゆうめいなまちです。"
+              },
+              {
+                jp: "<ruby>新幹線<rt>しんかんせん</rt></ruby>は<ruby>バス<rt>ばす</rt></ruby>より<ruby>速<rt>はや</rt></ruby>いです",
+                romaji: "shinkansen wa basu yori hayai desu",
+                zh: "新幹線比公車快（A は B より 形容詞＝A 比 B 更⋯⋯）",
+                audio: "しんかんせんはバスよりはやいです",
+                exampleJp: "<ruby>東京<rt>とうきょう</rt></ruby>は<ruby>台北<rt>たいぺい</rt></ruby>より<ruby>冬<rt>ふゆ</rt></ruby>が<ruby>寒<rt>さむ</rt></ruby>いです。",
+                exampleZh: "東京的冬天比台北冷。",
+                exampleAudio: "とうきょうはたいぺいよりふゆがさむいです。"
+              },
+              {
+                jp: "コーヒーと<ruby>紅茶<rt>こうちゃ</rt></ruby>と、どちらが<ruby>好<rt>す</rt></ruby>きですか",
+                romaji: "kōhī to kōcha to, dochira ga suki desu ka",
+                zh: "咖啡和紅茶，你比較喜歡哪一個？ → コーヒーのほうが好きです",
+                audio: "コーヒーとこうちゃと、どちらがすきですか。コーヒーのほうがすきです",
+                exampleJp: "<ruby>夏<rt>なつ</rt></ruby>と<ruby>冬<rt>ふゆ</rt></ruby>と、<ruby>冬<rt>ふゆ</rt></ruby>のほうが<ruby>好<rt>す</rt></ruby>きです。",
+                exampleZh: "夏天和冬天之中，我比較喜歡冬天。",
+                exampleAudio: "なつとふゆと、ふゆのほうがすきです。"
+              }
+            ],
+            questions: [
+              {
+                id: "q5_2_1",
+                type: "choice",
+                instruction: "將い形容詞「寒い（さむい，冷）」變成否定形「不冷」，正確寫法是？",
+                audioText: "きょうはあまりさむくないです",
+                promptDisplay: "<ruby>今日<rt>きょう</rt></ruby>はあまり（　　　　）です。",
+                options: ["寒くない", "寒くではありません", "寒いじゃない", "寒かった"],
+                answerIndex: 0,
+                fullJp: "<ruby>今日<rt>きょう</rt></ruby>はあまり<ruby>寒<rt>さむ</rt></ruby>くないです。",
+                romaji: "kyō wa amari samukunai desu",
+                zh: "今天不太冷。",
+                explanation: "い形容詞變否定时，先把字尾的「い」去掉，再接上「くない」→「寒くない」。"
+              },
+              {
+                id: "q5_2_2",
+                type: "choice",
+                instruction: "「綺麗（きれい，漂亮）」雖然字尾有い，但它是な形容詞！修飾名詞「花」時該怎麼接？",
+                audioText: "きれいなはな",
+                promptDisplay: "（　　　）<ruby>花<rt>はな</rt></ruby>ですね。",
+                options: ["綺麗な", "綺麗い", "綺麗の", "綺麗を"],
+                answerIndex: 0,
+                fullJp: "<ruby>綺麗<rt>きれい</rt></ruby>な<ruby>花<rt>はな</rt></ruby>ですね。",
+                romaji: "kirei na hana desu ne",
+                zh: "真是漂亮的花呢。",
+                explanation: "な形容詞修飾名詞時，中間必須加上「な」→「綺麗な花」。"
+              },
+              {
+                id: "q5_2_3",
+                type: "builder",
+                instruction: "重組句子：「飛機比電車快。」（飛機＝飛行機、電車＝電車）",
+                audioText: "ひこうきはでんしゃよりはやいです",
+                words: ["<ruby>速<rt>はや</rt></ruby>いです", "<ruby>飛行機<rt>ひこうき</rt></ruby>は", "<ruby>電車<rt>でんしゃ</rt></ruby>より"],
+                correctOrder: ["<ruby>飛行機<rt>ひこうき</rt></ruby>は", "<ruby>電車<rt>でんしゃ</rt></ruby>より", "<ruby>速<rt>はや</rt></ruby>いです"],
+                fullJp: "<ruby>飛行機<rt>ひこうき</rt></ruby>は<ruby>電車<rt>でんしゃ</rt></ruby>より<ruby>速<rt>はや</rt></ruby>いです。",
+                romaji: "hikōki wa densha yori hayai desu",
+                zh: "飛機比電車快。",
+                explanation: "比較句型「A は B より 形容詞」表示『A 比 B 更⋯⋯』。"
+              },
+              {
+                id: "q5_2_4",
+                type: "reading",
+                instruction: "閱讀下方住宿評論，請問這間旅館的優點與缺點分別是什麼？",
+                passage: "この<ruby>旅館<rt>りょかん</rt></ruby>は<ruby>駅<rt>えき</rt></ruby>から<ruby>近<rt>ちか</rt></ruby>くて、とても<ruby>便利<rt>べんり</rt></ruby>でした。それに、お<ruby>風呂<rt>ふろ</rt></ruby>も<ruby>広<rt>ひろ</rt></ruby>かったです。でも、<ruby>部屋<rt>へや</rt></ruby>はあまり<ruby>新<rt>あたら</rt></ruby>しくなかったです。",
+                passageAudio: "このりょかんはえきからちかくて、とてもべんりでした。それに、おふろもひろかったです。でも、へやはあまりあたらしくなかったです。",
+                audioText: "へやはあまりあたらしくなかったです",
+                promptDisplay: "根據評論，這間旅館的評價是？",
+                options: ["離車站近且浴池寬敞，但房間不太新", "房間非常新，但離車站很遠", "浴池很狹窄，而且交通不方便", "房間又新又大，完全沒有缺點"],
+                answerIndex: 0,
+                fullJp: "<ruby>便利<rt>べんり</rt></ruby>でお<ruby>風呂<rt>ふろ</rt></ruby>も<ruby>広<rt>ひろ</rt></ruby>かったですが、<ruby>部屋<rt>へや</rt></ruby>はあまり<ruby>新<rt>あたら</rt></ruby>しくなかったです。",
+                romaji: "benri de ofuro mo hirokatta desu ga, heya wa amari atarashikunakatta desu",
+                zh: "方便且浴池寬敞，但房間不太新。",
+                explanation: "「近くて便利（近又方便）」、「お風呂も広かった（浴池也很寬敞）」、「あまり新しくなかった（不太新）」。"
+              }
+            ]
+          },
+          {
+            id: "u5_3",
+            title: "STAGE 5-3：實戰情境五：看病就診與行程變更聯絡",
+            desc: "學會描述發燒、喉嚨痛、肚子痛等身體不適症狀，以及因故聯絡更改預約時間的長句對話與閱讀。",
+            xpReward: 90,
+            studyCards: [
+              {
+                jp: "<ruby>熱<rt>ねつ</rt></ruby>があります ／ <ruby>喉<rt>のど</rt></ruby>が<ruby>痛<rt>いた</rt></ruby>いです ／ お<ruby>腹<rt>なか</rt></ruby>が<ruby>痛<rt>いた</rt></ruby>いです",
+                romaji: "netsu ga arimasu / nodo ga itai desu / onaka ga itai desu",
+                zh: "發燒了 ／ 喉嚨痛 ／ 肚子痛（部位＋が痛いです）",
+                audio: "ねつがあります。のどがいたいです。おなかがいたいです",
+                exampleJp: "<ruby>昨日<rt>きのう</rt></ruby>の<ruby>夜<rt>よる</rt></ruby>から<ruby>熱<rt>ねつ</rt></ruby>があって、<ruby>頭<rt>あたま</rt></ruby>も<ruby>痛<rt>いた</rt></ruby>いです。",
+                exampleZh: "從昨天晚上開始發燒，頭也很痛。",
+                exampleAudio: "きのうのよるからねつがあって、あたまもいたいです。"
+              },
+              {
+                jp: "<ruby>薬<rt>くすり</rt></ruby>の<ruby>アレルギー<rt>あれるぎー</rt></ruby>はありません",
+                romaji: "kusuri no arerugī wa arimasen",
+                zh: "我沒有藥物過敏（就診填寫問診單必備表達）",
+                audio: "くすりのアレルギーはありません",
+                exampleJp: "この<ruby>薬<rt>くすり</rt></ruby>は<ruby>食後<rt>しょくご</rt></ruby>に<ruby>一日<rt>いちにち</rt></ruby><ruby>三回<rt>さんかい</rt></ruby><ruby>飲<rt>の</rt></ruby>んでください。",
+                exampleZh: "這個藥請在飯後一天吃三次。",
+                exampleAudio: "このくすりはしょくごにいちにちさんかいのんでください。"
+              },
+              {
+                jp: "<ruby>体調<rt>たいちょう</rt></ruby>が<ruby>悪<rt>わる</rt></ruby>いので、<ruby>予約<rt>よやく</rt></ruby>の<ruby>時間<rt>じかん</rt></ruby>を<ruby>変更<rt>へんこう</rt></ruby>したいのですが",
+                romaji: "taichō ga warui node, yoyaku no jikan o henkō shitai no desu ga",
+                zh: "因為身體不太舒服，想更改預約的時間（〜ので＝因為⋯⋯）",
+                audio: "たいちょうがわるいので、よやくのじかんをへんこうしたいのですが",
+                exampleJp: "<ruby>明日<rt>あした</rt></ruby>の<ruby>午後<rt>ごご</rt></ruby><ruby>二時<rt>にじ</rt></ruby>に<ruby>変更<rt>へんこう</rt></ruby>できますか。",
+                exampleZh: "請問可以改到明天下午兩點嗎？",
+                exampleAudio: "あしたのごごにじにへんこうできますか。"
+              }
+            ],
+            questions: [
+              {
+                id: "q5_3_1",
+                type: "choice",
+                instruction: "在診所向醫生說明「我發燒而且喉嚨痛」，正確的日文表達是？",
+                audioText: "ねつがあって、のどがいたいです",
+                promptDisplay: "描述感冒發燒與喉嚨痛症狀",
+                options: ["熱があって、喉が痛いです。", "お腹が空いて、眠いです。", "足が速くて、元気です。", "薬が甘くて、おいしいです。"],
+                answerIndex: 0,
+                fullJp: "<ruby>熱<rt>ねつ</rt></ruby>があって、<ruby>喉<rt>のど</rt></ruby>が<ruby>痛<rt>いた</rt></ruby>いです。",
+                romaji: "netsu ga atte, nodo ga itai desu",
+                zh: "發燒而且喉嚨痛。",
+                explanation: "「熱があります（發燒）」連接「喉が痛いです（喉嚨痛）」。"
+              },
+              {
+                id: "q5_3_2",
+                type: "listening",
+                instruction: "聆聽藥局藥劑師的服藥說明，這包藥應該怎麼吃？",
+                audioText: "このくすりは、あさごはんのあとでのんでください",
+                promptDisplay: "🔊 聆聽藥劑師用藥指示",
+                options: ["請在早餐飯後服用", "請在睡前空腹服用", "請在飯前 30 分鐘服用", "只有發燒時才需要吃"],
+                answerIndex: 0,
+                fullJp: "この<ruby>薬<rt>くすり</rt></ruby>は、<ruby>朝<rt>あさ</rt></ruby>ごはんの<ruby>後<rt>あと</rt></ruby>で<ruby>飲<rt>の</rt></ruby>んでください。",
+                romaji: "kono kusuri wa, asagohan no ato de nonde kudasai",
+                zh: "這個藥請在早餐之後服用。",
+                explanation: "「朝ごはんの後で（早餐之後）」＋「飲んでください（請服用）」。"
+              },
+              {
+                id: "q5_3_3",
+                type: "builder",
+                instruction: "重組句子：「想更改預約的時間。」",
+                audioText: "よやくのじかんをへんこうしたいです",
+                words: ["<ruby>変更<rt>へんこう</rt></ruby>したいです", "<ruby>予約<rt>よやく</rt></ruby>の", "<ruby>時間<rt>じかん</rt></ruby>を"],
+                correctOrder: ["<ruby>予約<rt>よやく</rt></ruby>の", "<ruby>時間<rt>じかん</rt></ruby>を", "<ruby>変更<rt>へんこう</rt></ruby>したいです"],
+                fullJp: "<ruby>予約<rt>よやく</rt></ruby>の<ruby>時間<rt>じかん</rt></ruby>を<ruby>変更<rt>へんこう</rt></ruby>したいです。",
+                romaji: "yoyaku no jikan o henkō shitai desu",
+                zh: "想更改預約的時間。",
+                explanation: "「予約の時間（預約的時間）」＋「変更したいです（想要更改）」。"
+              },
+              {
+                id: "q5_3_4",
+                type: "reading",
+                instruction: "【綜合長文閱讀】閱讀下方聯絡訊息，請問林先生為什麼聯絡餐廳，並希望改成什麼時候？",
+                passage: "もしもし、<ruby>本日<rt>ほんじつ</rt></ruby><ruby>午後<rt>ごご</rt></ruby><ruby>六時<rt>ろくじ</rt></ruby>に<ruby>二人<rt>ふたり</rt></ruby>で<ruby>予約<rt>よやく</rt></ruby>していた<ruby>林<rt>はやし</rt></ruby>です。すみませんが、<ruby>急<rt>きゅう</rt></ruby>に<ruby>体調<rt>たいちょう</rt></ruby>が<ruby>悪<rt>わる</rt></ruby>くなったので、<ruby>今日<rt>きょう</rt></ruby>は<ruby>行<rt>い</rt></ruby>けなくなりました。<ruby>来週<rt>らいしゅう</rt></ruby>の<ruby>土曜日<rt>どようび</rt></ruby>の<ruby>同<rt>おな</rt></ruby>じ<ruby>時間<rt>じかん</rt></ruby>に<ruby>変更<rt>へんこう</rt></ruby>できますか。",
+                passageAudio: "もしもし、ほんじつごごろくじにふたりでよやくしていたはやしです。すみませんが、きゅうにたいちょうがわるくなったので、きょうはいけなくなりました。らいしゅうのどようびのおなじじかんにへんこうできますか。",
+                audioText: "らいしゅうのどようびのおなじじかんにへんこうできますか",
+                promptDisplay: "根據這段聯絡內容，下列敘述何者完全正確？",
+                options: ["林先生因突然身體不適今天無法前往，希望改到下週六晚上 6 點", "林先生想把今天晚上 6 點的預約從 2 位增加到 4 位", "林先生已經到了餐廳門口，正在詢問停車場位置", "林先生想取消下週六的預約，改到今天晚上 6 點"],
+                answerIndex: 0,
+                fullJp: "<ruby>体調<rt>たいちょう</rt></ruby>が<ruby>悪<rt>わる</rt></ruby>くなったので、<ruby>来週<rt>らいしゅう</rt></ruby>の<ruby>土曜日<rt>どようび</rt></ruby>の<ruby>午後<rt>ごご</rt></ruby><ruby>六時<rt>ろくじ</rt></ruby>に<ruby>変更<rt>へんこう</rt></ruby>したい",
+                romaji: "taichō ga warukunatta node, raishū no doyōbi no gogo rokuji ni henkō shitai",
+                zh: "因為身體不適，想改期到下週六下午 6 點",
+                explanation: "恭喜完成 Level 1 至 Level 5 全部 18 個關卡挑戰！你已具備從五十音、核心文法到旅遊及生活深度情境的完整日語實力。"
               }
             ]
           }
@@ -1191,7 +2532,6 @@
         this.init();
         if (!this.ctx) return;
         const now = this.ctx.currentTime;
-        // 清脆雙音階 C5 -> E5 -> G5
         [523.25, 659.25, 783.99].forEach((freq, idx) => {
           const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
@@ -1252,7 +2592,7 @@
      */
     class NihongoStepsApp {
       constructor() {
-        this.STORAGE_KEY = 'nihongo_steps_state_v1';
+        this.STORAGE_KEY = 'nihongo_steps_state_v2';
         this.sfx = new SoundEffects();
         this.jpVoice = null;
 
@@ -1261,7 +2601,8 @@
           xp: 0,
           streak: 1,
           lastStudyDate: this.getTodayStr(),
-          completedUnits: {}, // { unitId: { bestScore: 100, count: 1 } }
+          completedUnits: {},
+          mistakeQuestionIds: [],
           unlockAllPreview: false,
           showFurigana: true,
           soundEnabled: true,
@@ -1294,7 +2635,6 @@
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       }
 
-      // 載入並校準每日連續天數與任務
       loadState() {
         try {
           const saved = localStorage.getItem(this.STORAGE_KEY);
@@ -1307,7 +2647,6 @@
         }
 
         const today = this.getTodayStr();
-        // 檢查連續天數
         if (this.state.lastStudyDate !== today) {
           const lastDate = new Date(this.state.lastStudyDate);
           const nowDate = new Date(today);
@@ -1320,7 +2659,6 @@
           this.state.lastStudyDate = today;
         }
 
-        // 重置跨日的每日任務
         if (!this.state.dailyTasks || this.state.dailyTasks.date !== today) {
           this.state.dailyTasks = {
             date: today,
@@ -1341,12 +2679,10 @@
         }
       }
 
-      // 初始化瀏覽器日語語音合成 (ja-JP)
       initSpeechSynthesis() {
         if (!('speechSynthesis' in window)) return;
         const pickVoice = () => {
           const voices = window.speechSynthesis.getVoices();
-          // 優先尋找日文女聲或 Google 日文語音
           this.jpVoice =
             voices.find(v => v.lang.includes('ja') && (v.name.includes('Google') || v.name.includes('Kyoko') || v.name.includes('Haruka'))) ||
             voices.find(v => v.lang.includes('ja')) ||
@@ -1356,10 +2692,8 @@
         window.speechSynthesis.onvoiceschanged = pickVoice;
       }
 
-      // 播放日文語音
       speakJapanese(text, rate = 1.0) {
         if (!text) return;
-        // 紀錄每日任務發音次數
         this.state.dailyTasks.audioPlays += 1;
         this.checkDailyGoalCompletion();
         this.saveState();
@@ -1413,13 +2747,12 @@
         this.state.unlockAllPreview = checked;
         this.saveState();
         this.renderCurriculum();
-        this.showToast(checked ? '已開啟自由預覽模式（全關卡解鎖）' : '已恢復正常階層解鎖進度');
+        this.showToast(checked ? '已開啟自由預覽模式（全 18 關卡解鎖）' : '已恢復正常階層解鎖進度');
       }
 
-      // 扁平化取得所有關卡清單，方便判斷解鎖順序
       getAllUnitsFlat() {
         const list = [];
-        CURRICULUM.forEach(lvl => {
+        LEVELS_DATA.forEach(lvl => {
           lvl.units.forEach(u => list.push({ ...u, level: lvl.level, levelTitle: lvl.title }));
         });
         return list;
@@ -1429,7 +2762,7 @@
         if (this.state.unlockAllPreview) return true;
         const flat = this.getAllUnitsFlat();
         const idx = flat.findIndex(u => u.id === unitId);
-        if (idx <= 0) return true; // 第一關永遠解鎖
+        if (idx <= 0) return true;
         const prevUnit = flat[idx - 1];
         const prevRecord = this.state.completedUnits[prevUnit.id];
         return Boolean(prevRecord && prevRecord.bestScore >= 80);
@@ -1440,7 +2773,6 @@
         return Boolean(rec && rec.bestScore >= 80);
       }
 
-      // 更新頂部數據與今日任務面板
       updateHeaderAndTasks() {
         const xp = this.state.xp;
         const userLevel = Math.floor(xp / 150) + 1;
@@ -1451,7 +2783,6 @@
         document.getElementById('stat-xp').textContent = xp;
         document.getElementById('stat-xp-bar').style.width = `${Math.max(8, levelProgress)}%`;
 
-        // 更新今日任務進度
         const dt = this.state.dailyTasks;
         this.updateSingleTaskUI('task1', Math.min(dt.unitsCompleted, 1), 1);
         this.updateSingleTaskUI('task2', Math.min(dt.correctAnswers, 8), 8);
@@ -1466,16 +2797,23 @@
           badge.textContent = '進行中';
           badge.className = 'text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800';
         }
+
+        const mistakeBadge = document.getElementById('mistake-book-badge');
+        if (mistakeBadge) {
+          const mCount = (this.state.mistakeQuestionIds || []).length;
+          mistakeBadge.innerHTML = mCount > 0
+            ? `<i class="fa-solid fa-bookmark text-amber-300"></i> 錯題本：${mCount} 題優先複習`
+            : `<i class="fa-solid fa-check-circle text-emerald-300"></i> 錯題本：目前零錯題`;
+        }
       }
 
       updateSingleTaskUI(prefix, current, target) {
-        const done = current >= target;
         const icon = document.getElementById(`${prefix}-icon`);
         const prog = document.getElementById(`${prefix}-progress`);
         prog.textContent = `${current}/${target}`;
-        if (done) {
-          icon.className = 'w-5 h-5 rounded-full bg-matcha border-2 border-matcha flex items-center justify-center text-xs text-white transition-colors';
-          icon.innerHTML = '<i class="fa-solid fa-check text-[10px]"></i>';
+        if (current >= target) {
+          icon.className = 'w-5 h-5 rounded-full bg-matcha border-2 border-matcha flex items-center justify-center text-[10px] text-white transition-colors';
+          icon.innerHTML = '<i class="fa-solid fa-check"></i>';
           prog.className = 'text-xs font-bold text-matcha';
         } else {
           icon.className = 'w-5 h-5 rounded-full border-2 border-stone-300 flex items-center justify-center text-xs text-white transition-colors';
@@ -1493,7 +2831,20 @@
         }
       }
 
-      // 渲染主學習地圖
+      switchView(viewId) {
+        ['view-dashboard', 'view-lesson-preview', 'view-quiz', 'view-summary'].forEach(id => {
+          document.getElementById(id).classList.add('hidden');
+        });
+        document.getElementById(viewId).classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      goHome() {
+        window.speechSynthesis && window.speechSynthesis.cancel();
+        this.renderDashboard();
+        this.switchView('view-dashboard');
+      }
+
       renderDashboard() {
         this.updateHeaderAndTasks();
         this.renderCurriculum();
@@ -1503,11 +2854,10 @@
         const container = document.getElementById('curriculum-container');
         container.innerHTML = '';
 
-        // 找出目前最推薦進行的下一關（第一個已解鎖但尚未達 80% 的關卡）
         const flatUnits = this.getAllUnitsFlat();
         const nextRecommended = flatUnits.find(u => this.isUnitUnlocked(u.id) && !this.isUnitCompleted(u.id));
 
-        CURRICULUM.forEach(lvl => {
+        LEVELS_DATA.forEach(lvl => {
           const totalInLvl = lvl.units.length;
           const completedInLvl = lvl.units.filter(u => this.isUnitCompleted(u.id)).length;
           const lvlUnlocked = lvl.units.some(u => this.isUnitUnlocked(u.id));
@@ -1515,7 +2865,6 @@
           const section = document.createElement('div');
           section.className = `bg-white rounded-3xl border ${lvlUnlocked ? 'border-stone-200/90 shadow-sm' : 'border-stone-200/60 opacity-85'} overflow-hidden`;
 
-          // Level 標題橫幅
           section.innerHTML = `
             <div class="p-5 sm:p-6 bg-gradient-to-r ${lvl.color} text-white flex flex-wrap items-center justify-between gap-4">
               <div class="flex items-center gap-3.5">
@@ -1585,8 +2934,8 @@
               </div>
               <div class="mt-4 pt-3 border-t ${unlocked ? 'border-stone-100' : 'border-stone-200/50'} flex items-center justify-between text-xs font-semibold">
                 <span class="${unlocked ? 'text-amber-600' : 'text-stone-400'}"><i class="fa-solid fa-star mr-1"></i>+${unit.xpReward} XP</span>
-                <span class="${unlocked ? 'text-ai group-hover:translate-x-1 transition-transform' : 'text-stone-400'}">
-                  ${unlocked ? (completed ? '複習 / 重測' : '開始學習') : '尚未開放'} <i class="fa-solid fa-chevron-right ml-0.5"></i>
+                <span class="${unlocked ? 'text-ai' : 'text-stone-400'}">
+                  ${!unlocked ? '尚未開放' : completed ? '複習 / 重測' : '開始學習'} <i class="fa-solid fa-chevron-right ml-0.5 text-[10px]"></i>
                 </span>
               </div>
             `;
@@ -1595,22 +2944,6 @@
         });
       }
 
-      // 切換主視圖 helper
-      switchView(viewId) {
-        ['view-dashboard', 'view-lesson-preview', 'view-quiz', 'view-summary'].forEach(id => {
-          document.getElementById(id).classList.add('hidden');
-        });
-        document.getElementById(viewId).classList.remove('hidden');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-
-      goHome() {
-        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-        this.switchView('view-dashboard');
-        this.renderDashboard();
-      }
-
-      // 開啟單元課前預覽卡片
       openLessonPreview(unit, levelObj) {
         this.currentUnit = unit;
         this.isDailyChallenge = false;
@@ -1624,18 +2957,42 @@
 
         unit.studyCards.forEach(card => {
           const el = document.createElement('div');
-          el.className = 'p-4 rounded-2xl bg-washi/70 border border-stone-200/80 hover:border-ai/40 transition flex items-center justify-between gap-3';
+          el.className = 'p-4 sm:p-5 rounded-2xl bg-washi/70 border border-stone-200/80 hover:border-ai/40 transition space-y-3';
           el.innerHTML = `
-            <div class="space-y-0.5">
-              <div class="font-jp font-bold text-lg text-stone-900">${card.jp}</div>
-              <div class="text-xs font-mono text-stone-400">${card.romaji}</div>
-              <div class="text-sm text-stone-700 font-medium pt-0.5">${card.zh}</div>
+            <div class="flex items-start justify-between gap-3">
+              <div class="space-y-0.5">
+                <div class="font-jp font-bold text-lg sm:text-xl text-stone-900">${card.jp}</div>
+                <div class="text-xs font-mono text-stone-400">${card.romaji}</div>
+                <div class="text-sm text-stone-700 font-medium pt-0.5">${card.zh}</div>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <button class="btn-audio-normal w-10 h-10 rounded-xl bg-white hover:bg-ai hover:text-white text-ai border border-stone-200 shadow-xs flex items-center justify-center transition" title="常速朗讀單字 (1.0x)">
+                  <i class="fa-solid fa-volume-high"></i>
+                </button>
+                <button class="btn-audio-slow px-2.5 h-10 rounded-xl bg-white hover:bg-slate-200 text-stone-600 border border-stone-200 text-xs font-bold flex items-center justify-center transition" title="慢速清晰朗讀 (0.7x)">
+                  0.7x
+                </button>
+              </div>
             </div>
-            <button class="w-10 h-10 rounded-xl bg-white hover:bg-ai hover:text-white text-ai border border-stone-200 shadow-xs flex items-center justify-center shrink-0 transition" title="聆聽日文發音">
-              <i class="fa-solid fa-volume-high"></i>
-            </button>
+            ${card.exampleJp ? `
+              <div class="bg-white rounded-xl p-3 border border-stone-200/70 flex items-center justify-between gap-3">
+                <div class="space-y-0.5 text-sm">
+                  <div class="text-[11px] font-bold text-ai/80 uppercase tracking-wider mb-0.5">情境對話 / 實用例句</div>
+                  <div class="font-jp font-medium text-stone-800">${card.exampleJp}</div>
+                  <div class="text-xs text-stone-500">${card.exampleZh}</div>
+                </div>
+                <button class="btn-example-audio w-9 h-9 rounded-lg bg-blue-50 hover:bg-ai hover:text-white text-ai flex items-center justify-center shrink-0 transition" title="朗讀情境例句">
+                  <i class="fa-solid fa-play text-xs"></i>
+                </button>
+              </div>
+            ` : ''}
           `;
-          el.querySelector('button').onclick = () => this.speakJapanese(card.audio, 0.95);
+          el.querySelector('.btn-audio-normal').onclick = () => this.speakJapanese(card.audio, 1.0);
+          el.querySelector('.btn-audio-slow').onclick = () => this.speakJapanese(card.audio, 0.7);
+          const exBtn = el.querySelector('.btn-example-audio');
+          if (exBtn) {
+            exBtn.onclick = () => this.speakJapanese(card.exampleAudio || card.audio, 0.95);
+          }
           list.appendChild(el);
         });
 
@@ -1645,36 +3002,37 @@
       startQuizFromPreview() {
         if (!this.currentUnit) return;
         this.isDailyChallenge = false;
-        // 複製題庫並隨機微調選項順序（保留正確答案追蹤）
         this.quizQuestions = this.prepareQuestions(this.currentUnit.questions);
         this.startQuizSession();
       }
 
-      // 啟動「每日混合特訓」：從所有已解鎖關卡中隨機抽取最多 6 題
       startDailyChallenge() {
         const flat = this.getAllUnitsFlat();
         const unlockedUnits = flat.filter(u => this.isUnitUnlocked(u.id));
-        let pool = [];
+        const allPool = [];
         unlockedUnits.forEach(u => {
-          u.questions.forEach(q => pool.push(q));
+          u.questions.forEach(q => allPool.push(q));
         });
 
-        // 洗牌抽 6 題
-        pool = this.shuffleArray(pool).slice(0, 6);
+        const mistakeIds = new Set(this.state.mistakeQuestionIds || []);
+        const priorityMistakes = this.shuffleArray(allPool.filter(q => mistakeIds.has(q.id)));
+        const otherQuestions = this.shuffleArray(allPool.filter(q => !mistakeIds.has(q.id)));
+
+        const selected = [...priorityMistakes, ...otherQuestions].slice(0, 8);
         this.currentUnit = {
           id: 'daily_challenge',
           title: '每日混合特訓',
-          xpReward: 50
+          xpReward: 60
         };
         this.isDailyChallenge = true;
-        this.quizQuestions = this.prepareQuestions(pool);
+        this.quizQuestions = this.prepareQuestions(selected);
         this.startQuizSession();
       }
 
       prepareQuestions(rawQuestions) {
         return rawQuestions.map(q => {
           const clone = JSON.parse(JSON.stringify(q));
-          if (clone.type === 'choice' || clone.type === 'listening') {
+          if (clone.type === 'choice' || clone.type === 'listening' || clone.type === 'reading') {
             const correctText = clone.options[clone.answerIndex];
             const shuffled = this.shuffleArray([...clone.options]);
             clone.options = shuffled;
@@ -1704,79 +3062,98 @@
         const q = this.quizQuestions[this.currentQIndex];
         const total = this.quizQuestions.length;
 
-        // 進度條與計數
         const pct = Math.round((this.currentQIndex / total) * 100);
         document.getElementById('quiz-progress-bar').style.width = `${pct}%`;
         document.getElementById('quiz-counter').textContent = `${this.currentQIndex + 1} / ${total}`;
 
-        // 題型徽章
         const badge = document.getElementById('quiz-type-badge');
         if (q.type === 'listening') {
           badge.innerHTML = '<i class="fa-solid fa-headphones"></i> 聽力辨識';
-          badge.className = 'inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-amber-50 text-amber-700';
+          badge.className = 'inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-purple-50 text-purple-700';
         } else if (q.type === 'builder') {
-          badge.innerHTML = '<i class="fa-solid fa-puzzle-piece"></i> 文法句型重組';
+          badge.innerHTML = '<i class="fa-solid fa-puzzle-piece"></i> 句型重組';
+          badge.className = 'inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-amber-50 text-amber-800';
+        } else if (q.type === 'reading') {
+          badge.innerHTML = '<i class="fa-solid fa-book-open-reader"></i> 情境閱讀理解';
           badge.className = 'inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-rose-50 text-shu';
         } else {
-          badge.innerHTML = '<i class="fa-solid fa-circle-question"></i> 語意與文法選擇';
+          badge.innerHTML = '<i class="fa-solid fa-list-check"></i> 文法與情境選擇';
           badge.className = 'inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-blue-50 text-ai';
         }
 
         document.getElementById('quiz-instruction').textContent = q.instruction;
 
-        // 音訊控制顯示（句型重組題先隱藏音訊以免直接破題，其他題型顯示）
-        const audioCtrl = document.getElementById('quiz-audio-controls');
-        if (q.type === 'builder') {
-          audioCtrl.classList.add('hidden');
+        const readingBox = document.getElementById('quiz-reading-box');
+        const readingPassageEl = document.getElementById('quiz-reading-passage');
+        if (q.type === 'reading' && q.passage) {
+          readingBox.classList.remove('hidden');
+          readingPassageEl.innerHTML = q.passage;
         } else {
-          audioCtrl.classList.remove('hidden');
+          readingBox.classList.add('hidden');
+          readingPassageEl.innerHTML = '';
         }
 
-        document.getElementById('quiz-prompt-display').innerHTML = q.promptDisplay || '';
+        const promptDisplay = document.getElementById('quiz-prompt-display');
+        const audioControls = document.getElementById('quiz-audio-controls');
+
+        if (q.type === 'builder') {
+          audioControls.classList.add('hidden');
+          promptDisplay.innerHTML = `<span class="text-base text-stone-600 font-sans font-normal">請將下方詞彙排列成正確日文句子</span>`;
+        } else {
+          audioControls.classList.remove('hidden');
+          promptDisplay.innerHTML = q.promptDisplay || q.fullJp;
+        }
+
         document.getElementById('quiz-feedback-panel').classList.add('hidden');
 
-        // 渲染對應作答介面
-        const optContainer = document.getElementById('quiz-options-container');
+        const optionsContainer = document.getElementById('quiz-options-container');
         const builderContainer = document.getElementById('quiz-builder-container');
         const submitRow = document.getElementById('quiz-submit-row');
 
-        if (q.type === 'choice' || q.type === 'listening') {
-          optContainer.classList.remove('hidden');
+        if (q.type === 'choice' || q.type === 'listening' || q.type === 'reading') {
+          optionsContainer.classList.remove('hidden');
           builderContainer.classList.add('hidden');
           submitRow.classList.add('hidden');
-          optContainer.innerHTML = '';
 
-          q.options.forEach((opt, idx) => {
+          optionsContainer.innerHTML = '';
+          q.options.forEach((optText, idx) => {
             const btn = document.createElement('button');
-            btn.className = 'w-full text-left p-4 rounded-2xl border-2 border-stone-200 hover:border-ai hover:bg-blue-50/40 font-jp font-medium text-base text-stone-800 transition flex items-center gap-3 active:scale-[0.99]';
+            btn.className = 'option-btn w-full text-left p-4 rounded-2xl border-2 border-stone-200 hover:border-ai hover:bg-blue-50/40 font-medium text-stone-800 transition flex items-center justify-between gap-3';
             btn.innerHTML = `
-              <span class="w-7 h-7 rounded-lg bg-stone-100 text-stone-600 font-sans font-bold text-xs flex items-center justify-center shrink-0">${String.fromCharCode(65 + idx)}</span>
-              <span>${opt}</span>
+              <div class="flex items-center gap-3">
+                <span class="w-7 h-7 rounded-lg bg-stone-100 text-stone-500 font-bold text-xs flex items-center justify-center shrink-0">${String.fromCharCode(65 + idx)}</span>
+                <span class="font-jp text-base sm:text-lg">${optText}</span>
+              </div>
+              <span class="status-icon text-lg"></span>
             `;
-            btn.onclick = () => this.handleChoiceAnswer(idx, btn);
-            optContainer.appendChild(btn);
+            btn.onclick = () => this.handleOptionSelect(idx, btn);
+            optionsContainer.appendChild(btn);
           });
-
-          // 若是聽力題，自動朗讀一次
-          if (q.type === 'listening' && q.audioText) {
-            setTimeout(() => this.speakJapanese(q.audioText, 0.95), 250);
-          }
         } else if (q.type === 'builder') {
-          optContainer.classList.add('hidden');
+          optionsContainer.classList.add('hidden');
           builderContainer.classList.remove('hidden');
           submitRow.classList.remove('hidden');
+          this.initSentenceBuilder(q);
+        }
 
-          this.selectedBuilderWords = [];
-          const bankWords = this.shuffleArray([...q.words]).map((w, i) => ({ id: i, text: w, used: false }));
-          this.builderBankState = bankWords;
-          this.renderSentenceBuilder();
+        if (q.type === 'listening' && q.audioText) {
+          setTimeout(() => this.speakJapanese(q.audioText, 0.95), 350);
         }
       }
 
-      playCurrentQuestionAudio(rate) {
+      playCurrentQuestionAudio(rate = 1.0) {
         const q = this.quizQuestions[this.currentQIndex];
         if (q && q.audioText) {
           this.speakJapanese(q.audioText, rate);
+        }
+      }
+
+      playReadingPassageAudio() {
+        const q = this.quizQuestions[this.currentQIndex];
+        if (q && q.passageAudio) {
+          this.speakJapanese(q.passageAudio, 0.95);
+        } else if (q && q.audioText) {
+          this.speakJapanese(q.audioText, 0.95);
         }
       }
 
@@ -1787,35 +3164,53 @@
         }
       }
 
-      // 處理單選題作答
-      handleChoiceAnswer(selectedIndex, clickedBtn) {
+      recordQuestionResult(questionId, isCorrect) {
+        if (!this.state.mistakeQuestionIds) this.state.mistakeQuestionIds = [];
+        const idx = this.state.mistakeQuestionIds.indexOf(questionId);
+        if (isCorrect) {
+          if (idx !== -1) {
+            this.state.mistakeQuestionIds.splice(idx, 1);
+          }
+        } else {
+          if (idx === -1) {
+            this.state.mistakeQuestionIds.push(questionId);
+          }
+        }
+      }
+
+      handleOptionSelect(selectedIndex, clickedBtn) {
         if (this.hasAnsweredCurrent) return;
         this.hasAnsweredCurrent = true;
 
         const q = this.quizQuestions[this.currentQIndex];
         const isCorrect = selectedIndex === q.answerIndex;
-        const allBtns = document.querySelectorAll('#quiz-options-container button');
+        const allBtns = document.querySelectorAll('.option-btn');
 
-        allBtns.forEach((b, idx) => {
-          b.disabled = true;
-          b.classList.remove('hover:border-ai', 'hover:bg-blue-50/40');
+        allBtns.forEach((btn, idx) => {
+          btn.disabled = true;
+          btn.classList.remove('hover:border-ai', 'hover:bg-blue-50/40');
           if (idx === q.answerIndex) {
-            b.className = 'w-full text-left p-4 rounded-2xl border-2 border-matcha bg-emerald-50 font-jp font-bold text-base text-emerald-950 flex items-center gap-3';
-            b.querySelector('span').className = 'w-7 h-7 rounded-lg bg-matcha text-white font-sans font-bold text-xs flex items-center justify-center shrink-0';
-            b.querySelector('span').innerHTML = '<i class="fa-solid fa-check"></i>';
+            btn.className = 'option-btn w-full text-left p-4 rounded-2xl border-2 border-matcha bg-emerald-50 text-emerald-950 font-bold flex items-center justify-between gap-3';
+            btn.querySelector('.status-icon').innerHTML = '<i class="fa-solid fa-circle-check text-matcha"></i>';
           } else if (idx === selectedIndex && !isCorrect) {
-            b.className = 'w-full text-left p-4 rounded-2xl border-2 border-shu bg-rose-50 font-jp font-medium text-base text-rose-950 flex items-center gap-3';
-            b.querySelector('span').className = 'w-7 h-7 rounded-lg bg-shu text-white font-sans font-bold text-xs flex items-center justify-center shrink-0';
-            b.querySelector('span').innerHTML = '<i class="fa-solid fa-xmark"></i>';
+            btn.className = 'option-btn w-full text-left p-4 rounded-2xl border-2 border-rose-500 bg-rose-50 text-rose-950 font-medium flex items-center justify-between gap-3';
+            btn.querySelector('.status-icon').innerHTML = '<i class="fa-solid fa-circle-xmark text-rose-600"></i>';
           } else {
-            b.classList.add('opacity-50');
+            btn.classList.add('opacity-50');
           }
         });
 
-        this.finalizeQuestionResult(isCorrect, q);
+        this.recordQuestionResult(q.id, isCorrect);
+        this.processAnswerResult(isCorrect, q);
       }
 
-      // 渲染句型重組區
+      initSentenceBuilder(q) {
+        this.selectedBuilderWords = [];
+        const shuffledWords = this.shuffleArray([...q.words]);
+        this.builderPool = shuffledWords.map((w, i) => ({ id: i, text: w, used: false }));
+        this.renderSentenceBuilder();
+      }
+
       renderSentenceBuilder() {
         const slot = document.getElementById('builder-answer-slot');
         const bank = document.getElementById('builder-word-bank');
@@ -1823,18 +3218,19 @@
 
         slot.innerHTML = '';
         if (this.selectedBuilderWords.length === 0) {
-          slot.innerHTML = '<span class="text-xs text-stone-400 select-none">請依序點擊下方的日文單字卡組合成句...</span>';
+          slot.innerHTML = `<span class="text-xs text-stone-400 select-none">請依序點擊下方的日文單字卡組合成句...</span>`;
+          checkBtn.disabled = true;
         } else {
+          checkBtn.disabled = false;
           this.selectedBuilderWords.forEach((item, pos) => {
             const chip = document.createElement('button');
-            chip.className = 'px-3.5 py-2 rounded-xl bg-ai text-white font-jp font-bold text-base shadow-xs hover:bg-aiLight transition active:scale-95';
+            chip.className = 'font-jp px-3.5 py-2 rounded-xl bg-ai text-white font-bold text-base shadow-xs hover:bg-aiLight active:scale-95 transition';
             chip.innerHTML = item.text;
             chip.disabled = this.hasAnsweredCurrent;
             chip.onclick = () => {
               if (this.hasAnsweredCurrent) return;
+              item.used = false;
               this.selectedBuilderWords.splice(pos, 1);
-              const targetBank = this.builderBankState.find(b => b.id === item.id);
-              if (targetBank) targetBank.used = false;
               this.renderSentenceBuilder();
             };
             slot.appendChild(chip);
@@ -1842,13 +3238,11 @@
         }
 
         bank.innerHTML = '';
-        this.builderBankState.forEach(item => {
+        this.builderPool.forEach(item => {
           const chip = document.createElement('button');
-          chip.className = `px-4 py-2.5 rounded-xl border-2 font-jp font-bold text-base transition ${
-            item.used
-              ? 'bg-stone-100 border-stone-200 text-transparent pointer-events-none select-none'
-              : 'bg-white border-stone-300 hover:border-ai text-stone-800 shadow-xs active:scale-95'
-          }`;
+          chip.className = item.used
+            ? 'font-jp px-4 py-2.5 rounded-xl bg-stone-200/70 text-transparent border border-stone-200 select-none cursor-default text-base'
+            : 'font-jp px-4 py-2.5 rounded-xl bg-white hover:bg-blue-50 border-2 border-stone-200 hover:border-ai text-stone-800 font-bold text-base shadow-xs active:scale-95 transition';
           chip.innerHTML = item.text;
           chip.disabled = item.used || this.hasAnsweredCurrent;
           chip.onclick = () => {
@@ -1859,8 +3253,26 @@
           };
           bank.appendChild(chip);
         });
+      }
 
-        checkBtn.disabled = this.selectedBuilderWords.length === 0;
+      showBuilderHint() {
+        if (this.hasAnsweredCurrent) return;
+        const q = this.quizQuestions[this.currentQIndex];
+        if (!q || !q.correctOrder || q.correctOrder.length === 0) return;
+        const firstWord = q.correctOrder[0];
+
+        this.selectedBuilderWords = [];
+        this.builderPool.forEach(item => {
+          item.used = false;
+        });
+
+        const matchItem = this.builderPool.find(item => item.text === firstWord);
+        if (matchItem) {
+          matchItem.used = true;
+          this.selectedBuilderWords.push(matchItem);
+          this.renderSentenceBuilder();
+          this.showToast('💡 已為您填入第一個開頭詞彙！');
+        }
       }
 
       checkSentenceBuilder() {
@@ -1868,46 +3280,49 @@
         this.hasAnsweredCurrent = true;
 
         const q = this.quizQuestions[this.currentQIndex];
-        const userSeq = this.selectedBuilderWords.map(w => w.text);
-        const isCorrect = JSON.stringify(userSeq) === JSON.stringify(q.correctOrder);
+        const userSentence = this.selectedBuilderWords.map(w => w.text).join('');
+        const targetSentence = q.correctOrder.join('');
+        const isCorrect = userSentence === targetSentence;
 
         document.getElementById('quiz-submit-row').classList.add('hidden');
         this.renderSentenceBuilder();
-        this.finalizeQuestionResult(isCorrect, q);
+        this.recordQuestionResult(q.id, isCorrect);
+        this.processAnswerResult(isCorrect, q);
       }
 
-      // 統一處理答題對錯回饋與解析顯示
-      finalizeQuestionResult(isCorrect, q) {
+      processAnswerResult(isCorrect, q) {
         if (isCorrect) {
           this.correctCount += 1;
           this.sfx.playCorrect();
           this.state.dailyTasks.correctAnswers += 1;
           this.checkDailyGoalCompletion();
-          this.saveState();
         } else {
           this.sfx.playWrong();
         }
+        this.saveState();
+        this.updateHeaderAndTasks();
 
         const panel = document.getElementById('quiz-feedback-panel');
         const icon = document.getElementById('feedback-icon');
         const title = document.getElementById('feedback-title');
         const nextBtn = document.getElementById('btn-next-question');
 
-        panel.classList.remove('hidden', 'bg-emerald-50/90', 'border-matcha', 'bg-rose-50/90', 'border-shu');
+        panel.classList.remove('hidden', 'bg-emerald-50/90', 'border-emerald-300', 'bg-rose-50/90', 'border-rose-300');
+
         if (isCorrect) {
-          panel.classList.add('bg-emerald-50/90', 'border-matcha');
+          panel.classList.add('bg-emerald-50/90', 'border-emerald-300');
           icon.className = 'w-10 h-10 rounded-2xl bg-matcha flex items-center justify-center text-white text-xl shrink-0 mt-0.5';
           icon.innerHTML = '<i class="fa-solid fa-check"></i>';
-          title.textContent = '答對了！表現非常出色！';
+          title.textContent = '正解！太棒了！';
           title.className = 'font-bold text-lg text-emerald-900';
-          nextBtn.className = 'mt-5 w-full py-3.5 font-bold rounded-xl text-white bg-matcha hover:bg-[#4d7528] shadow-md transition flex items-center justify-center gap-2';
+          nextBtn.className = 'mt-5 w-full py-3.5 font-bold rounded-xl text-white bg-matcha hover:bg-emerald-700 shadow-md transition flex items-center justify-center gap-2';
         } else {
-          panel.classList.add('bg-rose-50/90', 'border-shu');
-          icon.className = 'w-10 h-10 rounded-2xl bg-shu flex items-center justify-center text-white text-xl shrink-0 mt-0.5';
+          panel.classList.add('bg-rose-50/90', 'border-rose-300');
+          icon.className = 'w-10 h-10 rounded-2xl bg-rose-600 flex items-center justify-center text-white text-xl shrink-0 mt-0.5';
           icon.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-          title.textContent = '差一點點，來看看解析吧！';
+          title.textContent = '再接再厲！已加入錯題強化本';
           title.className = 'font-bold text-lg text-rose-900';
-          nextBtn.className = 'mt-5 w-full py-3.5 font-bold rounded-xl text-white bg-shu hover:bg-[#c44129] shadow-md transition flex items-center justify-center gap-2';
+          nextBtn.className = 'mt-5 w-full py-3.5 font-bold rounded-xl text-white bg-rose-600 hover:bg-rose-700 shadow-md transition flex items-center justify-center gap-2';
         }
 
         document.getElementById('feedback-jp').innerHTML = q.fullJp;
@@ -1915,57 +3330,49 @@
         document.getElementById('feedback-zh').textContent = q.zh;
         document.getElementById('feedback-explanation').textContent = q.explanation;
 
-        const isLast = this.currentQIndex >= this.quizQuestions.length - 1;
-        nextBtn.querySelector('span').textContent = isLast ? '查看本關結算成績' : '繼續下一題';
-
-        // 自動朗讀正確句型幫助記憶
         if (q.audioText) {
-          setTimeout(() => this.speakJapanese(q.audioText, 0.95), 350);
+          setTimeout(() => this.speakJapanese(q.audioText, 0.95), 250);
         }
-
-        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
 
       nextQuestion() {
-        if (this.currentQIndex < this.quizQuestions.length - 1) {
-          this.currentQIndex += 1;
+        this.currentQIndex += 1;
+        if (this.currentQIndex < this.quizQuestions.length) {
           this.renderCurrentQuestion();
         } else {
-          this.finishQuiz();
+          this.finishQuizSession();
         }
       }
 
-      finishQuiz() {
+      finishQuizSession() {
+        document.getElementById('quiz-progress-bar').style.width = '100%';
         const total = this.quizQuestions.length;
         const accuracy = Math.round((this.correctCount / total) * 100);
         const passed = accuracy >= 80;
 
-        // 計算獲得 XP
-        const baseXp = this.currentUnit.xpReward || 40;
-        const earnedXp = passed ? baseXp : Math.max(10, Math.round(baseXp * (accuracy / 100) * 0.5));
-        this.state.xp += earnedXp;
+        let earnedXp = Math.round((this.currentUnit.xpReward || 40) * (accuracy / 100));
+        if (earnedXp < 10) earnedXp = 10;
 
-        // 更新每日任務
+        this.state.xp += earnedXp;
         this.state.dailyTasks.unitsCompleted += 1;
         this.checkDailyGoalCompletion();
 
-        let unlockedNextTitle = null;
+        let newlyUnlockedTitle = null;
 
-        if (!this.isDailyChallenge) {
+        if (!this.isDailyChallenge && this.currentUnit) {
           const prevRecord = this.state.completedUnits[this.currentUnit.id];
-          const wasAlreadyPassed = prevRecord && prevRecord.bestScore >= 80;
+          const wasPassedBefore = prevRecord && prevRecord.bestScore >= 80;
 
           this.state.completedUnits[this.currentUnit.id] = {
             bestScore: Math.max(accuracy, prevRecord ? prevRecord.bestScore : 0),
-            count: (prevRecord ? prevRecord.count : 0) + 1
+            attempts: (prevRecord ? prevRecord.attempts : 0) + 1
           };
 
-          // 若首次達標 80%，檢查下一個解鎖關卡
-          if (passed && !wasAlreadyPassed) {
+          if (passed && !wasPassedBefore) {
             const flat = this.getAllUnitsFlat();
-            const idx = flat.findIndex(u => u.id === this.currentUnit.id);
-            if (idx >= 0 && idx < flat.length - 1) {
-              unlockedNextTitle = flat[idx + 1].title;
+            const curIdx = flat.findIndex(u => u.id === this.currentUnit.id);
+            if (curIdx >= 0 && curIdx + 1 < flat.length) {
+              newlyUnlockedTitle = flat[curIdx + 1].title;
             }
           }
         }
@@ -1973,36 +3380,34 @@
         this.saveState();
         this.updateHeaderAndTasks();
 
-        // 渲染結算畫面
-        document.getElementById('summary-accuracy').textContent = `${accuracy}%`;
-        document.getElementById('summary-xp').textContent = `+${earnedXp} XP`;
-        document.getElementById('summary-streak').textContent = `${this.state.streak} 天`;
-
-        const badgeIcon = document.getElementById('summary-badge-icon');
-        const titleEl = document.getElementById('summary-title');
-        const subEl = document.getElementById('summary-subtitle');
+        const summaryBadge = document.getElementById('summary-badge-icon');
+        const summaryTitle = document.getElementById('summary-title');
+        const summarySub = document.getElementById('summary-subtitle');
         const unlockBanner = document.getElementById('summary-unlock-banner');
 
         if (passed) {
           this.sfx.playFanfare();
-          badgeIcon.className = 'w-20 h-20 mx-auto rounded-3xl bg-amber-100 text-amber-500 flex items-center justify-center text-4xl shadow-inner';
-          badgeIcon.innerHTML = '<i class="fa-solid fa-trophy"></i>';
-          titleEl.textContent = this.isDailyChallenge ? '每日特訓挑戰成功！' : '恭喜達標過關！';
-          subEl.textContent = `答對 ${this.correctCount} / ${total} 題，日文實力又更上一層樓！`;
-
           if (typeof confetti === 'function') {
             confetti({ particleCount: 75, spread: 65, origin: { y: 0.6 } });
           }
+          summaryBadge.className = 'w-20 h-20 mx-auto rounded-3xl bg-amber-100 text-amber-500 flex items-center justify-center text-4xl shadow-inner';
+          summaryBadge.innerHTML = '<i class="fa-solid fa-trophy"></i>';
+          summaryTitle.textContent = this.isDailyChallenge ? '每日混合特訓完成！' : '關卡挑戰過關！';
+          summarySub.textContent = '太優秀了！你的日文實力又更上一層樓。';
         } else {
-          badgeIcon.className = 'w-20 h-20 mx-auto rounded-3xl bg-blue-100 text-ai flex items-center justify-center text-4xl shadow-inner';
-          badgeIcon.innerHTML = '<i class="fa-solid fa-book-reader"></i>';
-          titleEl.textContent = '練習完成！再接再厲';
-          subEl.textContent = `本次正確率 ${accuracy}%（需達 80% 才能解鎖下一關卡喔！）`;
+          summaryBadge.className = 'w-20 h-20 mx-auto rounded-3xl bg-blue-100 text-ai flex items-center justify-center text-4xl shadow-inner';
+          summaryBadge.innerHTML = '<i class="fa-solid fa-dumbbell"></i>';
+          summaryTitle.textContent = '練習完成！距離過關只差一點';
+          summarySub.textContent = '需要達到 80% 正確率才能解鎖下一個關卡，再試一次吧！';
         }
 
-        if (unlockedNextTitle) {
+        document.getElementById('summary-accuracy').textContent = `${accuracy}%`;
+        document.getElementById('summary-xp').textContent = `+${earnedXp} XP`;
+        document.getElementById('summary-streak').textContent = `${this.state.streak} 天`;
+
+        if (newlyUnlockedTitle) {
           unlockBanner.classList.remove('hidden');
-          document.getElementById('summary-unlock-text').textContent = `已解鎖新單元：「${unlockedNextTitle}」`;
+          document.getElementById('summary-unlock-text').textContent = `恭喜解鎖新關卡：「${newlyUnlockedTitle}」！`;
         } else {
           unlockBanner.classList.add('hidden');
         }
@@ -2013,15 +3418,16 @@
       retryCurrentQuiz() {
         if (this.isDailyChallenge) {
           this.startDailyChallenge();
-        } else {
-          this.startQuizFromPreview();
+        } else if (this.currentUnit) {
+          this.quizQuestions = this.prepareQuestions(this.currentUnit.questions);
+          this.startQuizSession();
         }
       }
 
       confirmExitQuiz() {
         this.openModal(
           '確定要離開目前的練習嗎？',
-          '<p>離開後本回合的答題進度將不會儲存，確定要返回學習地圖嗎？</p>',
+          '<p>現在離開的話，本輪尚未結算的答題進度將不會保存。</p>',
           `
             <button onclick="app.closeModal()" class="px-4 py-2 rounded-xl border border-stone-300 text-stone-700 font-medium hover:bg-stone-50">繼續練習</button>
             <button onclick="app.closeModal(); app.goHome();" class="px-4 py-2 rounded-xl bg-shu text-white font-bold hover:bg-[#c44129]">確定離開</button>
@@ -2030,30 +3436,42 @@
       }
 
       toggleSettingsModal() {
-        const completedCount = Object.values(this.state.completedUnits).filter(v => v.bestScore >= 80).length;
-        const totalUnits = this.getAllUnitsFlat().length;
+        const mistakeCount = (this.state.mistakeQuestionIds || []).length;
+        const bodyHtml = `
+          <div class="space-y-4">
+            <div class="flex items-center justify-between p-3 rounded-xl bg-washi border border-stone-200/70">
+              <div>
+                <div class="font-bold text-stone-800">答題音效回饋</div>
+                <div class="text-xs text-stone-500">答對與過關時的清脆提示音</div>
+              </div>
+              <input type="checkbox" ${this.state.soundEnabled ? 'checked' : ''} onchange="app.toggleSound(this.checked)" class="w-5 h-5 accent-ai cursor-pointer">
+            </div>
 
-        this.openModal(
-          '學習設定與進度管理',
-          `
-            <div class="bg-washi p-4 rounded-2xl border border-stone-200/80 space-y-2">
-              <div class="flex justify-between"><span>已完成單元數：</span><strong class="text-ai">${completedCount} / ${totalUnits} 單元</strong></div>
-              <div class="flex justify-between"><span>累積總經驗值：</span><strong class="text-matcha">${this.state.xp} XP</strong></div>
-              <div class="flex justify-between"><span>連續學習天數：</span><strong class="text-shu">${this.state.streak} 天</strong></div>
+            <div class="flex items-center justify-between p-3 rounded-xl bg-washi border border-stone-200/70">
+              <div>
+                <div class="font-bold text-stone-800">錯題強化本（目前 ${mistakeCount} 題）</div>
+                <div class="text-xs text-stone-500">每日混合特訓會優先抽選錯題加強練習</div>
+              </div>
+              <button onclick="app.clearMistakes()" class="px-3 py-1.5 text-xs font-bold rounded-lg border border-stone-300 text-stone-600 hover:bg-white transition">清空錯題</button>
             </div>
-            <div class="flex items-center justify-between pt-2">
-              <span class="font-medium text-stone-800">答題清脆音效</span>
-              <input type="checkbox" ${this.state.soundEnabled ? 'checked' : ''} onchange="app.toggleSound(this.checked)" class="w-4 h-4 accent-ai">
-            </div>
-            <div class="pt-3 border-t border-stone-100">
-              <p class="text-xs text-stone-400 mb-2">若想從頭體驗五十音到進階閱讀的解鎖過程，可重置所有紀錄：</p>
-              <button onclick="app.confirmResetProgress()" class="w-full py-2.5 rounded-xl border border-rose-300 text-shu hover:bg-rose-50 font-bold text-xs transition">
-                <i class="fa-solid fa-rotate-left mr-1"></i> 重置所有學習進度
+
+            <div class="p-3 rounded-xl bg-washi border border-stone-200/70 space-y-2">
+              <div class="font-bold text-stone-800">語音朗讀測試 (ja-JP)</div>
+              <p class="text-xs text-stone-500">若聽不到聲音，請確認裝置未靜音並支援日語語音包。</p>
+              <button onclick="app.speakJapanese('こんにちは、きょうもいっしょにがんばりましょう！', 1.0)" class="px-3 py-1.5 bg-ai text-white text-xs font-bold rounded-lg hover:bg-aiLight transition">
+                <i class="fa-solid fa-volume-high mr-1"></i> 播放測試語音
               </button>
             </div>
-          `,
-          `<button onclick="app.closeModal()" class="px-5 py-2 rounded-xl bg-ai text-white font-bold">完成</button>`
-        );
+
+            <div class="pt-2 border-t border-stone-200 flex items-center justify-between">
+              <span class="text-xs text-stone-500">重置所有關卡、連勝天數與 XP</span>
+              <button onclick="app.promptResetProgress()" class="px-3 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-lg transition">重置學習紀錄</button>
+            </div>
+          </div>
+        `;
+        this.openModal('學習偏好與進度管理', bodyHtml, `
+          <button onclick="app.closeModal()" class="px-5 py-2 rounded-xl bg-ai text-white font-bold hover:bg-aiLight">完成</button>
+        `);
       }
 
       toggleSound(enabled) {
@@ -2062,18 +3480,26 @@
         this.saveState();
       }
 
-      confirmResetProgress() {
+      clearMistakes() {
+        this.state.mistakeQuestionIds = [];
+        this.saveState();
+        this.updateHeaderAndTasks();
+        this.toggleSettingsModal();
+        this.showToast('已清空錯題強化本紀錄');
+      }
+
+      promptResetProgress() {
         this.openModal(
-          '確認重置學習進度？',
-          '<p class="text-rose-700 font-medium">此操作將會清除您的所有 XP、連勝天數與關卡解鎖紀錄，且無法復原。</p>',
+          '確定要重置所有學習進度嗎？',
+          '<p class="text-rose-600 font-medium">此動作將會清除所有的 XP 經驗值、關卡過關紀錄與連續天數，且無法復原。</p>',
           `
-            <button onclick="app.toggleSettingsModal()" class="px-4 py-2 rounded-xl border border-stone-300 text-stone-700">取消</button>
-            <button onclick="app.resetAllProgress()" class="px-4 py-2 rounded-xl bg-shu text-white font-bold">確定全部重置</button>
+            <button onclick="app.toggleSettingsModal()" class="px-4 py-2 rounded-xl border border-stone-300 text-stone-700 font-medium">取消</button>
+            <button onclick="app.executeResetProgress()" class="px-4 py-2 rounded-xl bg-rose-600 text-white font-bold">確認重置</button>
           `
         );
       }
 
-      resetAllProgress() {
+      executeResetProgress() {
         localStorage.removeItem(this.STORAGE_KEY);
         this.closeModal();
         location.reload();
@@ -2094,9 +3520,9 @@
         overlay.classList.remove('flex');
       }
 
-      showToast(msg) {
+      showToast(message) {
         const toast = document.getElementById('toast');
-        document.getElementById('toast-msg').textContent = msg;
+        document.getElementById('toast-msg').textContent = message;
         toast.classList.remove('opacity-0');
         clearTimeout(this.toastTimer);
         this.toastTimer = setTimeout(() => {
@@ -2105,7 +3531,6 @@
       }
     }
 
-    // 啟動應用程式
     let app;
     window.addEventListener('DOMContentLoaded', () => {
       app = new NihongoStepsApp();
