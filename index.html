@@ -2773,236 +2773,505 @@
         return Boolean(rec && rec.bestScore >= 80);
       }
 
-      updateHeaderAndTasks() {
-        const xp = this.state.xp;
-        const userLevel = Math.floor(xp / 150) + 1;
-        const levelProgress = Math.round(((xp % 150) / 150) * 100);
-
-        document.getElementById('stat-streak').textContent = this.state.streak;
-        document.getElementById('stat-level-badge').textContent = `Lv.${userLevel}`;
-        document.getElementById('stat-xp').textContent = xp;
-        document.getElementById('stat-xp-bar').style.width = `${Math.max(8, levelProgress)}%`;
-
-        const dt = this.state.dailyTasks;
-        this.updateSingleTaskUI('task1', Math.min(dt.unitsCompleted, 1), 1);
-        this.updateSingleTaskUI('task2', Math.min(dt.correctAnswers, 8), 8);
-        this.updateSingleTaskUI('task3', Math.min(dt.audioPlays, 3), 3);
-
-        const allDone = dt.unitsCompleted >= 1 && dt.correctAnswers >= 8 && dt.audioPlays >= 3;
-        const badge = document.getElementById('daily-goal-badge');
-        if (allDone) {
-          badge.textContent = '已全部達成！';
-          badge.className = 'text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
-        } else {
-          badge.textContent = '進行中';
-          badge.className = 'text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800';
-        }
-
-        const mistakeBadge = document.getElementById('mistake-book-badge');
-        if (mistakeBadge) {
-          const mCount = (this.state.mistakeQuestionIds || []).length;
-          mistakeBadge.innerHTML = mCount > 0
-            ? `<i class="fa-solid fa-bookmark text-amber-300"></i> 錯題本：${mCount} 題優先複習`
-            : `<i class="fa-solid fa-check-circle text-emerald-300"></i> 錯題本：目前零錯題`;
-        }
-      }
-
-      updateSingleTaskUI(prefix, current, target) {
-        const icon = document.getElementById(`${prefix}-icon`);
-        const prog = document.getElementById(`${prefix}-progress`);
-        prog.textContent = `${current}/${target}`;
-        if (current >= target) {
-          icon.className = 'w-5 h-5 rounded-full bg-matcha border-2 border-matcha flex items-center justify-center text-[10px] text-white transition-colors';
-          icon.innerHTML = '<i class="fa-solid fa-check"></i>';
-          prog.className = 'text-xs font-bold text-matcha';
-        } else {
-          icon.className = 'w-5 h-5 rounded-full border-2 border-stone-300 flex items-center justify-center text-xs text-white transition-colors';
-          icon.innerHTML = '';
-          prog.className = 'text-xs font-semibold text-stone-500';
-        }
-      }
-
-      checkDailyGoalCompletion() {
-        const dt = this.state.dailyTasks;
-        if (!dt.bonusClaimed && dt.unitsCompleted >= 1 && dt.correctAnswers >= 8 && dt.audioPlays >= 3) {
-          dt.bonusClaimed = true;
-          this.state.xp += 30;
-          this.showToast('🎉 今日目標全達成！額外獲得 +30 XP');
-        }
-      }
-
+      /**
+       * 切換主畫面視圖（學習地圖 / 課前預習 / 測驗區 / 結算頁）
+       */
       switchView(viewId) {
         ['view-dashboard', 'view-lesson-preview', 'view-quiz', 'view-summary'].forEach(id => {
-          document.getElementById(id).classList.add('hidden');
+          const el = document.getElementById(id);
+          if (el) {
+            el.classList.toggle('hidden', id !== viewId);
+          }
         });
-        document.getElementById(viewId).classList.remove('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
+      /**
+       * 返回學習地圖主畫面並重新渲染進度
+       */
       goHome() {
-        window.speechSynthesis && window.speechSynthesis.cancel();
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+        }
+        this.currentUnit = null;
+        this.isDailyChallenge = false;
         this.renderDashboard();
         this.switchView('view-dashboard');
       }
 
+      /**
+       * 完整渲染主儀表板（頂部數據、每日任務、錯題本與五階層課程地圖）
+       */
       renderDashboard() {
         this.updateHeaderAndTasks();
         this.renderCurriculum();
       }
 
+      /**
+       * 檢查每日目標是否達成並發放額外獎勵 XP
+       */
+      checkDailyGoalCompletion() {
+        const tasks = this.state.dailyTasks;
+        if (!tasks || tasks.bonusClaimed) return;
+        if (tasks.unitsCompleted >= 1 && tasks.correctAnswers >= 8 && tasks.audioPlays >= 3) {
+          tasks.bonusClaimed = true;
+          this.state.xp += 30;
+          this.showToast('🎉 達成今日全部學習目標！額外獲得 +30 XP！');
+        }
+      }
+
+      /**
+       * 更新頂部連勝天數、等級經驗條、每日任務與錯題本數量
+       */
+      updateHeaderAndTasks() {
+        const xp = Number(this.state.xp || 0);
+        const level = Math.floor(xp / 120) + 1;
+        const levelProgress = Math.min(100, Math.max(8, Math.round(((xp % 120) / 120) * 100)));
+
+        const streakEl = document.getElementById('stat-streak');
+        const badgeEl = document.getElementById('stat-level-badge');
+        const xpEl = document.getElementById('stat-xp');
+        const xpBarEl = document.getElementById('stat-xp-bar');
+
+        if (streakEl) streakEl.textContent = this.state.streak || 1;
+        if (badgeEl) badgeEl.textContent = `Lv.${level}`;
+        if (xpEl) xpEl.textContent = xp;
+        if (xpBarEl) xpBarEl.style.width = `${levelProgress}%`;
+
+        const mistakeCount = (this.state.mistakeQuestionIds || []).length;
+        const mistakeBadge = document.getElementById('mistake-book-badge');
+        if (mistakeBadge) {
+          mistakeBadge.innerHTML = `<i class="fa-solid fa-bookmark text-amber-300"></i> 錯題本：${mistakeCount} 題待複習`;
+        }
+
+        const tasks = this.state.dailyTasks || {
+          unitsCompleted: 0,
+          correctAnswers: 0,
+          audioPlays: 0,
+          bonusClaimed: false
+        };
+
+        const updateTaskRow = (iconId, progId, current, target) => {
+          const done = current >= target;
+          const iconEl = document.getElementById(iconId);
+          const progEl = document.getElementById(progId);
+          if (iconEl) {
+            iconEl.className = done
+              ? 'w-5 h-5 rounded-full bg-matcha border-2 border-matcha flex items-center justify-center text-xs text-white transition-colors'
+              : 'w-5 h-5 rounded-full border-2 border-stone-300 flex items-center justify-center text-xs text-white transition-colors';
+            iconEl.innerHTML = done ? '<i class="fa-solid fa-check"></i>' : '';
+          }
+          if (progEl) {
+            progEl.textContent = `${Math.min(current, target)}/${target}`;
+            progEl.className = done ? 'text-xs font-bold text-matcha' : 'text-xs font-semibold text-stone-500';
+          }
+        };
+
+        updateTaskRow('task1-icon', 'task1-progress', tasks.unitsCompleted, 1);
+        updateTaskRow('task2-icon', 'task2-progress', tasks.correctAnswers, 8);
+        updateTaskRow('task3-icon', 'task3-progress', tasks.audioPlays, 3);
+
+        const goalBadge = document.getElementById('daily-goal-badge');
+        if (goalBadge) {
+          const allDone = tasks.unitsCompleted >= 1 && tasks.correctAnswers >= 8 && tasks.audioPlays >= 3;
+          goalBadge.textContent = allDone ? '已達成' : '進行中';
+          goalBadge.className = allDone
+            ? 'text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800'
+            : 'text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800';
+        }
+      }
+
+      /**
+       * 渲染五大階層與 18 個關卡卡片
+       */
       renderCurriculum() {
         const container = document.getElementById('curriculum-container');
+        if (!container) return;
         container.innerHTML = '';
 
         const flatUnits = this.getAllUnitsFlat();
-        const nextRecommended = flatUnits.find(u => this.isUnitUnlocked(u.id) && !this.isUnitCompleted(u.id));
+        const nextRecommendedUnit = flatUnits.find(u => this.isUnitUnlocked(u.id) && !this.isUnitCompleted(u.id));
 
         LEVELS_DATA.forEach(lvl => {
-          const totalInLvl = lvl.units.length;
-          const completedInLvl = lvl.units.filter(u => this.isUnitCompleted(u.id)).length;
-          const lvlUnlocked = lvl.units.some(u => this.isUnitUnlocked(u.id));
-
+          const completedInLevel = lvl.units.filter(u => this.isUnitCompleted(u.id)).length;
           const section = document.createElement('div');
-          section.className = `bg-white rounded-3xl border ${lvlUnlocked ? 'border-stone-200/90 shadow-sm' : 'border-stone-200/60 opacity-85'} overflow-hidden`;
+          section.className = 'bg-white rounded-3xl border border-stone-200/90 shadow-sm overflow-hidden';
 
-          section.innerHTML = `
-            <div class="p-5 sm:p-6 bg-gradient-to-r ${lvl.color} text-white flex flex-wrap items-center justify-between gap-4">
-              <div class="flex items-center gap-3.5">
-                <div class="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-xs flex items-center justify-center text-2xl shrink-0">
+          const headerHtml = `
+            <div class="bg-gradient-to-r ${lvl.color} text-white px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-white/15 flex items-center justify-center text-lg">
                   <i class="fa-solid ${lvl.icon}"></i>
                 </div>
                 <div>
-                  <div class="flex items-center gap-2">
-                    <h3 class="text-lg sm:text-xl font-bold">${lvl.title}</h3>
-                    ${!lvlUnlocked ? '<span class="text-xs px-2 py-0.5 rounded-full bg-black/25 text-white/90"><i class="fa-solid fa-lock mr-1"></i>未解鎖</span>' : ''}
-                  </div>
-                  <p class="text-xs sm:text-sm text-white/85 mt-0.5">${lvl.subtitle}</p>
+                  <h3 class="font-bold text-base sm:text-lg leading-snug">${lvl.title}</h3>
+                  <p class="text-xs text-white/85">${lvl.subtitle}</p>
                 </div>
               </div>
-              <div class="bg-black/20 px-3.5 py-2 rounded-xl text-xs font-bold backdrop-blur-xs">
-                完成進度：${completedInLvl} / ${totalInLvl} 單元
-              </div>
+              <span class="text-xs font-bold px-3 py-1 rounded-full bg-white/15 backdrop-blur-xs">
+                完成進度：${completedInLevel}/${lvl.units.length} 單元
+              </span>
             </div>
-            <div class="p-5 sm:p-6 grid grid-cols-1 md:grid-cols-3 gap-4" id="lvl-units-${lvl.level}"></div>
           `;
 
-          container.appendChild(section);
-          const grid = section.querySelector(`#lvl-units-${lvl.level}`);
+          const cardsGrid = document.createElement('div');
+          cardsGrid.className = 'p-5 sm:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
 
-          lvl.units.forEach((unit, idx) => {
+          lvl.units.forEach(unit => {
             const unlocked = this.isUnitUnlocked(unit.id);
             const completed = this.isUnitCompleted(unit.id);
             const record = this.state.completedUnits[unit.id];
-            const isNext = nextRecommended && nextRecommended.id === unit.id;
+            const isRecommended = nextRecommendedUnit && nextRecommendedUnit.id === unit.id && !completed;
 
             const card = document.createElement('div');
-            card.className = `node-card relative rounded-2xl p-5 border-2 flex flex-col justify-between ${
+            card.className = `node-card relative rounded-2xl border-2 p-5 flex flex-col justify-between ${
               !unlocked
-                ? 'locked bg-stone-50 border-stone-200/80 text-stone-400 cursor-not-allowed'
+                ? 'locked bg-stone-50/90 border-stone-200/80 opacity-75 cursor-not-allowed'
                 : completed
-                ? 'bg-emerald-50/30 border-emerald-200 hover:border-emerald-400 cursor-pointer'
-                : isNext
+                ? 'bg-emerald-50/40 border-matcha/50 hover:border-matcha cursor-pointer'
+                : isRecommended
                 ? 'active-pulse bg-white border-shu shadow-md cursor-pointer'
                 : 'bg-white border-stone-200 hover:border-ai cursor-pointer'
             }`;
 
-            if (unlocked) {
-              card.onclick = () => this.openLessonPreview(unit, lvl);
-            } else {
-              card.onclick = () => this.showToast('請先完成前一關並達 80% 正確率以解鎖此單元！');
-            }
+            const statusBadge = !unlocked
+              ? `<span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-stone-200 text-stone-600"><i class="fa-solid fa-lock mr-1"></i>待解鎖</span>`
+              : completed
+              ? `<span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800"><i class="fa-solid fa-circle-check mr-1"></i>最高 ${record.bestScore}%</span>`
+              : isRecommended
+              ? `<span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-shu/10 text-shu">當前推薦</span>`
+              : `<span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-ai">可挑戰</span>`;
 
-            let statusBadge = '';
-            if (!unlocked) {
-              statusBadge = `<span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-stone-200/80 text-stone-500"><i class="fa-solid fa-lock mr-1"></i>待解鎖</span>`;
-            } else if (completed) {
-              statusBadge = `<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800"><i class="fa-solid fa-circle-check mr-1"></i>最高 ${record.bestScore}%</span>`;
-            } else if (isNext) {
-              statusBadge = `<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-shu text-white animate-pulse">當前推薦</span>`;
-            } else {
-              statusBadge = `<span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-50 text-ai">已解鎖</span>`;
-            }
+            const actionLabel = !unlocked
+              ? `<span class="text-xs font-medium text-stone-400">尚未開放 &gt;</span>`
+              : completed
+              ? `<span class="text-xs font-bold text-matcha">複習 / 重測 &gt;</span>`
+              : `<span class="text-xs font-bold text-ai">開始學習 &gt;</span>`;
 
             card.innerHTML = `
               <div>
-                <div class="flex items-center justify-between gap-2 mb-3">
-                  <span class="text-xs font-bold text-stone-400">STAGE ${lvl.level}-${idx + 1}</span>
+                <div class="flex items-center justify-between gap-2 mb-2.5">
+                  <span class="text-[11px] font-bold tracking-wider uppercase text-stone-400">LEVEL ${lvl.level}</span>
                   ${statusBadge}
                 </div>
-                <h4 class="font-bold text-base ${unlocked ? 'text-stone-900' : 'text-stone-500'} mb-1.5 leading-snug">${unit.title}</h4>
-                <p class="text-xs ${unlocked ? 'text-stone-600' : 'text-stone-400'} leading-relaxed line-clamp-2">${unit.desc}</p>
+                <h4 class="font-bold text-stone-900 text-base mb-1.5 leading-snug">${unit.title}</h4>
+                <p class="text-xs text-stone-600 leading-relaxed line-clamp-3">${unit.desc}</p>
               </div>
-              <div class="mt-4 pt-3 border-t ${unlocked ? 'border-stone-100' : 'border-stone-200/50'} flex items-center justify-between text-xs font-semibold">
-                <span class="${unlocked ? 'text-amber-600' : 'text-stone-400'}"><i class="fa-solid fa-star mr-1"></i>+${unit.xpReward} XP</span>
-                <span class="${unlocked ? 'text-ai' : 'text-stone-400'}">
-                  ${!unlocked ? '尚未開放' : completed ? '複習 / 重測' : '開始學習'} <i class="fa-solid fa-chevron-right ml-0.5 text-[10px]"></i>
-                </span>
+              <div class="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between">
+                <span class="text-xs font-bold text-amber-600"><i class="fa-solid fa-star mr-1"></i>+${unit.xpReward} XP</span>
+                ${actionLabel}
               </div>
             `;
-            grid.appendChild(card);
+
+            if (unlocked) {
+              card.onclick = () => this.openLessonPreview(unit.id, lvl.level);
+            } else {
+              card.onclick = () => this.showToast('請先完成前一關卡（達 80% 正確率），或開啟「自由預覽」');
+            }
+
+            cardsGrid.appendChild(card);
           });
+
+          section.innerHTML = headerHtml;
+          section.appendChild(cardsGrid);
+          container.appendChild(section);
         });
       }
 
-      openLessonPreview(unit, levelObj) {
-        this.currentUnit = unit;
+      /**
+       * 開啟單元課前預習與知識點 / 情境例句卡片
+       */
+      openLessonPreview(unitId, levelNum) {
+        const flat = this.getAllUnitsFlat();
+        const found = flat.find(u => u.id === unitId);
+        if (!found) return;
+
+        this.currentUnit = found;
         this.isDailyChallenge = false;
 
-        document.getElementById('preview-level-tag').textContent = levelObj.title.split('：')[0];
-        document.getElementById('preview-title').textContent = unit.title;
-        document.getElementById('preview-desc').textContent = unit.desc;
+        document.getElementById('preview-level-tag').textContent = `Level ${levelNum || found.level}`;
+        document.getElementById('preview-title').textContent = found.title;
+        document.getElementById('preview-desc').textContent = found.desc;
 
-        const list = document.getElementById('preview-cards-list');
-        list.innerHTML = '';
+        const listEl = document.getElementById('preview-cards-list');
+        listEl.innerHTML = '';
 
-        unit.studyCards.forEach(card => {
-          const el = document.createElement('div');
-          el.className = 'p-4 sm:p-5 rounded-2xl bg-washi/70 border border-stone-200/80 hover:border-ai/40 transition space-y-3';
-          el.innerHTML = `
+        (found.studyCards || []).forEach(card => {
+          const item = document.createElement('div');
+          item.className = 'rounded-2xl border border-stone-200/90 bg-washi/60 p-4 sm:p-5 space-y-3';
+
+          const safeMainAudio = (card.audio || '').replace(/'/g, "\\'");
+          const safeExAudio = (card.exampleAudio || card.audio || '').replace(/'/g, "\\'");
+
+          item.innerHTML = `
             <div class="flex items-start justify-between gap-3">
-              <div class="space-y-0.5">
+              <div class="space-y-1">
                 <div class="font-jp font-bold text-lg sm:text-xl text-stone-900">${card.jp}</div>
-                <div class="text-xs font-mono text-stone-400">${card.romaji}</div>
-                <div class="text-sm text-stone-700 font-medium pt-0.5">${card.zh}</div>
+                <div class="text-xs font-mono text-stone-500">${card.romaji}</div>
+                <div class="text-sm font-semibold text-ai">${card.zh}</div>
               </div>
               <div class="flex items-center gap-1.5 shrink-0">
-                <button class="btn-audio-normal w-10 h-10 rounded-xl bg-white hover:bg-ai hover:text-white text-ai border border-stone-200 shadow-xs flex items-center justify-center transition" title="常速朗讀單字 (1.0x)">
-                  <i class="fa-solid fa-volume-high"></i>
+                <button type="button" onclick="app.speakJapanese('${safeMainAudio}', 1.0)" class="w-9 h-9 rounded-xl bg-ai hover:bg-aiLight text-white flex items-center justify-center shadow-xs transition" title="常速朗讀 (1.0x)">
+                  <i class="fa-solid fa-volume-high text-sm"></i>
                 </button>
-                <button class="btn-audio-slow px-2.5 h-10 rounded-xl bg-white hover:bg-slate-200 text-stone-600 border border-stone-200 text-xs font-bold flex items-center justify-center transition" title="慢速清晰朗讀 (0.7x)">
+                <button type="button" onclick="app.speakJapanese('${safeMainAudio}', 0.7)" class="px-2.5 h-9 rounded-xl bg-white hover:bg-stone-100 text-ai border border-stone-200 text-xs font-bold transition" title="慢速朗讀 (0.7x)">
                   0.7x
                 </button>
               </div>
             </div>
-            ${card.exampleJp ? `
-              <div class="bg-white rounded-xl p-3 border border-stone-200/70 flex items-center justify-between gap-3">
+            ${
+              card.exampleJp
+                ? `
+              <div class="pt-2.5 border-t border-stone-200/70 flex items-start justify-between gap-3">
                 <div class="space-y-0.5 text-sm">
-                  <div class="text-[11px] font-bold text-ai/80 uppercase tracking-wider mb-0.5">情境對話 / 實用例句</div>
+                  <div class="text-[11px] font-bold text-stone-400">情境例句</div>
                   <div class="font-jp font-medium text-stone-800">${card.exampleJp}</div>
-                  <div class="text-xs text-stone-500">${card.exampleZh}</div>
+                  <div class="text-xs text-stone-600">${card.exampleZh || ''}</div>
                 </div>
-                <button class="btn-example-audio w-9 h-9 rounded-lg bg-blue-50 hover:bg-ai hover:text-white text-ai flex items-center justify-center shrink-0 transition" title="朗讀情境例句">
-                  <i class="fa-solid fa-play text-xs"></i>
+                <button type="button" onclick="app.speakJapanese('${safeExAudio}', 0.95)" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-blue-50 text-ai border border-stone-200 text-xs font-bold shrink-0 transition" title="朗讀情境例句">
+                  <i class="fa-solid fa-play mr-1"></i>例句
                 </button>
               </div>
-            ` : ''}
+            `
+                : ''
+            }
           `;
-          el.querySelector('.btn-audio-normal').onclick = () => this.speakJapanese(card.audio, 1.0);
-          el.querySelector('.btn-audio-slow').onclick = () => this.speakJapanese(card.audio, 0.7);
-          const exBtn = el.querySelector('.btn-example-audio');
-          if (exBtn) {
-            exBtn.onclick = () => this.speakJapanese(card.exampleAudio || card.audio, 0.95);
-          }
-          list.appendChild(el);
+          listEl.appendChild(item);
         });
 
         this.switchView('view-lesson-preview');
       }
 
+      /**
+       * ======================================================================
+       * 動態題庫生成器：針對平假名、片假名、數字時間與各關卡知識點自動生成變化題
+       * 確保每次進入同一關卡時，題目內容、順序與選項皆會動態變化！
+       * ======================================================================
+       */
+      generateDynamicQuestionsForUnit(unit) {
+        const dynamicList = [];
+
+        // 1. 針對第一關「完整平假名」動態產生全五十音隨機聽力與羅馬拼音辨識題
+        if (unit.id === 'u1_1') {
+          const hiraganaPool = [
+            { kana: 'あ', roma: 'a', row: 'あ行' }, { kana: 'い', roma: 'i', row: 'あ行' }, { kana: 'う', roma: 'u', row: 'あ行' }, { kana: 'え', roma: 'e', row: 'あ行' }, { kana: 'お', roma: 'o', row: 'あ行' },
+            { kana: 'か', roma: 'ka', row: 'か行' }, { kana: 'き', roma: 'ki', row: 'か行' }, { kana: 'く', roma: 'ku', row: 'か行' }, { kana: 'け', roma: 'ke', row: 'か行' }, { kana: 'こ', roma: 'ko', row: 'か行' },
+            { kana: 'さ', roma: 'sa', row: 'さ行' }, { kana: 'し', roma: 'shi', row: 'さ行' }, { kana: 'す', roma: 'su', row: 'さ行' }, { kana: 'せ', roma: 'se', row: 'さ行' }, { kana: 'そ', roma: 'so', row: 'さ行' },
+            { kana: 'た', roma: 'ta', row: 'た行' }, { kana: 'ち', roma: 'chi', row: 'た行' }, { kana: 'つ', roma: 'tsu', row: 'た行' }, { kana: 'て', roma: 'te', row: 'た行' }, { kana: 'と', roma: 'to', row: 'た行' },
+            { kana: 'な', roma: 'na', row: 'な行' }, { kana: 'に', roma: 'ni', row: 'な行' }, { kana: 'ぬ', roma: 'nu', row: 'な行' }, { kana: 'ね', roma: 'ne', row: 'な行' }, { kana: 'の', roma: 'no', row: 'な行' },
+            { kana: 'は', roma: 'ha', row: 'は行' }, { kana: 'ひ', roma: 'hi', row: 'は行' }, { kana: 'ふ', roma: 'fu', row: 'は行' }, { kana: 'へ', roma: 'he', row: 'は行' }, { kana: 'ほ', roma: 'ho', row: 'は行' },
+            { kana: 'ま', roma: 'ma', row: 'ま行' }, { kana: 'み', roma: 'mi', row: 'ま行' }, { kana: 'む', roma: 'mu', row: 'ま行' }, { kana: 'め', roma: 'me', row: 'ま行' }, { kana: 'も', roma: 'mo', row: 'ま行' },
+            { kana: 'や', roma: 'ya', row: 'や行' }, { kana: 'ゆ', roma: 'yu', row: 'や行' }, { kana: 'よ', roma: 'yo', row: 'や行' },
+            { kana: 'ら', roma: 'ra', row: 'ら行' }, { kana: 'り', roma: 'ri', row: 'ら行' }, { kana: 'る', roma: 'ru', row: 'ら行' }, { kana: 'れ', roma: 're', row: 'ら行' }, { kana: 'ろ', roma: 'ro', row: 'ら行' },
+            { kana: 'わ', roma: 'wa', row: 'わ行' }, { kana: 'を', roma: 'o (wo)', row: 'わ行' }, { kana: 'ん', roma: 'n', row: '撥音' }
+          ];
+          const picked = this.shuffleArray([...hiraganaPool]).slice(0, 6);
+          picked.forEach((item, idx) => {
+            const distractors = this.shuffleArray(hiraganaPool.filter(x => x.kana !== item.kana)).slice(0, 3);
+            if (idx % 2 === 0) {
+              dynamicList.push({
+                id: `dyn_hira_listen_${item.kana}`,
+                type: 'listening',
+                instruction: '【隨機聽音辨字】點擊喇叭聆聽平假名發音，選出對應的假名：',
+                audioText: item.kana,
+                promptDisplay: '🔊 聆聽單音發音並選出正確平假名',
+                options: [
+                  `${item.kana} (${item.roma})`,
+                  ...distractors.map(d => `${d.kana} (${d.roma})`)
+                ],
+                answerIndex: 0,
+                fullJp: `${item.kana}`,
+                romaji: item.roma,
+                zh: `平假名「${item.kana}」（${item.row}）`,
+                explanation: `這個發音對應的平假名是「${item.kana}」，羅馬拼音為 ${item.roma}（屬於${item.row}）。`
+              });
+            } else {
+              dynamicList.push({
+                id: `dyn_hira_read_${item.kana}`,
+                type: 'choice',
+                instruction: '【隨機字形測驗】請選出下方平假名的正確羅馬拼音：',
+                audioText: item.kana,
+                promptDisplay: `平假名：「 ${item.kana} 」`,
+                options: [item.roma, ...distractors.map(d => d.roma)],
+                answerIndex: 0,
+                fullJp: `${item.kana}`,
+                romaji: item.roma,
+                zh: `讀音為 ${item.roma}`,
+                explanation: `平假名「${item.kana}」屬於${item.row}，標準發音為 ${item.roma}。`
+              });
+            }
+          });
+        }
+
+        // 2. 針對第二關「完整片假名」動態產生全五十音隨機聽音與字形辨識題
+        if (unit.id === 'u1_2') {
+          const katakanaPool = [
+            { kana: 'ア', roma: 'a', row: 'ア行' }, { kana: 'イ', roma: 'i', row: 'ア行' }, { kana: 'ウ', roma: 'u', row: 'ア行' }, { kana: 'エ', roma: 'e', row: 'ア行' }, { kana: 'オ', roma: 'o', row: 'ア行' },
+            { kana: 'カ', roma: 'ka', row: 'カ行' }, { kana: 'キ', roma: 'ki', row: 'カ行' }, { kana: 'ク', roma: 'ku', row: 'カ行' }, { kana: 'ケ', roma: 'ke', row: 'カ行' }, { kana: 'コ', roma: 'ko', row: 'カ行' },
+            { kana: 'サ', roma: 'sa', row: 'サ行' }, { kana: 'シ', roma: 'shi', row: 'サ行' }, { kana: 'ス', roma: 'su', row: 'サ行' }, { kana: 'セ', roma: 'se', row: 'サ行' }, { kana: 'ソ', roma: 'so', row: 'サ行' },
+            { kana: 'タ', roma: 'ta', row: 'タ行' }, { kana: 'チ', roma: 'chi', row: 'タ行' }, { kana: 'ツ', roma: 'tsu', row: 'タ行' }, { kana: 'テ', roma: 'te', row: 'タ行' }, { kana: 'ト', roma: 'to', row: 'タ行' },
+            { kana: 'ナ', roma: 'na', row: 'ナ行' }, { kana: 'ニ', roma: 'ni', row: 'ナ行' }, { kana: 'ヌ', roma: 'nu', row: 'ナ行' }, { kana: 'ネ', roma: 'ne', row: 'ナ行' }, { kana: 'ノ', roma: 'no', row: 'ナ行' },
+            { kana: 'ハ', roma: 'ha', row: 'ハ行' }, { kana: 'ヒ', roma: 'hi', row: 'ハ行' }, { kana: 'フ', roma: 'fu', row: 'ハ行' }, { kana: 'ヘ', roma: 'he', row: 'ハ行' }, { kana: 'ホ', roma: 'ho', row: 'ハ行' },
+            { kana: 'マ', roma: 'ma', row: 'マ行' }, { kana: 'ミ', roma: 'mi', row: 'マ行' }, { kana: 'ム', roma: 'mu', row: 'マ行' }, { kana: 'メ', roma: 'me', row: 'マ行' }, { kana: 'モ', roma: 'mo', row: 'マ行' },
+            { kana: 'ヤ', roma: 'ya', row: 'ヤ行' }, { kana: 'ユ', roma: 'yu', row: 'ヤ行' }, { kana: 'ヨ', roma: 'yo', row: 'ヤ行' },
+            { kana: 'ラ', roma: 'ra', row: 'ラ行' }, { kana: 'リ', roma: 'ri', row: 'ラ行' }, { kana: 'ル', roma: 'ru', row: 'ラ行' }, { kana: 'レ', roma: 're', row: 'ラ行' }, { kana: 'ロ', roma: 'ro', row: 'ラ行' },
+            { kana: 'ワ', roma: 'wa', row: 'ワ行' }, { kana: 'ヲ', roma: 'o (wo)', row: 'ワ行' }, { kana: 'ン', roma: 'n', row: '撥音' }
+          ];
+          const picked = this.shuffleArray([...katakanaPool]).slice(0, 6);
+          picked.forEach((item, idx) => {
+            const distractors = this.shuffleArray(katakanaPool.filter(x => x.kana !== item.kana)).slice(0, 3);
+            if (idx % 2 === 0) {
+              dynamicList.push({
+                id: `dyn_kata_listen_${item.kana}`,
+                type: 'listening',
+                instruction: '【隨機聽音辨字】點擊喇叭聆聽片假名發音，選出對應的片假名：',
+                audioText: item.kana,
+                promptDisplay: '🔊 聆聽單音發音並選出正確片假名',
+                options: [
+                  `${item.kana} (${item.roma})`,
+                  ...distractors.map(d => `${d.kana} (${d.roma})`)
+                ],
+                answerIndex: 0,
+                fullJp: `${item.kana}`,
+                romaji: item.roma,
+                zh: `片假名「${item.kana}」（${item.row}）`,
+                explanation: `這個發音對應的片假名是「${item.kana}」，羅馬拼音為 ${item.roma}（屬於${item.row}）。`
+              });
+            } else {
+              dynamicList.push({
+                id: `dyn_kata_read_${item.kana}`,
+                type: 'choice',
+                instruction: '【隨機字形測驗】請選出下方片假名的正確讀音：',
+                audioText: item.kana,
+                promptDisplay: `片假名：「 ${item.kana} 」`,
+                options: [item.roma, ...distractors.map(d => d.roma)],
+                answerIndex: 0,
+                fullJp: `${item.kana}`,
+                romaji: item.roma,
+                zh: `讀音為 ${item.roma}`,
+                explanation: `片假名「${item.kana}」屬於${item.row}，發音為 ${item.roma}。`
+              });
+            }
+          });
+        }
+
+        // 3. 針對「數字、時間與星期」關卡動態生成隨機數字聽力題 (11~99)
+        if (unit.id === 'u2_1') {
+          const onesJp = ['', 'いち', 'に', 'さん', 'よん', 'ご', 'ろく', 'なな', 'はち', 'きゅう'];
+          const usedNums = new Set();
+          while (usedNums.size < 3) {
+            const n = Math.floor(Math.random() * 88) + 12; // 12 ~ 99
+            if (!usedNums.has(n)) {
+              usedNums.add(n);
+              const tens = Math.floor(n / 10);
+              const ones = n % 10;
+              const jpNum = `${tens === 1 ? '' : onesJp[tens]}じゅう${onesJp[ones]}`;
+              const d1 = ((n + 13) % 88) + 11;
+              const d2 = ((n + 27) % 88) + 11;
+              const d3 = Number(String(n).split('').reverse().join('')) || n + 5;
+              const optSet = Array.from(new Set([String(n), String(d1), String(d2), String(d3), '42', '86'])).slice(0, 4);
+              dynamicList.push({
+                id: `dyn_num_${n}`,
+                type: 'listening',
+                instruction: '【隨機數字聽力】點擊喇叭聆聽日文數字，選出正確的阿拉伯數字：',
+                audioText: jpNum,
+                promptDisplay: '🔊 聆聽隨機生成的兩位數日文發音',
+                options: optSet,
+                answerIndex: 0,
+                fullJp: `${jpNum}（${n}）`,
+                romaji: jpNum,
+                zh: `數字 ${n}`,
+                explanation: `「${jpNum}」拆解為十位數「${tens === 1 ? 'じゅう' : onesJp[tens] + 'じゅう'}」加上個位數「${onesJp[ones] || '零'}」，即 ${n}。`
+              });
+            }
+          }
+        }
+
+        // 4. 針對所有關卡：從該關卡的「核心知識點與情境例句」自動生成隨機例句聽力與詞義配對題
+        if (unit.studyCards && unit.studyCards.length >= 4) {
+          const shuffledCards = this.shuffleArray([...unit.studyCards]);
+          shuffledCards.forEach((card, idx) => {
+            const otherCards = this.shuffleArray(unit.studyCards.filter(c => c !== card)).slice(0, 3);
+            if (otherCards.length === 3) {
+              // 題型 A：核心知識點中翻日／日翻中隨機變換
+              dynamicList.push({
+                id: `dyn_card_${unit.id}_${idx}`,
+                type: idx % 2 === 0 ? 'listening' : 'choice',
+                instruction: idx % 2 === 0
+                  ? '【知識點隨機聽力】聆聽本關核心句型／詞彙發音，選出正確含義：'
+                  : '【知識點隨機檢核】請選出符合下方中文說明的正確日文表達：',
+                audioText: card.audio,
+                promptDisplay: idx % 2 === 0 ? '🔊 點擊聆聽核心句型發音' : card.zh,
+                options: idx % 2 === 0
+                  ? [card.zh, ...otherCards.map(c => c.zh)]
+                  : [card.jp, ...otherCards.map(c => c.jp)],
+                answerIndex: 0,
+                fullJp: card.jp,
+                romaji: card.romaji,
+                zh: card.zh,
+                explanation: `本關重點「${card.jp}」（${card.romaji}）的意思是：${card.zh}。`
+              });
+
+              // 題型 B：若有情境對話例句，也自動抽出一題例句聽力理解
+              if (card.exampleJp && card.exampleZh && idx < 2) {
+                const otherExamples = this.shuffleArray(
+                  unit.studyCards.filter(c => c !== card && c.exampleZh)
+                ).slice(0, 3);
+                if (otherExamples.length === 3) {
+                  dynamicList.push({
+                    id: `dyn_ex_${unit.id}_${idx}`,
+                    type: 'listening',
+                    instruction: '【情境例句隨機聽力】聆聽日文情境對話例句，選出正確的中文句意：',
+                    audioText: card.exampleAudio || card.audio,
+                    promptDisplay: '🔊 聆聽完整情境例句',
+                    options: [card.exampleZh, ...otherExamples.map(c => c.exampleZh)],
+                    answerIndex: 0,
+                    fullJp: card.exampleJp,
+                    romaji: card.romaji,
+                    zh: card.exampleZh,
+                    explanation: `例句「${card.exampleJp}」的意思是：「${card.exampleZh}」。`
+                  });
+                }
+              }
+            }
+          });
+        }
+
+        return dynamicList;
+      }
+
+      /**
+       * 為單一關卡組裝「每次都不同」的隨機測驗卷（固定經典題 + 動態生成題混合洗牌，避免重複）
+       */
+      buildVariedUnitQuiz(unit) {
+        const baseQuestions = unit.questions || [];
+        const dynamicQuestions = this.generateDynamicQuestionsForUnit(unit);
+
+        // 合併固定題庫與動態生成題庫，確保每次進入都洗牌抽樣
+        const combinedPool = this.shuffleArray([
+          ...this.shuffleArray([...baseQuestions]),
+          ...this.shuffleArray([...dynamicQuestions])
+        ]);
+
+        // 去除相同題幹的重複題目，每次抽出 6 題（題庫不足時則全出）
+        const seenPrompts = new Set();
+        const uniquePicked = [];
+        for (const q of combinedPool) {
+          const key = `${q.type}_${q.fullJp}_${q.instruction}`;
+          if (!seenPrompts.has(key)) {
+            seenPrompts.add(key);
+            uniquePicked.push(q);
+          }
+          if (uniquePicked.length >= 6) break;
+        }
+
+        return this.prepareQuestions(uniquePicked);
+      }
+
       startQuizFromPreview() {
         if (!this.currentUnit) return;
         this.isDailyChallenge = false;
-        this.quizQuestions = this.prepareQuestions(this.currentUnit.questions);
+        this.quizQuestions = this.buildVariedUnitQuiz(this.currentUnit);
         this.startQuizSession();
       }
 
@@ -3012,6 +3281,7 @@
         const allPool = [];
         unlockedUnits.forEach(u => {
           u.questions.forEach(q => allPool.push(q));
+          this.generateDynamicQuestionsForUnit(u).slice(0, 3).forEach(dq => allPool.push(dq));
         });
 
         const mistakeIds = new Set(this.state.mistakeQuestionIds || []);
@@ -3419,7 +3689,7 @@
         if (this.isDailyChallenge) {
           this.startDailyChallenge();
         } else if (this.currentUnit) {
-          this.quizQuestions = this.prepareQuestions(this.currentUnit.questions);
+          this.quizQuestions = this.buildVariedUnitQuiz(this.currentUnit);
           this.startQuizSession();
         }
       }
